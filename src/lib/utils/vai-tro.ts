@@ -1,0 +1,63 @@
+import { vi } from "@/lib/i18n/vi";
+import type { VaiTro } from "@/types";
+
+export const coQuyen = (vaiTro: VaiTro | null | undefined, cho: VaiTro[]) =>
+  !!vaiTro && cho.includes(vaiTro);
+
+// Trang chủ sau đăng nhập theo vai trò
+export function trangChuTheoVaiTro(vaiTro: VaiTro): string {
+  switch (vaiTro) {
+    case "admin": return "/quan-tri";
+    case "support": return "/nhan-vien";
+    case "chef": return "/bep";
+    default: return "/bang-dieu-khien";
+  }
+}
+
+export type MucMenu = { nhan: string; href: string; icon: string };
+
+const m = vi.menu;
+
+// Menu sidebar theo khu vực (icon là tên icon lucide-react)
+export const MENU_NGUOI_DUNG: MucMenu[] = [
+  { nhan: m.bang_dieu_khien, href: "/bang-dieu-khien", icon: "LayoutDashboard" },
+  { nhan: "Gói Pro của tôi", href: "/goi-cua-toi", icon: "Crown" },
+  { nhan: m.cong_thuc_da_luu, href: "/cong-thuc-cua-toi", icon: "Bookmark" },
+  { nhan: m.khoa_hoc_cua_toi, href: "/khoa-hoc-cua-toi", icon: "GraduationCap" },
+  { nhan: m.tao_cong_thuc, href: "/tao-cong-thuc", icon: "PlusCircle" },
+  { nhan: m.cong_thuc_da_gui, href: "/cong-thuc-da-gui", icon: "Send" },
+  { nhan: m.thong_bao, href: "/thong-bao", icon: "Bell" },
+  { nhan: m.ho_tro, href: "/ho-tro", icon: "LifeBuoy" },
+  { nhan: m.ho_so, href: "/ho-so", icon: "User" },
+];
+
+export const MENU_DAU_BEP: MucMenu[] = [
+  { nhan: m.tong_quan, href: "/bep", icon: "LayoutDashboard" },
+  { nhan: m.quan_ly_cong_thuc, href: "/bep/cong-thuc", icon: "ChefHat" },
+  { nhan: m.quan_ly_khoa_hoc, href: "/bep/khoa-hoc", icon: "GraduationCap" },
+];
+
+export const MENU_QUAN_TRI: MucMenu[] = [
+  { nhan: m.tong_quan, href: "/quan-tri", icon: "LayoutDashboard" },
+  { nhan: "Duyệt nâng cấp Pro", href: "/quan-tri/duyet-nang-cap", icon: "ShieldCheck" },
+  { nhan: "Quản lý gói Pro", href: "/quan-tri/quan-ly-goi", icon: "Crown" },
+  { nhan: m.nguoi_dung, href: "/quan-tri/nguoi-dung", icon: "Users" },
+  { nhan: m.quan_ly_dau_bep, href: "/quan-tri/dau-bep", icon: "ChefHat" },
+  { nhan: m.quan_ly_cong_thuc, href: "/quan-tri/cong-thuc", icon: "BookOpen" },
+  { nhan: m.quan_ly_khoa_hoc, href: "/quan-tri/khoa-hoc", icon: "GraduationCap" },
+  { nhan: m.danh_muc, href: "/quan-tri/danh-muc", icon: "FolderTree" },
+  { nhan: m.binh_luan, href: "/quan-tri/binh-luan", icon: "MessageSquare" },
+  { nhan: m.danh_gia, href: "/quan-tri/danh-gia", icon: "Star" },
+  { nhan: m.quan_ly_bai_viet, href: "/quan-tri/bai-viet", icon: "Newspaper" },
+  { nhan: m.ho_tro, href: "/quan-tri/ho-tro", icon: "LifeBuoy" },
+  { nhan: m.gui_thong_bao, href: "/quan-tri/thong-bao", icon: "Megaphone" },
+  { nhan: m.thanh_toan, href: "/quan-tri/thanh-toan", icon: "CreditCard" },
+  { nhan: m.bao_cao, href: "/quan-tri/bao-cao", icon: "BarChart3" },
+  { nhan: m.nhat_ky, href: "/quan-tri/nhat-ky", icon: "ScrollText" },
+  { nhan: m.cau_hinh, href: "/quan-tri/cau-hinh", icon: "Settings" },
+];
+
+export const MENU_HO_TRO: MucMenu[] = [
+  { nhan: m.tong_quan, href: "/nhan-vien", icon: "LayoutDashboard" },
+  { nhan: m.quan_ly_ticket, href: "/nhan-vien/ticket", icon: "Inbox" },
+];
