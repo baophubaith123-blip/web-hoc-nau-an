@@ -1,3 +1,4 @@
+import type { Bang } from "@/types";
 import Link from "next/link";
 import { BookOpen, Bookmark, ChefHat, Award, ArrowRight } from "lucide-react";
 import { TheThongKe } from "@/components/quan-tri/the-thong-ke";
@@ -150,7 +151,7 @@ export default async function BangDieuKhienNguoiDung() {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {daLuuList.map((ct) => (
-              <TheCongThuc key={ct!.id} congThuc={ct as any} />
+              <TheCongThuc key={ct!.id} congThuc={ct as Bang<"cong_thuc">} />
             ))}
           </div>
         )}

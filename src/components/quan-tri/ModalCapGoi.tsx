@@ -85,8 +85,8 @@ export function ModalCapGoi({
       toast.success(`Đã cấp gói Pro thành công cho @${nguoiDung.username}!`);
       onDong();
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi xử lý cấp gói.");
+    } catch (err) {
+      toast.error(err instanceof Error && err.message ? err.message : "Lỗi xử lý cấp gói.");
     } finally {
       setDangXuLy(false);
     }
@@ -109,8 +109,8 @@ export function ModalCapGoi({
       toast.info(`Đã thu hồi quyền Pro của @${nguoiDung.username}.`);
       onDong();
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi xử lý thu hồi gói.");
+    } catch (err) {
+      toast.error(err instanceof Error && err.message ? err.message : "Lỗi xử lý thu hồi gói.");
     } finally {
       setDangXuLy(false);
     }

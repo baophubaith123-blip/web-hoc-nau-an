@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Utensils, BookOpen, Users, Eye, Plus, ArrowRight } from "lucide-react";
 import { TheThongKe } from "@/components/quan-tri/the-thong-ke";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 
 export default async function ChefDashboard() {

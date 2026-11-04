@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
-import { Clock, Eye, Flame, ChefHat, Calendar, CheckSquare } from "lucide-react";
+import { Eye, Calendar, CheckSquare } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { NutLuuCongThuc } from "@/components/cong-thuc/nut-luu-cong-thuc";

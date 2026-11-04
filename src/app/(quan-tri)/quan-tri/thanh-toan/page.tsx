@@ -36,7 +36,7 @@ export default async function QuanLyThanhToanPage() {
         </div>
       ) : (
         <div className="border rounded-2xl divide-y bg-card overflow-hidden shadow-xs">
-          {danhSachGiaoDich.map((gd: any) => {
+          {danhSachGiaoDich.map((gd) => {
             const tt = mauTrangThai[gd.trang_thai] || { label: gd.trang_thai, variant: "outline" };
 
             return (

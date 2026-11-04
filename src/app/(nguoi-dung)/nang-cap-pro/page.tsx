@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { layPhienHienTai, taoSupabaseServer } from "@/lib/supabase/server";
 import { FormMuaGoi } from "@/components/goi/FormMuaGoi";
-import { Crown, Sparkles } from "lucide-react";
+import { Crown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 

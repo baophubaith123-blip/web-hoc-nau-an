@@ -1,9 +1,10 @@
+import type { Bang } from "@/types";
 import Link from "next/link";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 import { ThaoTacDuyetCongThuc } from "./thao-tac-duyet-cong-thuc";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Eye, Clock, Users, Edit3 } from "lucide-react";
+import { Plus, Eye, Edit3 } from "lucide-react";
 import Image from "next/image";
 import { dinhDangTuongDoi } from "@/lib/utils/dinh-dang";
 
@@ -23,7 +24,7 @@ export default async function QuanLyCongThucAdminPage({ searchParams }: Props) {
     .order("created_at", { ascending: false });
 
   if (params.trang_thai) {
-    truyVan = truyVan.eq("trang_thai", params.trang_thai as any);
+    truyVan = truyVan.eq("trang_thai", params.trang_thai as Bang<"cong_thuc">["trang_thai"]);
   }
 
   const { data: danhSachCongThuc } = await truyVan;

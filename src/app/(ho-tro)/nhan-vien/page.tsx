@@ -4,15 +4,10 @@ import { TheThongKe } from "@/components/quan-tri/the-thong-ke";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Inbox,
-  Clock,
-  CheckCircle2,
-  AlertTriangle,
   ArrowRight,
   MessageSquare,
 } from "lucide-react";
 import { dinhDangTuongDoi } from "@/lib/utils/dinh-dang";
-import type { Bang } from "@/types";
 
 export default async function NhanVienDashboardPage() {
   await yeuCauVaiTro(["support", "admin"]);

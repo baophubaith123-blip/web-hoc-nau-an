@@ -1,11 +1,8 @@
 import Link from "next/link";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChefHat, BookOpen, GraduationCap, Eye, Settings } from "lucide-react";
-import { dinhDangTuongDoi } from "@/lib/utils/dinh-dang";
-import type { Bang } from "@/types";
 
 export default async function QuanLyDauBepPage() {
   await yeuCauVaiTro(["admin"]);
@@ -33,7 +30,7 @@ export default async function QuanLyDauBepPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {danhSachDauBep.map((db: any) => {
+          {danhSachDauBep.map((db) => {
             const soCongThuc = db.cong_thuc?.[0]?.count || 0;
             const soKhoaHoc = db.khoa_hoc?.[0]?.count || 0;
 

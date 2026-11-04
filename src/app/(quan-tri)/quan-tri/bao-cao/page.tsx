@@ -1,6 +1,6 @@
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 import { TheThongKe } from "@/components/quan-tri/the-thong-ke";
-import { BarChart3, TrendingUp, Award, BookOpen, Eye, Users } from "lucide-react";
+import { BarChart3, BookOpen, Eye } from "lucide-react";
 import { dinhDangTien } from "@/lib/utils/dinh-dang";
 
 export default async function BaoCaoThongKePage() {

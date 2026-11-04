@@ -52,7 +52,7 @@ export default async function QuanTriHoTroPage() {
         </div>
       ) : (
         <div className="border rounded-2xl divide-y bg-card overflow-hidden shadow-xs">
-          {danhSachTicket.map((tk: any) => {
+          {danhSachTicket.map((tk) => {
             const tt = mauTrangThai[tk.trang_thai] || { label: tk.trang_thai, variant: "outline" };
             const ut = mauUuTien[tk.do_uu_tien] || "secondary";
 

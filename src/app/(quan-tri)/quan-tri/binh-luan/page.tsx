@@ -76,7 +76,7 @@ export default async function QuanLyBinhLuanPage({ searchParams }: Props) {
         </div>
       ) : (
         <div className="border rounded-2xl divide-y bg-card overflow-hidden shadow-xs">
-          {danhSachBinhLuan.map((bl: any) => (
+          {danhSachBinhLuan.map((bl) => (
             <div
               key={bl.id}
               className="p-4 flex flex-col sm:flex-row items-start justify-between gap-4 hover:bg-muted/40 transition-colors"

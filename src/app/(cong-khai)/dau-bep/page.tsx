@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ChefHat, BookOpen, Utensils } from "lucide-react";
+import { ChefHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { taoSupabaseServer } from "@/lib/supabase/server";

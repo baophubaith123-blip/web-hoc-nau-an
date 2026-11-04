@@ -106,8 +106,8 @@ export function FormGoi({ goiBanDau }: FormGoiProps) {
 
       router.push("/quan-tri/quan-ly-goi");
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi xử lý dữ liệu");
+    } catch (err) {
+      toast.error(err instanceof Error && err.message ? err.message : "Lỗi xử lý dữ liệu");
       setDangLuu(false);
     }
   };

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageSquare, Clock, ArrowRight } from "lucide-react";
+import { MessageSquare, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { TaoTicketDialog } from "./tao-ticket-dialog";

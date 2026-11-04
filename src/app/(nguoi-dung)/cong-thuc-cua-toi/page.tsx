@@ -1,3 +1,4 @@
+import type { Bang } from "@/types";
 import Link from "next/link";
 import { TheCongThuc } from "@/components/cong-thuc/the-cong-thuc";
 import { Button } from "@/components/ui/button";
@@ -45,7 +46,7 @@ export default async function CongThucCuaToi() {
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {congThucList.map((ct) => (
-            <TheCongThuc key={ct!.id} congThuc={ct as any} />
+            <TheCongThuc key={ct!.id} congThuc={ct as Bang<"cong_thuc">} />
           ))}
         </div>
       )}

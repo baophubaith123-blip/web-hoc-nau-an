@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 import { ShieldCheck, Clock, CheckCircle2, XCircle, Filter } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { BangDuyetNangCap } from "@/components/quan-tri/BangDuyetNangCap";
 import { Button } from "@/components/ui/button";
 

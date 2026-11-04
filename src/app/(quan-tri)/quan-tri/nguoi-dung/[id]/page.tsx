@@ -5,7 +5,7 @@ import { ChiTietNguoiDungClient } from "./chi-tiet-nguoi-dung-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, Clock } from "lucide-react";
+import { ArrowLeft, Phone, MapPin, Calendar } from "lucide-react";
 import { dinhDangTuongDoi } from "@/lib/utils/dinh-dang";
 
 interface Props {

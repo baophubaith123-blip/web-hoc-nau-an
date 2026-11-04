@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Star, ExternalLink } from "lucide-react";
 import { dinhDangTuongDoi } from "@/lib/utils/dinh-dang";
 import { XoaDanhGiaNut } from "./xoa-danh-gia-nut";
@@ -31,7 +30,7 @@ export default async function QuanLyDanhGiaPage() {
         </div>
       ) : (
         <div className="border rounded-2xl divide-y bg-card overflow-hidden shadow-xs">
-          {danhSachDanhGia.map((dg: any) => (
+          {danhSachDanhGia.map((dg) => (
             <div
               key={dg.id}
               className="p-4 flex flex-col sm:flex-row items-start justify-between gap-4 hover:bg-muted/40 transition-colors"

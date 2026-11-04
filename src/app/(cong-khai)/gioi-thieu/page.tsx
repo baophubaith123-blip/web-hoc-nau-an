@@ -1,5 +1,5 @@
-import { ChefHat, Heart, Award, Sparkles, BookOpen, Users } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Heart, Award, Users } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 export default function TrangGioiThieu() {
   return (

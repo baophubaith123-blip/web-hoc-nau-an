@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ChefHat, ArrowRight, Utensils, Award, BookOpen, Sparkles } from "lucide-react";
+import { ChefHat, ArrowRight, Utensils, BookOpen, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TheCongThuc } from "@/components/cong-thuc/the-cong-thuc";
 import { TheKhoaHoc } from "@/components/khoa-hoc/the-khoa-hoc";

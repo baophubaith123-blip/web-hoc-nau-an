@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, ArrowLeft } from "lucide-react";
 import { dinhDangTuongDoi } from "@/lib/utils/dinh-dang";
-import type { Bang } from "@/types";
 
 interface Props {
   searchParams: Promise<{ trang_thai?: string; uu_tien?: string }>;

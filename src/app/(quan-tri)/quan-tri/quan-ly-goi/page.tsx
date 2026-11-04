@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
-import { Crown, Plus, Edit, Check, X, ShieldAlert } from "lucide-react";
+import { Crown, Plus, Edit, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";

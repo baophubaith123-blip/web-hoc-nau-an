@@ -1,9 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { taoTicketSchema, DANH_MUC_TICKET } from "@/lib/validations/ticket";
 import { taoTicket } from "@/lib/actions/ticket";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

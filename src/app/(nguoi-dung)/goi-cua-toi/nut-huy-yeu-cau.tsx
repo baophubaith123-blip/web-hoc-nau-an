@@ -27,8 +27,8 @@ export function NutHuyYeuCau({ yeuCauId }: { yeuCauId: string }) {
 
       toast.info("Đã hủy yêu cầu nâng cấp thành công.");
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi xử lý hủy yêu cầu.");
+    } catch (err) {
+      toast.error(err instanceof Error && err.message ? err.message : "Lỗi xử lý hủy yêu cầu.");
       setDangHuy(false);
     }
   };

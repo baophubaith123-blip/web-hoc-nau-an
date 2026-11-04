@@ -1,8 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Clock, ShieldCheck } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ChatHoTro, type TinNhanItem } from "@/components/ho-tro/chat-ho-tro";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 

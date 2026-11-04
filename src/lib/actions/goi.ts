@@ -1,5 +1,6 @@
 "use server";
 
+import type { Bang } from "@/types";
 import { revalidatePath } from "next/cache";
 import { canPhien, ghiNhatKy } from "@/lib/actions/chung";
 import { huyYeuCauSchema } from "@/lib/validations/yeu-cau-nang-cap";
@@ -7,7 +8,7 @@ import { chuanHoaLoi, thanhCong, thatBai, type KetQua } from "@/lib/utils/phan-h
 import { t } from "@/lib/i18n/config";
 
 // Lấy danh sách các gói Pro đang hoạt động công khai
-export async function layDanhSachGoiAction(): Promise<KetQua<any[]>> {
+export async function layDanhSachGoiAction(): Promise<KetQua<Bang<"goi_premium">[]>> {
   try {
     const p = await canPhien();
     const supabase = p.ok ? p.supabase : (await import("@/lib/supabase/server")).taoSupabaseServer().then((s) => s);
@@ -29,9 +30,12 @@ export async function layDanhSachGoiAction(): Promise<KetQua<any[]>> {
 // Lấy thông tin gói của người dùng hiện tại + lịch sử + yêu cầu đang chờ
 export async function layGoiCuaToiAction(): Promise<
   KetQua<{
-    dangHoatDong: any | null;
-    lichSu: any[];
-    yeuCauChoDuyet: any[];
+    dangHoatDong: (Bang<"goi_nguoi_dung"> & { goi: Bang<"goi_premium"> | null }) | null;
+    lichSu: (Bang<"goi_nguoi_dung"> & { goi: Bang<"goi_premium"> | null })[];
+    yeuCauChoDuyet: (Bang<"yeu_cau_nang_cap"> & {
+      goi: Bang<"goi_premium"> | null;
+      thanh_toan: Bang<"thanh_toan"> | null;
+    })[];
     profile: {
       la_pro: boolean;
       goi_het_han: string | null;

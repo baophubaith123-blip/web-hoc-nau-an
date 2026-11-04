@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { taoCongThuc, capNhatCongThuc } from "@/lib/actions/cong-thuc";
 import { toast } from "sonner";
 import type { Bang, NguyenLieu, BuocNau } from "@/types";
@@ -80,7 +81,7 @@ export function FormCongThuc({ danhMucList, congThucGoc }: FormCongThucProps) {
     setNguyenLieu(nguyenLieu.filter((_, i) => i !== index));
   };
 
-  const suaNguyenLieu = (index: number, key: keyof NguyenLieu, val: any) => {
+  const suaNguyenLieu = <K extends keyof NguyenLieu>(index: number, key: K, val: NguyenLieu[K]) => {
     const copy = [...nguyenLieu];
     copy[index] = { ...copy[index], [key]: val };
     setNguyenLieu(copy);
@@ -228,7 +229,7 @@ export function FormCongThuc({ danhMucList, congThucGoc }: FormCongThucProps) {
               <Label>Độ khó</Label>
               <Select
                 value={doKho}
-                onValueChange={(val) => setDoKho(val as any)}
+                onValueChange={(val) => { if (val) setDoKho(val as "de" | "trung_binh" | "kho"); }}
                 disabled={dangGui}
               >
                 <SelectTrigger className="w-full">
@@ -277,6 +278,51 @@ export function FormCongThuc({ danhMucList, congThucGoc }: FormCongThucProps) {
                 onChange={(e) => setKhauPhan(e.target.value)}
                 disabled={dangGui}
               />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4 pt-2 sm:flex-row">
+            <div className="space-y-2 shrink-0 sm:w-44">
+              <Label htmlFor="calories">Calories (kcal)</Label>
+              <Input
+                id="calories"
+                type="number"
+                value={calories}
+                onChange={(e) => setCalories(e.target.value)}
+                placeholder="VD: 450"
+                disabled={dangGui}
+              />
+            </div>
+
+            <div className="flex-1 space-y-2">
+              <Label>Danh mục món ăn</Label>
+              {danhMucList.length > 0 ? (
+                <div className="flex flex-wrap gap-x-4 gap-y-2 pt-1">
+                  {danhMucList.map((dm) => (
+                    <label
+                      key={dm.id}
+                      className="flex cursor-pointer items-center gap-2 text-sm"
+                    >
+                      <Checkbox
+                        checked={danhMucIds.includes(dm.id)}
+                        onCheckedChange={(checked) =>
+                          setDanhMucIds((prev) =>
+                            checked
+                              ? [...prev, dm.id]
+                              : prev.filter((id) => id !== dm.id)
+                          )
+                        }
+                        disabled={dangGui}
+                      />
+                      {dm.ten}
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <p className="pt-1 text-sm text-muted-foreground">
+                  Chưa có danh mục nào.
+                </p>
+              )}
             </div>
           </div>
         </CardContent>

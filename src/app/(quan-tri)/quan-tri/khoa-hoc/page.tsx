@@ -1,9 +1,10 @@
+import type { Bang } from "@/types";
 import Link from "next/link";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 import { ThaoTacDuyetKhoaHoc } from "./thao-tac-duyet-khoa-hoc";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Eye, BookOpen, Clock, Award, Edit3 } from "lucide-react";
+import { Plus, Eye, BookOpen, Clock, Edit3 } from "lucide-react";
 import Image from "next/image";
 import { HienThiGia } from "@/components/thanh-toan/hien-thi-gia";
 
@@ -22,7 +23,7 @@ export default async function QuanLyKhoaHocAdminPage({ searchParams }: Props) {
     .order("created_at", { ascending: false });
 
   if (params.trang_thai) {
-    truyVan = truyVan.eq("trang_thai", params.trang_thai as any);
+    truyVan = truyVan.eq("trang_thai", params.trang_thai as Bang<"khoa_hoc">["trang_thai"]);
   }
 
   const { data: danhSachKhoaHoc } = await truyVan;

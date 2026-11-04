@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Check, X, Clock, AlertCircle, Eye, Loader2, Sparkles, User } from "lucide-react";
+import { Check, X, Clock, AlertCircle, Loader2, Sparkles, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -90,8 +91,8 @@ export function BangDuyetNangCap({ danhSach }: BangDuyetNangCapProps) {
       setYeuCauDangDuyet(null);
       setGhiChuDuyet("");
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi xử lý duyệt yêu cầu.");
+    } catch (err) {
+      toast.error(err instanceof Error && err.message ? err.message : "Lỗi xử lý duyệt yêu cầu.");
     } finally {
       setDangXuLy(false);
     }
@@ -121,8 +122,8 @@ export function BangDuyetNangCap({ danhSach }: BangDuyetNangCapProps) {
       setYeuCauDangTuChoi(null);
       setLyDoTuChoi("");
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi xử lý từ chối yêu cầu.");
+    } catch (err) {
+      toast.error(err instanceof Error && err.message ? err.message : "Lỗi xử lý từ chối yêu cầu.");
     } finally {
       setDangXuLy(false);
     }
@@ -195,9 +196,12 @@ export function BangDuyetNangCap({ danhSach }: BangDuyetNangCapProps) {
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-xs font-bold shrink-0">
                         {item.nguoi_dung?.avatar_url ? (
-                          <img
+                          <Image
                             src={item.nguoi_dung.avatar_url}
                             alt=""
+                            width={28}
+                            height={28}
+                            unoptimized
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (

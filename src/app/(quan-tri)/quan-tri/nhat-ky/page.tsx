@@ -29,7 +29,7 @@ export default async function NhatKyHoatDongPage() {
         </div>
       ) : (
         <div className="border rounded-2xl divide-y bg-card overflow-hidden shadow-xs">
-          {danhSachNhatKy.map((nk: any) => (
+          {danhSachNhatKy.map((nk) => (
             <div
               key={nk.id}
               className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-muted/40 transition-colors"

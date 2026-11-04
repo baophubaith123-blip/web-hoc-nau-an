@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, FileText, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TrinhPhatYouTube } from "@/components/khoa-hoc/trinh-phat-youtube";
 import { DanhSachBaiHoc } from "@/components/khoa-hoc/danh-sach-bai-hoc";

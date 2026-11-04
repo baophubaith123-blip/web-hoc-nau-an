@@ -46,7 +46,7 @@ export default async function QuanLyBaiVietPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {danhSachBaiViet.map((bv: any) => {
+          {danhSachBaiViet.map((bv) => {
             const tt = mauTrangThai[bv.trang_thai] || { label: bv.trang_thai, variant: "outline" };
 
             return (
@@ -75,7 +75,7 @@ export default async function QuanLyBaiVietPage() {
                   <div className="p-4 space-y-2">
                     <h3 className="font-bold line-clamp-1">{bv.tieu_de}</h3>
                     <p className="text-xs text-muted-foreground line-clamp-2">
-                      {bv.tomTat || bv.tom_tat || "Không có tóm tắt"}
+                      {bv.tom_tat || bv.tom_tat || "Không có tóm tắt"}
                     </p>
                     <p className="text-xs text-muted-foreground pt-1">
                       Chuyên mục: <span className="font-medium text-foreground">{bv.danh_muc || "Chung"}</span> • {dinhDangTuongDoi(bv.created_at)}

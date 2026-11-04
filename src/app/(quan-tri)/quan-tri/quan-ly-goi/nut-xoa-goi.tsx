@@ -27,8 +27,8 @@ export function NutXoaGoi({ id, ten }: { id: string; ten: string }) {
 
       toast.success(`Đã xử lý gói "${ten}".`);
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Lỗi xử lý xóa gói.");
+    } catch (err) {
+      toast.error(err instanceof Error && err.message ? err.message : "Lỗi xử lý xóa gói.");
       setDangXoa(false);
     }
   };

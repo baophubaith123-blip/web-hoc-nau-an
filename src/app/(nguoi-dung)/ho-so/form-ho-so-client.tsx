@@ -153,7 +153,7 @@ export function FormHoSoClient({ profile }: FormHoSoClientProps) {
                 <Label htmlFor="gioi_tinh">Giới tính</Label>
                 <Select
                   value={formHoSo.watch("gioi_tinh") || ""}
-                  onValueChange={(val) => formHoSo.setValue("gioi_tinh", val as any)}
+                  onValueChange={(val) => formHoSo.setValue("gioi_tinh", val as "nam" | "nu" | "khac" | "")}
                   disabled={dangLuuHoSo}
                 >
                   <SelectTrigger className="w-full">

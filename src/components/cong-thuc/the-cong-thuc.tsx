@@ -1,10 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Eye, Flame, ChefHat, Star } from "lucide-react";
+import { Clock, Eye, Flame, ChefHat } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { BadgePro } from "@/components/goi/BadgePro";
-import { vi } from "@/lib/i18n/vi";
 import type { Bang } from "@/types";
 
 type CongThucItem = Bang<"cong_thuc"> & {

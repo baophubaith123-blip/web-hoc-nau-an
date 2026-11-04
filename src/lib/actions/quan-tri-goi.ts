@@ -14,13 +14,12 @@ import {
 } from "@/lib/validations/yeu-cau-nang-cap";
 import { idUuid } from "@/lib/validations/chung";
 import { chuanHoaLoi, thanhCong, thatBai, type KetQua } from "@/lib/utils/phan-hoi-loi";
-import { tinhNgayHetHan, formatGiaVND } from "@/lib/utils/goi";
+import { tinhNgayHetHan } from "@/lib/utils/goi";
 import { guiEmailChucMungPro } from "@/lib/email/gui-email";
-import { t } from "@/lib/i18n/config";
 import type { Bang } from "@/types";
 
 // 1. Lấy tất cả các gói dành cho admin
-export async function layDanhSachGoiQuanTriAction(): Promise<KetQua<any[]>> {
+export async function layDanhSachGoiQuanTriAction(): Promise<KetQua<Bang<"goi_premium">[]>> {
   try {
     const p = await canPhien(["admin"]);
     if (!p.ok) return p.loi;
@@ -38,7 +37,7 @@ export async function layDanhSachGoiQuanTriAction(): Promise<KetQua<any[]>> {
 }
 
 // 2. Tạo gói Premium mới
-export async function taoGoiAction(dauVao: unknown): Promise<KetQua<any>> {
+export async function taoGoiAction(dauVao: unknown): Promise<KetQua<Bang<"goi_premium">>> {
   try {
     const p = await canPhien(["admin"]);
     if (!p.ok) return p.loi;
@@ -76,7 +75,7 @@ export async function taoGoiAction(dauVao: unknown): Promise<KetQua<any>> {
 }
 
 // 3. Sửa gói Premium
-export async function suaGoiAction(dauVao: unknown): Promise<KetQua<any>> {
+export async function suaGoiAction(dauVao: unknown): Promise<KetQua<Bang<"goi_premium">>> {
   try {
     const p = await canPhien(["admin"]);
     if (!p.ok) return p.loi;
@@ -157,7 +156,18 @@ export async function layDanhSachYeuCauNangCapAction({
   trangThai?: string;
   trang?: number;
   gioiHan?: number;
-}): Promise<KetQua<{ items: any[]; tongSo: number; trangHienTai: number; tongTrang: number }>> {
+}): Promise<
+  KetQua<{
+    items: (Bang<"yeu_cau_nang_cap"> & {
+      nguoi_dung: Bang<"profiles"> | null;
+      goi: Bang<"goi_premium"> | null;
+      thanh_toan: Bang<"thanh_toan"> | null;
+    })[];
+    tongSo: number;
+    trangHienTai: number;
+    tongTrang: number;
+  }>
+> {
   try {
     const p = await canPhien(["admin"]);
     if (!p.ok) return p.loi;

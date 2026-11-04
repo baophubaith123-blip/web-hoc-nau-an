@@ -80,8 +80,8 @@ export function FormMuaGoi({
       } else {
         throw new Error("Không nhận được URL thanh toán từ hệ thống.");
       }
-    } catch (err: any) {
-      toast.error(err.message || "Đã xảy ra lỗi khi khởi tạo thanh toán.");
+    } catch (err) {
+      toast.error(err instanceof Error && err.message ? err.message : "Đã xảy ra lỗi khi khởi tạo thanh toán.");
       setDangXuLy(false);
     }
   };

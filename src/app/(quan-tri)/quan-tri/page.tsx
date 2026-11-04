@@ -1,18 +1,13 @@
 import Link from "next/link";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 import { TheThongKe } from "@/components/quan-tri/the-thong-ke";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Users,
-  ChefHat,
   BookOpen,
-  GraduationCap,
-  CreditCard,
   AlertCircle,
   ArrowRight,
   Clock,
-  Eye,
 } from "lucide-react";
 import { dinhDangTuongDoi } from "@/lib/utils/dinh-dang";
 import { dinhDangTien } from "@/lib/utils/dinh-dang";
@@ -45,7 +40,7 @@ export default async function QuanTriDashboardPage() {
       .limit(5),
   ]);
 
-  const tongDoanhThu = (dangKyThanhToan || []).reduce((tong, item: any) => {
+  const tongDoanhThu = (dangKyThanhToan || []).reduce((tong, item) => {
     return tong + (item.khoa_hoc?.gia || 0);
   }, 0);
 

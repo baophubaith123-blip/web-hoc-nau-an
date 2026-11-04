@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
-import { Crown, Sparkles, Clock, Calendar, CheckCircle, ArrowRight, ShieldCheck } from "lucide-react";
+import { Crown, Sparkles, Clock, Calendar, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
