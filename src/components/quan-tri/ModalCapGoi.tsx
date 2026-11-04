@@ -140,7 +140,14 @@ export function ModalCapGoi({
               <Label htmlFor="chon_goi">Chọn gói Premium cần cấp</Label>
               <Select value={goiDuocChon} onValueChange={(val) => { if (val) setGoiDuocChon(val); }}>
                 <SelectTrigger id="chon_goi">
-                  <SelectValue placeholder="Chọn gói dịch vụ..." />
+                  <SelectValue placeholder="Chọn gói dịch vụ...">
+                    {(value: string) => {
+                      const goi = danhSachGoi.find((g) => g.id === value);
+                      return goi
+                        ? `${goi.ten} (${goi.thoi_han_ngay} ngày)`
+                        : "Chọn gói dịch vụ...";
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {danhSachGoi.map((g) => (

@@ -232,7 +232,11 @@ export function FormCongThuc({ danhMucList, congThucGoc }: FormCongThucProps) {
                 disabled={dangGui}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {(value: string) =>
+                      ({ de: "Dễ", trung_binh: "Trung bình", kho: "Khó" } as Record<string, string>)[value] ?? value
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="de">Dễ</SelectItem>

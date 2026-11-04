@@ -78,8 +78,8 @@ create table if not exists public.quyen_nguoi_dung (
 -- Khởi tạo sẵn 2 gói Pro chuẩn
 insert into public.goi_premium (ma_goi, ten, mo_ta, thoi_han_ngay, gia, quyen_loi, thu_tu, hoat_dong)
 values
-  ('pro_thang', 'Pro Tháng', 'Trải nghiệm trọn vẹn toàn bộ tính năng cao cấp trong 30 ngày.', 30, 99000, '["xem_video_hd", "tai_tai_lieu", "lam_bai_tap", "nhan_chung_chi", "tao_cong_thuc", "profile_nang_cap", "ho_tro_1_1", "khong_quang_cao"]'::jsonb, 1, true),
-  ('pro_nam', 'Pro Năm', 'Gói tiết kiệm 33% chi phí, thỏa sức nấu nướng và nhận chứng chỉ trọn năm.', 365, 799000, '["xem_video_hd", "tai_tai_lieu", "lam_bai_tap", "nhan_chung_chi", "tao_cong_thuc", "profile_nang_cap", "ho_tro_1_1", "khong_quang_cao"]'::jsonb, 2, true)
+  ('pro_thang', 'Pro Tháng', 'Trải nghiệm trọn vẹn toàn bộ tính năng cao cấp trong 30 ngày.', 30, 99000, '["Xem video HD 1080p sắc nét", "Tải tài liệu công thức độc quyền (PDF)", "Làm bài tập trắc nghiệm có chấm điểm", "Nhận chứng chỉ tốt nghiệp (PDF + mã QR)", "Quyền đăng tải công thức chia sẻ cộng đồng", "Huy hiệu Pro vương miện vàng", "Hỗ trợ 1-1 chuyên sâu cùng đầu bếp", "Trải nghiệm học tập không quảng cáo"]'::jsonb, 1, true),
+  ('pro_nam', 'Pro Năm', 'Gói tiết kiệm 33% chi phí, thỏa sức nấu nướng và nhận chứng chỉ trọn năm.', 365, 799000, '["Xem video HD 1080p sắc nét", "Tải tài liệu công thức độc quyền (PDF)", "Làm bài tập trắc nghiệm có chấm điểm", "Nhận chứng chỉ tốt nghiệp (PDF + mã QR)", "Quyền đăng tải công thức chia sẻ cộng đồng", "Huy hiệu Pro vương miện vàng", "Hỗ trợ 1-1 chuyên sâu cùng đầu bếp", "Trải nghiệm học tập không quảng cáo"]'::jsonb, 2, true)
 on conflict (ma_goi) do update set
   ten = excluded.ten,
   mo_ta = excluded.mo_ta,

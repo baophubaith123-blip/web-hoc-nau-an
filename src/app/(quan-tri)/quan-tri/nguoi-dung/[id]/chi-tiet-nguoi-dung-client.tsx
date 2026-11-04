@@ -131,7 +131,18 @@ export function ChiTietNguoiDungClient({
             onValueChange={(v) => { if (v) setVaiTroMoi(v as VaiTro); }}
           >
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Chọn vai trò" />
+              <SelectValue placeholder="Chọn vai trò">
+                {(value: string) =>
+                  value
+                    ? ({
+                        user: "Học viên (User)",
+                        chef: "Đầu bếp (Chef)",
+                        support: "Nhân viên hỗ trợ (Support)",
+                        admin: "Quản trị viên (Admin)",
+                      } as Record<string, string>)[value] ?? value
+                    : "Chọn vai trò"
+                }
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="user">Học viên (User)</SelectItem>

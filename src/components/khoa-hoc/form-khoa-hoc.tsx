@@ -224,7 +224,17 @@ export function FormKhoaHoc({
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Chọn cấp độ" />
+                    <SelectValue placeholder="Chọn cấp độ">
+                      {(value: string) =>
+                        value
+                          ? ({
+                              co_ban: "Cơ bản cho người mới",
+                              trung_cap: "Trung cấp / Thực hành",
+                              nang_cao: "Nâng cao / Chuyên nghiệp",
+                            } as Record<string, string>)[value] ?? value
+                          : "Chọn cấp độ"
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="co_ban">Cơ bản cho người mới</SelectItem>

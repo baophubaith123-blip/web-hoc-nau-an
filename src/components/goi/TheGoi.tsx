@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Check, Sparkles, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { formatGiaVND } from "@/lib/utils/goi";
+import { formatGiaVND, QUYEN_LOI_PRO } from "@/lib/utils/goi";
 import { cn } from "@/lib/utils/cn";
 
 export interface GoiProps {
@@ -118,7 +118,10 @@ export function TheGoi({
               <div className="rounded-full p-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">
                 <Check className="w-3.5 h-3.5" />
               </div>
-              <span className="leading-snug">{item}</span>
+              <span className="leading-snug">
+                {/* Dịch mã quyền lợi (vd: xem_video_hd) sang tên tiếng Việt nếu khớp danh mục chuẩn */}
+                {QUYEN_LOI_PRO.find((q) => q.id === item)?.ten ?? item}
+              </span>
             </li>
           ))}
         </ul>

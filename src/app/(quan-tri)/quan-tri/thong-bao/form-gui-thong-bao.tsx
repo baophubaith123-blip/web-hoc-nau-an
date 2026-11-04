@@ -74,7 +74,17 @@ export function FormGuiThongBao() {
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Chọn nhóm đối tượng" />
+                <SelectValue placeholder="Chọn nhóm đối tượng">
+                  {(value: string) =>
+                    value
+                      ? ({
+                          tat_ca: "Tất cả thành viên hệ thống",
+                          chef: "Chỉ đầu bếp đối tác (Chef)",
+                          support: "Chỉ nhân viên hỗ trợ (Support)",
+                        } as Record<string, string>)[value] ?? value
+                      : "Chọn nhóm đối tượng"
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="tat_ca">Tất cả thành viên hệ thống</SelectItem>

@@ -157,7 +157,13 @@ export function FormHoSoClient({ profile }: FormHoSoClientProps) {
                   disabled={dangLuuHoSo}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Chọn giới tính" />
+                    <SelectValue placeholder="Chọn giới tính">
+                      {(value: string) =>
+                        value
+                          ? ({ nam: "Nam", nu: "Nữ", khac: "Khác" } as Record<string, string>)[value] ?? value
+                          : "Chọn giới tính"
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="nam">Nam</SelectItem>

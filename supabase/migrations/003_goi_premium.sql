@@ -116,7 +116,7 @@ values
     'Trải nghiệm trọn vẹn toàn bộ tính năng cao cấp trong 30 ngày.',
     30,
     99000,
-    '["xem_video_hd", "tai_tai_lieu", "lam_bai_tap", "nhan_chung_chi", "tao_cong_thuc", "profile_nang_cap", "ho_tro_1_1", "khong_quang_cao"]'::jsonb,
+    '["Xem video HD 1080p sắc nét", "Tải tài liệu công thức độc quyền (PDF)", "Làm bài tập trắc nghiệm có chấm điểm", "Nhận chứng chỉ tốt nghiệp (PDF + mã QR)", "Quyền đăng tải công thức chia sẻ cộng đồng", "Huy hiệu Pro vương miện vàng", "Hỗ trợ 1-1 chuyên sâu cùng đầu bếp", "Trải nghiệm học tập không quảng cáo"]'::jsonb,
     1,
     true
   ),
@@ -126,7 +126,7 @@ values
     'Gói tiết kiệm 33% chi phí, thỏa sức nấu nướng và nhận chứng chỉ trọn năm.',
     365,
     799000,
-    '["xem_video_hd", "tai_tai_lieu", "lam_bai_tap", "nhan_chung_chi", "tao_cong_thuc", "profile_nang_cap", "ho_tro_1_1", "khong_quang_cao"]'::jsonb,
+    '["Xem video HD 1080p sắc nét", "Tải tài liệu công thức độc quyền (PDF)", "Làm bài tập trắc nghiệm có chấm điểm", "Nhận chứng chỉ tốt nghiệp (PDF + mã QR)", "Quyền đăng tải công thức chia sẻ cộng đồng", "Huy hiệu Pro vương miện vàng", "Hỗ trợ 1-1 chuyên sâu cùng đầu bếp", "Trải nghiệm học tập không quảng cáo"]'::jsonb,
     2,
     true
   )

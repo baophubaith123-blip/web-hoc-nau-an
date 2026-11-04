@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,35 @@ export function BoLocCongThuc({ danhMucList }: BoLocCongThucProps) {
   const doKho = searchParams.get("do_kho") || "tat_ca";
   const sapXep = searchParams.get("sap_xep") || "moi_nhat";
 
+  // Ô tìm kiếm giữ chữ tại chỗ, chỉ cập nhật URL sau khi ngừng gõ 400ms (tránh chuyển trang từng ký tự)
+  const [tuKhoaNhap, setTuKhoaNhap] = useState(tuKhoa);
+  useEffect(() => {
+    setTuKhoaNhap(tuKhoa);
+  }, [tuKhoa]);
+  useEffect(() => {
+    if (tuKhoaNhap === tuKhoa) return;
+    const henGio = setTimeout(() => capNhatThamSo("tu_khoa", tuKhoaNhap), 400);
+    return () => clearTimeout(henGio);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tuKhoaNhap]);
+
+  // Bảng nhãn hiển thị cho Select (Base UI mặc định hiện giá trị thô như "tat_ca")
+  const nhanDanhMuc: Record<string, string> = {
+    tat_ca: "Tất cả danh mục",
+    ...Object.fromEntries(danhMucList.map((dm) => [dm.slug, dm.ten])),
+  };
+  const nhanDoKho: Record<string, string> = {
+    tat_ca: "Mọi độ khó",
+    de: "Dễ làm",
+    trung_binh: "Trung bình",
+    kho: "Kỳ công / Khó",
+  };
+  const nhanSapXep: Record<string, string> = {
+    moi_nhat: "Mới nhất",
+    xem_nhieu: "Xem nhiều nhất",
+    thoi_gian_ngan: "Nấu nhanh nhất",
+  };
+
   const capNhatThamSo = (khoa: string, giaTri: string) => {
     const params = new URLSearchParams(searchParams.toString());
     if (giaTri && giaTri !== "tat_ca") {
@@ -51,8 +81,8 @@ export function BoLocCongThuc({ danhMucList }: BoLocCongThucProps) {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            value={tuKhoa}
-            onChange={(e) => capNhatThamSo("tu_khoa", e.target.value)}
+            value={tuKhoaNhap}
+            onChange={(e) => setTuKhoaNhap(e.target.value)}
             placeholder="Tìm tên món, nguyên liệu..."
             className="pl-9"
           />
@@ -64,7 +94,9 @@ export function BoLocCongThuc({ danhMucList }: BoLocCongThucProps) {
           onValueChange={(val) => capNhatThamSo("danh_muc", val ?? "tat_ca")}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Danh mục món ăn" />
+            <SelectValue placeholder="Danh mục món ăn">
+              {(value: string) => nhanDanhMuc[value] ?? value}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="tat_ca">Tất cả danh mục</SelectItem>
@@ -82,7 +114,9 @@ export function BoLocCongThuc({ danhMucList }: BoLocCongThucProps) {
           onValueChange={(val) => capNhatThamSo("do_kho", val ?? "tat_ca")}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Độ khó" />
+            <SelectValue placeholder="Độ khó">
+              {(value: string) => nhanDoKho[value] ?? value}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="tat_ca">Mọi độ khó</SelectItem>
@@ -98,7 +132,9 @@ export function BoLocCongThuc({ danhMucList }: BoLocCongThucProps) {
           onValueChange={(val) => capNhatThamSo("sap_xep", val ?? "moi_nhat")}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Sắp xếp" />
+            <SelectValue placeholder="Sắp xếp">
+              {(value: string) => nhanSapXep[value] ?? value}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="moi_nhat">Mới nhất</SelectItem>

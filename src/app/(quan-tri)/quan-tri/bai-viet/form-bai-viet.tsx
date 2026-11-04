@@ -148,7 +148,17 @@ export function FormBaiViet({ baiVietHienTai }: FormBaiVietProps) {
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Chọn trạng thái" />
+                    <SelectValue placeholder="Chọn trạng thái">
+                      {(value: string) =>
+                        value
+                          ? ({
+                              xuat_ban: "Xuất bản công khai",
+                              nhap: "Bản nháp",
+                              luu_tru: "Lưu trữ (Ẩn)",
+                            } as Record<string, string>)[value] ?? value
+                          : "Chọn trạng thái"
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="xuat_ban">Xuất bản công khai</SelectItem>

@@ -89,7 +89,17 @@ export function TaoTicketDialog() {
               disabled={dangGui}
             >
               <SelectTrigger className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {(value: string) =>
+                    ({
+                      tai_khoan: "Vấn đề tài khoản",
+                      thanh_toan: "Thanh toán & Đơn hàng",
+                      khoa_hoc: "Khóa học & Bài tập",
+                      ky_thuat: "Lỗi kỹ thuật website",
+                      khac: "Khác",
+                    } as Record<string, string>)[value] ?? value
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="tai_khoan">Vấn đề tài khoản</SelectItem>
