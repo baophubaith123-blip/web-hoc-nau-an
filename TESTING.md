@@ -77,8 +77,8 @@ Các mục dưới đây **không phải lỗi code** — code đã hoàn thiệ
 |---|---|---|
 | Thanh toán VNPay (sandbox) | Chưa test được | `VNPAY_TMN_CODE`, `VNPAY_HASH_SECRET` đang trống — đăng ký tại sandbox.vnpayment.vn |
 | Gửi email (Resend) | Chưa test được | `RESEND_API_KEY` đang trống |
-| Tải chứng chỉ PDF, form liên hệ, đếm lượt xem, IPN VNPay | Đang lỗi | `SUPABASE_SERVICE_ROLE_KEY` hiện tại không hợp lệ (Supabase trả 401) — lấy lại key đúng tại Supabase Dashboard → Settings → API Keys |
-| Chứng chỉ PDF — dữ liệu mẫu | Chưa có dữ liệu | Database hiện chưa có học viên nào hoàn thành 100% khóa học nên chưa phát sinh chứng chỉ để tải thử |
+| Tải chứng chỉ PDF, form liên hệ, đếm lượt xem, IPN VNPay | **Đã khắc phục 05/11/2026** | Secret key "default" cũ phía Supabase đã chết (trả 401 dù đúng định dạng) — đã tạo secret key mới và cấu hình lại `SUPABASE_SERVICE_ROLE_KEY`; kiểm chứng: form liên hệ ghi được nhật ký + thông báo admin, đếm lượt xem tăng đúng, sitemap có đủ slug, chứng chỉ xuất PDF thành công (riêng IPN VNPay còn chờ thông tin VNPay bên dưới) |
+| Chứng chỉ PDF — dữ liệu mẫu | **Đã kiểm chứng** | Đã tạo chứng chỉ thử cho học viên mẫu, tải PDF thành công (200, đúng định dạng PDF), sau đó xóa dữ liệu thử. Lưu ý: bản đầu phát hiện lỗi font WinAnsi không mã hóa được tiếng Việt trong `src/lib/pdf/chung-chi.ts` — đã sửa bằng cách nhúng font Be Vietnam Pro (Regular/Bold/Italic) qua `@pdf-lib/fontkit` |
 | Đẩy code lên GitHub từ phiên làm việc từ xa | Làm thủ công | Git Credential Manager không chạy trong phiên SSH — chạy `git push` từ terminal/VS Code trên máy |
 
 ## 7. Ghi chú dữ liệu

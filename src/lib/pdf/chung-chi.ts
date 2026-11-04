@@ -1,4 +1,7 @@
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
+import { readFile } from "fs/promises";
+import path from "path";
 import QRCode from "qrcode";
 
 export async function taoPdfChungChi({
@@ -17,10 +20,18 @@ export async function taoPdfChungChi({
   const page = pdfDoc.addPage([842, 595]);
   const { width, height } = page.getSize();
 
-  // Load font tiêu chuẩn
-  const fontTieuDe = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const fontVanBan = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontNghieng = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+  // Nhúng font Be Vietnam Pro (Unicode) — font chuẩn Helvetica của pdf-lib
+  // dùng bảng mã WinAnsi nên không vẽ được tiếng Việt có dấu (lỗi encode).
+  pdfDoc.registerFontkit(fontkit);
+  const thuMucFont = path.join(process.cwd(), "public", "fonts");
+  const [fontBoldBytes, fontRegularBytes, fontItalicBytes] = await Promise.all([
+    readFile(path.join(thuMucFont, "BeVietnamPro-Bold.ttf")),
+    readFile(path.join(thuMucFont, "BeVietnamPro-Regular.ttf")),
+    readFile(path.join(thuMucFont, "BeVietnamPro-Italic.ttf")),
+  ]);
+  const fontTieuDe = await pdfDoc.embedFont(fontBoldBytes, { subset: true });
+  const fontVanBan = await pdfDoc.embedFont(fontRegularBytes, { subset: true });
+  const fontNghieng = await pdfDoc.embedFont(fontItalicBytes, { subset: true });
 
   // Khung viền đôi sang trọng
   const mauCam = rgb(0.91, 0.35, 0.05); // #ea580c
