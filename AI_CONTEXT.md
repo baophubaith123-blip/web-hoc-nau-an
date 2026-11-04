@@ -1,5 +1,14 @@
 # 🤖 AI CONTEXT — Đọc file này TRƯỚC KHI LÀM VIỆC
 
+## 📌 TRẠNG THÁI HIỆN TẠI (cập nhật 05/11/2026)
+
+- Code đã hoàn thiện toàn bộ tính năng: TypeScript 0 lỗi, ESLint 0 lỗi 0 cảnh báo, build production thành công.
+- Toàn bộ source đã được commit Git (trước đây phần lớn file chưa từng commit).
+- Giao diện hiển thị nhãn tiếng Việt ở mọi Select/quyền lợi gói; ảnh dữ liệu mẫu là ảnh món ăn thật (Unsplash), video bài học là video nấu ăn thật trên YouTube.
+- Lưu ý dữ liệu: database đang chạy dùng bộ dữ liệu gọn (9 công thức, 5 khóa học, 15 bài học, 2 bài viết) — khác với `supabase/seed.sql` trong repo (20 công thức, 5 khóa học, 10 bài học, 5 bài viết). Khi cài mới từ seed.sql sẽ ra bộ dữ liệu đầy đủ của repo.
+- Còn chờ cấu hình môi trường để các luồng chạy thật: `VNPAY_TMN_CODE`, `VNPAY_HASH_SECRET` (thanh toán), `RESEND_API_KEY` (email) và `SUPABASE_SERVICE_ROLE_KEY` phải là key đúng của project (chứng chỉ PDF, form liên hệ, đếm lượt xem và IPN VNPay dùng key này).
+
+
 > **Dành cho AI tool (Antigravity, Cursor, Claude, Copilot...)**
 > File này chứa TOÀN BỘ context để AI mới hiểu dự án ngay lập tức.
 > Đọc kỹ trước khi sinh code.
@@ -108,6 +117,8 @@ text
 **Mọi gói đều có `ngay_het_han` cụ thể — KHÔNG có null/vĩnh viễn.**
 
 ### Quyền lợi Pro (quyen_loi JSONB)
+
+Cột `quyen_loi` lưu danh sách **nhãn hiển thị tiếng Việt** (mỗi phần tử là một dòng quyền lợi, admin sửa tự do ở form gói). Danh mục 8 quyền lợi chuẩn nằm ở `QUYEN_LOI_PRO` trong `src/lib/utils/goi.ts` (id → tên hiển thị); component `TheGoi` tự dịch id sang tên nếu gặp dữ liệu cũ còn lưu id:
 
 ```json
 [

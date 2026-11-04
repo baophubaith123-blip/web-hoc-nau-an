@@ -15,7 +15,7 @@
 - **Tên đồ án:** Web học nấu ăn online
 - **Mục tiêu:** Xây dựng một website học nấu ăn toàn diện phục vụ từ người mới bắt đầu đến người học nâng cao; cung cấp công thức, bài học tương tác, hệ thống cấp chứng chỉ trực tuyến và quản lý vận hành khép kín.
 - **Mô hình hoạt động:** Chuyển đổi từ bán khóa học lẻ sang **gói hội viên cao cấp (Pro Membership)**, tối ưu trải nghiệm học tập liên tục và mở khóa đặc quyền tác giả nội dung.
-- **Quy mô hệ thống:** 54 màn hình chuyên biệt (16 Public, 12 Học viên, 6 Đầu bếp, 17 Quản trị viên, 3 Nhân viên CSKH) cùng 24 bảng cơ sở dữ liệu quan hệ.
+- **Quy mô hệ thống:** 68 màn hình chuyên biệt (17 Public, 14 Học viên, 8 Đầu bếp, 26 Quản trị viên, 3 Nhân viên CSKH), 7 API route cùng 24 bảng cơ sở dữ liệu quan hệ.
 
 ---
 
@@ -70,7 +70,7 @@ Nền tảng vận hành theo mô hình gói dịch vụ thời hạn cố đị
 ```text
 D:\web-hoc-nau-an\
 ├── src/
-│   ├── app/                                # Next.js App Router (54 màn hình)
+│   ├── app/                                # Next.js App Router (68 màn hình)
 │   │   ├── (cong-khai)/                    # Trang dành cho khách & tổng quan
 │   │   ├── (nguoi-dung)/                   # Bảng điều khiển cá nhân & mua gói
 │   │   ├── (dau-bep)/bep/                  # Giao diện quản lý của Đầu bếp
@@ -98,7 +98,7 @@ D:\web-hoc-nau-an\
 ├── .env.example                            # Khung cấu hình biến môi trường
 ├── README.md                               # Tổng quan dự án (File này)
 ├── TAILIEU-NGHIEPVU.md                     # Tài liệu đặc tả quy trình nghiệp vụ
-├── TAILIEU-GIAODIEN.md                     # Tài liệu giao diện wireframe 54 màn hình
+├── TAILIEU-GIAODIEN.md                     # Tài liệu giao diện wireframe các màn hình
 ├── TAILIEU-KYTHUAT-FRONTEND.md             # Hướng dẫn kiến trúc kỹ thuật Frontend
 ├── TAILIEU-KYTHUAT-ADMIN.md                # Hướng dẫn kiến trúc kỹ thuật Admin
 └── AGENT.md                                # Quy chuẩn chỉ dẫn AI phát triển code
@@ -179,7 +179,7 @@ Hệ thống sẽ biên dịch sạch 63 route mà không gặp bất kỳ lỗi
 Bộ tài liệu kỹ thuật chi tiết của đồ án được phân chia độc lập theo vai trò tra cứu:
 
 1. 📄 [**Tài Liệu Nghiệp Vụ (TAILIEU-NGHIEPVU.md)**](./TAILIEU-NGHIEPVU.md): Đặc tả 7 luồng vận hành kinh doanh, 15 quy tắc nghiệp vụ, bảng ma trận phân quyền RBAC và sơ đồ chuyển đổi trạng thái thực thể.
-2. 🖥️ [**Tài Liệu Giao Diện (TAILIEU-GIAODIEN.md)**](./TAILIEU-GIAODIEN.md): Đặc tả chi tiết Design System và cấu trúc Wireframe ASCII cho toàn bộ 54 màn hình trong đồ án.
+2. 🖥️ [**Tài Liệu Giao Diện (TAILIEU-GIAODIEN.md)**](./TAILIEU-GIAODIEN.md): Đặc tả chi tiết Design System và cấu trúc Wireframe ASCII cho các màn hình trong đồ án.
 3. 💻 [**Tài Liệu Kỹ Thuật Frontend (TAILIEU-KYTHUAT-FRONTEND.md)**](./TAILIEU-KYTHUAT-FRONTEND.md): Hướng dẫn triển khai Client/Server components, quản trị state TanStack Query/Zustand, Server Actions và Realtime cho học viên.
 4. ⚙️ [**Tài Liệu Kỹ Thuật Admin (TAILIEU-KYTHUAT-ADMIN.md)**](./TAILIEU-KYTHUAT-ADMIN.md): Hướng dẫn chuyên sâu xây dựng Admin Dashboard, xử lý duyệt duyệt yêu cầu Pro, Audit Log, bảo vệ tuyến RLS và báo cáo Recharts.
 5. 🤖 [**Quy Ước Làm Việc Với AI (AGENT.md)**](./AGENT.md): Bộ nguyên tắc chỉ đạo, checklist nghiệm thu mã nguồn và kỹ năng tối ưu context dành cho các công cụ AI Pair Programmer.
