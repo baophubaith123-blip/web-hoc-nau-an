@@ -113,7 +113,7 @@ insert into public.cong_thuc (
     30, 180, 4, 'trung_binh', 450,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', true, 4200,
     'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    'https://www.youtube.com/watch?v=KykRAWBXbhg'
   ),
 
   -- 2. Bún chả Hà Nội
@@ -127,7 +127,7 @@ insert into public.cong_thuc (
     45, 30, 4, 'trung_binh', 520,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', true, 3850,
     'https://images.unsplash.com/photo-1594998893017-36147cbcae05?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    'https://www.youtube.com/watch?v=c9GfHgMk1ac'
   ),
 
   -- 3. Bánh mì thịt nướng
@@ -141,7 +141,7 @@ insert into public.cong_thuc (
     20, 15, 4, 'de', 380,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 2900,
     'https://images.unsplash.com/photo-1626804475297-41608ea09aeb?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   ),
 
   -- 4. Cơm tấm sườn bì chả
@@ -155,7 +155,7 @@ insert into public.cong_thuc (
     40, 35, 4, 'trung_binh', 680,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', true, 4900,
     'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   ),
 
   -- 5. Sushi cá hồi Nigiri
@@ -169,7 +169,7 @@ insert into public.cong_thuc (
     30, 20, 2, 'kho', 320,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 2150,
     'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   ),
 
   -- 6. Mì Ramen Tonkotsu
@@ -183,7 +183,7 @@ insert into public.cong_thuc (
     40, 240, 4, 'kho', 650,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', true, 4100,
     'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    'https://www.youtube.com/watch?v=x9zfoZVVCpY'
   ),
 
   -- 7. Há cảo tôm thịt Dimsum
@@ -197,7 +197,7 @@ insert into public.cong_thuc (
     45, 10, 4, 'trung_binh', 260,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 1890,
     'https://images.unsplash.com/photo-1496116218417-1a781b1c416c?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   ),
 
   -- 8. Pizza Margherita Ý
@@ -211,7 +211,7 @@ insert into public.cong_thuc (
     90, 10, 3, 'trung_binh', 580,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', true, 3450,
     'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   ),
 
   -- 9. Mì Ý Pasta Carbonara
@@ -225,7 +225,7 @@ insert into public.cong_thuc (
     15, 12, 2, 'de', 510,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 2800,
     'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   ),
 
   -- 10. Bò bít tết sốt tiêu đen
@@ -239,7 +239,7 @@ insert into public.cong_thuc (
     15, 10, 2, 'trung_binh', 490,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 3600,
     'https://images.unsplash.com/photo-1544025162-d76694265947?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   ),
 
   -- 11. Đậu hũ sốt cà chua
@@ -253,7 +253,7 @@ insert into public.cong_thuc (
     10, 15, 3, 'de', 210,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 1600,
     'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    'https://www.youtube.com/watch?v=0IE7t5qG1gI'
   ),
 
   -- 12. Salad rau củ sốt mè rang
@@ -267,7 +267,7 @@ insert into public.cong_thuc (
     15, 0, 2, 'de', 150,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 1420,
     'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   ),
 
   -- 13. Bánh flan caramel
@@ -281,7 +281,7 @@ insert into public.cong_thuc (
     25, 30, 6, 'de', 220,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 3100,
     'https://images.unsplash.com/photo-1528975604071-b4dc52a2d18c?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    'https://www.youtube.com/watch?v=Eghm7c0FWf0'
   ),
 
   -- 14. Chè ba màu Nam Bộ
@@ -295,7 +295,7 @@ insert into public.cong_thuc (
     30, 45, 4, 'de', 310,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 2450,
     'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   ),
 
   -- 15. Gỏi cuốn tôm thịt
@@ -309,7 +309,7 @@ insert into public.cong_thuc (
     20, 15, 4, 'de', 240,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 3300,
     'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   ),
 
   -- 16. Chả giò hải sản
@@ -323,7 +323,7 @@ insert into public.cong_thuc (
     25, 15, 4, 'de', 340,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 2750,
     'https://images.unsplash.com/photo-1544025162-d76694265947?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   ),
 
   -- 17. Canh chua cá lóc Nam Bộ
@@ -337,7 +337,7 @@ insert into public.cong_thuc (
     20, 20, 4, 'de', 220,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 2600,
     'https://images.unsplash.com/photo-1547592180-85f173990554?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   ),
 
   -- 18. Súp bí đỏ kem tươi
@@ -351,7 +351,7 @@ insert into public.cong_thuc (
     15, 20, 3, 'de', 180,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 1950,
     'https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   ),
 
   -- 19. Cà phê sữa đá truyền thống
@@ -365,7 +365,7 @@ insert into public.cong_thuc (
     5, 7, 1, 'de', 160,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 3900,
     'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   ),
 
   -- 20. Trà đào cam sả
@@ -379,7 +379,7 @@ insert into public.cong_thuc (
     10, 5, 2, 'de', 120,
     'c1000000-0000-0000-0000-000000000001', true, 'xuat_ban', false, 3700,
     'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=800',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    null
   )
 on conflict (slug) do update set
   tieu_de = excluded.tieu_de,
@@ -425,20 +425,20 @@ insert into public.bai_hoc (
   id, khoa_hoc_id, tieu_de, mo_ta, video_url, video_hd_url, chi_pro, thoi_gian_phut, thu_tu, xem_truoc,
   tai_lieu, tai_lieu_pro, bai_tap
 ) values
-  ('40000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Bài 1: Kỹ thuật cầm dao và các nhát cắt cơ bản', 'Luyện tập cắt sợi julienne, xúc xắc brunoise và bảo quản dao bén.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', false, 30, 1, true, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb),
-  ('40000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000001', 'Bài 2: Điều chỉnh nhiệt độ chảo và kỹ năng áp chảo', 'Bí quyết căn nhiệt giúp thực phẩm chín đều không bị dai khô.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', true, 30, 2, false, '[]'::jsonb, '[{"ten":"So_tay_nhiet_do_nau_an.pdf","url":"#"}]'::jsonb, '[{"cau_hoi":"Áp chảo bò nên để chảo ở mức nhiệt nào?","cac_lua_chon":["Nhiệt độ thật cao","Nhiệt độ thấp","Nhiệt độ trung bình","Để nguội"],"dap_an_dung":0,"giai_thich":"Chảo gang thật nóng giúp xém mặt ngoài và giữ nước ngọt bên trong."}]'::jsonb),
+  ('40000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Bài 1: Kỹ thuật cầm dao và các nhát cắt cơ bản', 'Luyện tập cắt sợi julienne, xúc xắc brunoise và bảo quản dao bén.', 'https://www.youtube.com/watch?v=WoVUOytOMAQ', 'https://www.youtube.com/watch?v=WoVUOytOMAQ', false, 30, 1, true, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb),
+  ('40000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000001', 'Bài 2: Điều chỉnh nhiệt độ chảo và kỹ năng áp chảo', 'Bí quyết căn nhiệt giúp thực phẩm chín đều không bị dai khô.', 'https://www.youtube.com/watch?v=SuqzihG1qj0', 'https://www.youtube.com/watch?v=SuqzihG1qj0', true, 30, 2, false, '[]'::jsonb, '[{"ten":"So_tay_nhiet_do_nau_an.pdf","url":"#"}]'::jsonb, '[{"cau_hoi":"Áp chảo bò nên để chảo ở mức nhiệt nào?","cac_lua_chon":["Nhiệt độ thật cao","Nhiệt độ thấp","Nhiệt độ trung bình","Để nguội"],"dap_an_dung":0,"giai_thich":"Chảo gang thật nóng giúp xém mặt ngoài và giữ nước ngọt bên trong."}]'::jsonb),
 
-  ('40000000-0000-0000-0000-000000000003', '30000000-0000-0000-0000-000000000002', 'Bài 1: Nấu nước dùng phở bò trong veo ngọt thanh', 'Kỹ thuật khử mùi xương bò và nướng hồi quế thảo quả chuẩn vị Hà Nội.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', false, 40, 1, true, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb),
-  ('40000000-0000-0000-0000-000000000004', '30000000-0000-0000-0000-000000000002', 'Bài 2: Pha nước mắm bún chả và ướp thịt nướng than', 'Tỷ lệ mắm đường dấm vàng óng và kỹ thuật giữ thịt mềm mọng nước.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', true, 35, 2, false, '[]'::jsonb, '[{"ten":"Bi_quyet_gia_vi_truyen_thong.pdf","url":"#"}]'::jsonb, '[]'::jsonb),
+  ('40000000-0000-0000-0000-000000000003', '30000000-0000-0000-0000-000000000002', 'Bài 1: Nấu nước dùng phở bò trong veo ngọt thanh', 'Kỹ thuật khử mùi xương bò và nướng hồi quế thảo quả chuẩn vị Hà Nội.', 'https://www.youtube.com/watch?v=KykRAWBXbhg', 'https://www.youtube.com/watch?v=KykRAWBXbhg', false, 40, 1, true, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb),
+  ('40000000-0000-0000-0000-000000000004', '30000000-0000-0000-0000-000000000002', 'Bài 2: Pha nước mắm bún chả và ướp thịt nướng than', 'Tỷ lệ mắm đường dấm vàng óng và kỹ thuật giữ thịt mềm mọng nước.', 'https://www.youtube.com/watch?v=x9zfoZVVCpY', 'https://www.youtube.com/watch?v=x9zfoZVVCpY', true, 35, 2, false, '[]'::jsonb, '[{"ten":"Bi_quyet_gia_vi_truyen_thong.pdf","url":"#"}]'::jsonb, '[]'::jsonb),
 
-  ('40000000-0000-0000-0000-000000000005', '30000000-0000-0000-0000-000000000003', 'Bài 1: Hiểu về các loại men và bột mì', 'Phân biệt bột số 8, số 11, số 13 và cách kích hoạt men nở thành công.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', false, 45, 1, true, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb),
-  ('40000000-0000-0000-0000-000000000006', '30000000-0000-0000-0000-000000000003', 'Bài 2: Kỹ thuật nhồi bột bánh mì bằng tay chuẩn màng', 'Cách kéo màng mỏng gluten và canh thời điểm bánh nở đẹp nhất.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', true, 45, 2, false, '[]'::jsonb, '[{"ten":"Bang_nhiet_do_lo_nuong.pdf","url":"#"}]'::jsonb, '[]'::jsonb),
+  ('40000000-0000-0000-0000-000000000005', '30000000-0000-0000-0000-000000000003', 'Bài 1: Hiểu về các loại men và bột mì', 'Phân biệt bột số 8, số 11, số 13 và cách kích hoạt men nở thành công.', 'https://www.youtube.com/watch?v=auPR1MQ47eg', 'https://www.youtube.com/watch?v=auPR1MQ47eg', false, 45, 1, true, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb),
+  ('40000000-0000-0000-0000-000000000006', '30000000-0000-0000-0000-000000000003', 'Bài 2: Kỹ thuật nhồi bột bánh mì bằng tay chuẩn màng', 'Cách kéo màng mỏng gluten và canh thời điểm bánh nở đẹp nhất.', 'https://www.youtube.com/watch?v=5o7jPsRywGI', 'https://www.youtube.com/watch?v=5o7jPsRywGI', true, 45, 2, false, '[]'::jsonb, '[{"ten":"Bang_nhiet_do_lo_nuong.pdf","url":"#"}]'::jsonb, '[]'::jsonb),
 
-  ('40000000-0000-0000-0000-000000000007', '30000000-0000-0000-0000-000000000004', 'Bài 1: Nấu nước dùng rau củ ngọt tự nhiên', 'Dùng bắp ngọt, củ cải, cà rốt và mía lau tạo vị ngọt thay mì chính.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', false, 25, 1, true, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb),
-  ('40000000-0000-0000-0000-000000000008', '30000000-0000-0000-0000-000000000004', 'Bài 2: Chế biến món nấm đùi gà kho tiêu xanh', 'Cách sơ chế nấm giòn sần sật ngấm đậm sốt tiêu xanh cay the.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', true, 25, 2, false, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb),
+  ('40000000-0000-0000-0000-000000000007', '30000000-0000-0000-0000-000000000004', 'Bài 1: Nấu nước dùng rau củ ngọt tự nhiên', 'Dùng bắp ngọt, củ cải, cà rốt và mía lau tạo vị ngọt thay mì chính.', 'https://www.youtube.com/watch?v=TNeU5qgzFwY', 'https://www.youtube.com/watch?v=TNeU5qgzFwY', false, 25, 1, true, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb),
+  ('40000000-0000-0000-0000-000000000008', '30000000-0000-0000-0000-000000000004', 'Bài 2: Chế biến món nấm đùi gà kho tiêu xanh', 'Cách sơ chế nấm giòn sần sật ngấm đậm sốt tiêu xanh cay the.', 'https://www.youtube.com/watch?v=0IE7t5qG1gI', 'https://www.youtube.com/watch?v=0IE7t5qG1gI', true, 25, 2, false, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb),
 
-  ('40000000-0000-0000-0000-000000000009', '30000000-0000-0000-0000-000000000005', 'Bài 1: Kỹ thuật ủ trà đậm đà không bị chát', 'Căn chỉnh nhiệt độ nước 85-90°C và thời gian hãm trà trái cây.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', false, 20, 1, true, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb),
-  ('40000000-0000-0000-0000-000000000010', '30000000-0000-0000-0000-000000000005', 'Bài 2: Làm milk foam kem mặn béo ngậy', 'Đánh bông kem whipping và phô mai tươi bồng bềnh phủ trên ly trà.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', true, 25, 2, false, '[]'::jsonb, '[{"ten":"Cong_thuc_milk_foam.pdf","url":"#"}]'::jsonb, '[]'::jsonb)
+  ('40000000-0000-0000-0000-000000000009', '30000000-0000-0000-0000-000000000005', 'Bài 1: Kỹ thuật ủ trà đậm đà không bị chát', 'Căn chỉnh nhiệt độ nước 85-90°C và thời gian hãm trà trái cây.', null, null, false, 20, 1, true, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb),
+  ('40000000-0000-0000-0000-000000000010', '30000000-0000-0000-0000-000000000005', 'Bài 2: Làm milk foam kem mặn béo ngậy', 'Đánh bông kem whipping và phô mai tươi bồng bềnh phủ trên ly trà.', null, null, true, 25, 2, false, '[]'::jsonb, '[{"ten":"Cong_thuc_milk_foam.pdf","url":"#"}]'::jsonb, '[]'::jsonb)
 on conflict (id) do update set
   khoa_hoc_id = excluded.khoa_hoc_id,
   tieu_de = excluded.tieu_de,
