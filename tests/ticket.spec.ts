@@ -39,11 +39,11 @@ test("Ticket hỗ trợ: user tạo, nhân viên trả lời, user thấy phản
   const oNhap = sup.getByPlaceholder(/Nhập tin nhắn phản hồi/);
   await oNhap.fill(PHAN_HOI);
   await oNhap.press("Enter");
-  await expect(sup.getByText(PHAN_HOI)).toBeVisible();
+  await expect(sup.getByText(PHAN_HOI).first()).toBeVisible();
 
   // 3) Học viên tải lại trang và thấy phản hồi
   await user.reload();
-  await expect(user.getByText(PHAN_HOI)).toBeVisible();
+  await expect(user.getByText(PHAN_HOI).first()).toBeVisible();
 
   await ctxUser.close();
   await ctxSup.close();

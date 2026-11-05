@@ -96,7 +96,7 @@ test.describe("Nội dung seed đợt 2 (Part C)", () => {
     await page.goto("/khoa-hoc/mon-han-tai-nha");
     await expect(page.getByRole("heading", { name: "Món Hàn tại nhà" })).toBeVisible();
     // Khóa học khai báo đủ 3 bài học; người chưa ghi danh chỉ thấy bài xem trước (đúng RLS)
-    await expect(page.getByText(/3 bài học video/)).toBeVisible();
+    await expect(page.getByText(/3 bài học video/).first()).toBeVisible();
     const baiXemTruoc = page.getByRole("link", { name: /Muối kim chi cải thảo giòn cay chuẩn vị/ });
     await expect(baiXemTruoc).toBeVisible();
     await baiXemTruoc.click();

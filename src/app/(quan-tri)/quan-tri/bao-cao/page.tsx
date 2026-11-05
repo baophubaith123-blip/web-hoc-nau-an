@@ -1,6 +1,6 @@
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 import { TheThongKe } from "@/components/quan-tri/the-thong-ke";
-import { BarChart3, BookOpen, Eye } from "lucide-react";
+import { BarChart3, BookOpen, Eye, TrendingUp, Users, Award } from "lucide-react";
 import { dinhDangTien } from "@/lib/utils/dinh-dang";
 
 export default async function BaoCaoThongKePage() {
@@ -37,19 +37,19 @@ export default async function BaoCaoThongKePage() {
           tieuDe="Tổng doanh số"
           giaTri={dinhDangTien(tongDoanhThu)}
           moTa="Doanh thu tích lũy từ bán khóa học"
-          icon="TrendingUp"
+          icon={<TrendingUp className="h-4 w-4" />}
         />
         <TheThongKe
           tieuDe="Lượt đăng ký học"
           giaTri={tongDangKy || 0}
           moTa="Tổng số học viên đã ghi danh"
-          icon="Users"
+          icon={<Users className="h-4 w-4" />}
         />
         <TheThongKe
           tieuDe="Chứng chỉ đã cấp"
           giaTri={tongChungChi || 0}
           moTa="Học viên hoàn thành 100% khóa học"
-          icon="Award"
+          icon={<Award className="h-4 w-4" />}
         />
       </div>
 

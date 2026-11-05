@@ -37,7 +37,7 @@ export default async function ChefDashboard() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Bếp trưởng {phien.profile.ho_ten || "Đầu bếp"}
+            Bếp trưởng {(phien.profile.ho_ten || "Đầu bếp").replace(/^bếp trưởng\s+/i, "")}
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
             Tổng quan hiệu quả giảng dạy và chia sẻ công thức ẩm thực của bạn

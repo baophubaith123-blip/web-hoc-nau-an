@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import {
   Users,
   BookOpen,
+  GraduationCap,
+  CreditCard,
   AlertCircle,
   ArrowRight,
   Clock,
@@ -58,25 +60,25 @@ export default async function QuanTriDashboardPage() {
           tieuDe="Tổng người dùng"
           giaTri={tongNguoiDung || 0}
           moTa={`${tongDauBep || 0} đầu bếp đối tác`}
-          icon="Users"
+          icon={<Users className="h-4 w-4" />}
         />
         <TheThongKe
           tieuDe="Công thức món ăn"
           giaTri={tongCongThuc || 0}
           moTa={`${congThucChoDuyet || 0} đang chờ phê duyệt`}
-          icon="BookOpen"
+          icon={<BookOpen className="h-4 w-4" />}
         />
         <TheThongKe
           tieuDe="Khóa học trực tuyến"
           giaTri={tongKhoaHoc || 0}
           moTa="Chương trình đào tạo nấu ăn"
-          icon="GraduationCap"
+          icon={<GraduationCap className="h-4 w-4" />}
         />
         <TheThongKe
           tieuDe="Tổng doanh thu"
           giaTri={dinhDangTien(tongDoanhThu)}
           moTa="Từ đăng ký khóa học trả phí"
-          icon="CreditCard"
+          icon={<CreditCard className="h-4 w-4" />}
         />
       </div>
 

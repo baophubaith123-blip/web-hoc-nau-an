@@ -6,8 +6,13 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
   MessageSquare,
+  Inbox,
+  Clock,
+  AlertTriangle,
+  CheckCircle2,
 } from "lucide-react";
 import { dinhDangTuongDoi } from "@/lib/utils/dinh-dang";
+import { nhanCua } from "@/lib/utils/hang-so";
 
 export default async function NhanVienDashboardPage() {
   await yeuCauVaiTro(["support", "admin"]);
@@ -60,25 +65,25 @@ export default async function NhanVienDashboardPage() {
           tieuDe="Chờ xử lý"
           giaTri={tongChuaXuLy || 0}
           moTa="Yêu cầu mới chưa tiếp nhận"
-          icon="Inbox"
+          icon={<Inbox className="h-4 w-4" />}
         />
         <TheThongKe
           tieuDe="Đang hỗ trợ"
           giaTri={tongDangXuLy || 0}
           moTa="Ticket đang được trao đổi"
-          icon="Clock"
+          icon={<Clock className="h-4 w-4" />}
         />
         <TheThongKe
           tieuDe="Ưu tiên cao / Khẩn"
           giaTri={tongUuTienCao || 0}
           moTa="Cần xử lý gấp"
-          icon="AlertTriangle"
+          icon={<AlertTriangle className="h-4 w-4" />}
         />
         <TheThongKe
           tieuDe="Đã giải quyết"
           giaTri={tongDaGiaiQuyet || 0}
           moTa="Ticket hoàn tất"
-          icon="CheckCircle2"
+          icon={<CheckCircle2 className="h-4 w-4" />}
         />
       </div>
 
@@ -110,7 +115,7 @@ export default async function NhanVienDashboardPage() {
                   <div className="space-y-1 flex-1">
                     <div className="flex items-center gap-2">
                       <Badge variant={ut} className="text-[10px] uppercase">
-                        {tk.do_uu_tien}
+                        {nhanCua("do_uu_tien", tk.do_uu_tien)}
                       </Badge>
                       <Link
                         href={`/nhan-vien/ticket/${tk.id}`}

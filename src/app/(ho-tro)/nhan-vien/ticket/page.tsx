@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, ArrowLeft } from "lucide-react";
 import { dinhDangTuongDoi } from "@/lib/utils/dinh-dang";
+import { nhanCua } from "@/lib/utils/hang-so";
 
 interface Props {
   searchParams: Promise<{ trang_thai?: string; uu_tien?: string }>;
@@ -110,7 +111,7 @@ export default async function DanhSachTicketSupportPage({ searchParams }: Props)
                 <div className="space-y-1 flex-1">
                   <div className="flex items-center gap-2">
                     <Badge variant={ut} className="text-[10px] uppercase">
-                      {tk.do_uu_tien}
+                      {nhanCua("do_uu_tien", tk.do_uu_tien)}
                     </Badge>
                     <Link
                       href={`/nhan-vien/ticket/${tk.id}`}
@@ -120,7 +121,7 @@ export default async function DanhSachTicketSupportPage({ searchParams }: Props)
                     </Link>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Người gửi: <span className="font-semibold text-foreground">{tk.nguoi_tao?.ho_ten || "Khách"}</span> {tk.nguoi_tao?.username ? `(@${tk.nguoi_tao.username})` : ""} • Danh mục: <span className="font-medium">{tk.danh_muc || "Chung"}</span> • Tạo {dinhDangTuongDoi(tk.created_at)}
+                    Người gửi: <span className="font-semibold text-foreground">{tk.nguoi_tao?.ho_ten || "Khách"}</span> {tk.nguoi_tao?.username ? `(@${tk.nguoi_tao.username})` : ""} • Danh mục: <span className="font-medium">{tk.danh_muc ? nhanCua("danh_muc_ticket", tk.danh_muc) : "Chung"}</span> • Tạo {dinhDangTuongDoi(tk.created_at)}
                   </p>
                 </div>
 

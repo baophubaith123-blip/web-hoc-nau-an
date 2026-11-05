@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Mail, Calendar, AlertCircle } from "lucide-react";
 import { dinhDangTuongDoi } from "@/lib/utils/dinh-dang";
+import { nhanCua } from "@/lib/utils/hang-so";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -63,7 +64,7 @@ export default async function ChiTietTicketSupportPage({ params }: Props) {
           </Button>
           <div className="flex items-center gap-2">
             <Badge variant={ut} className="text-xs uppercase">
-              {ticket.do_uu_tien}
+              {nhanCua("do_uu_tien", ticket.do_uu_tien)}
             </Badge>
             <h1 className="text-2xl font-bold tracking-tight">{ticket.tieu_de}</h1>
             <Badge variant={tt.variant}>{tt.label}</Badge>
@@ -91,7 +92,7 @@ export default async function ChiTietTicketSupportPage({ params }: Props) {
           <AlertCircle className="w-4 h-4 text-blue-500 shrink-0" />
           <div>
             <p className="font-semibold text-foreground">Danh mục</p>
-            <p className="capitalize">{ticket.danh_muc || "Hỗ trợ chung"}</p>
+            <p>{ticket.danh_muc ? nhanCua("danh_muc_ticket", ticket.danh_muc) : "Hỗ trợ chung"}</p>
           </div>
         </div>
 

@@ -318,6 +318,7 @@ export const vi = {
     cap_do: { co_ban: "Cơ bản", trung_cap: "Trung cấp", nang_cao: "Nâng cao" },
     trang_thai_ticket: { moi: "Mới", dang_xu_ly: "Đang xử lý", cho_phan_hoi: "Chờ phản hồi", da_giai_quyet: "Đã giải quyết", dong: "Đã đóng" },
     do_uu_tien: { thap: "Thấp", trung_binh: "Trung bình", cao: "Cao", khan_cap: "Khẩn cấp" },
+    danh_muc_ticket: { tai_khoan: "Vấn đề tài khoản", thanh_toan: "Thanh toán & Đơn hàng", khoa_hoc: "Khóa học & Bài tập", ky_thuat: "Lỗi kỹ thuật website", khac: "Khác" },
     vai_tro: { user: "Người dùng", chef: "Đầu bếp", support: "Hỗ trợ", admin: "Quản trị viên" },
     phuong_thuc: { momo: "MoMo", vnpay: "VNPay", stripe: "Thẻ quốc tế", chuyen_khoan: "Chuyển khoản" },
     trang_thai_thanh_toan: { cho_xu_ly: "Chờ xử lý", thanh_cong: "Thành công", that_bai: "Thất bại", hoan_tien: "Đã hoàn tiền" },

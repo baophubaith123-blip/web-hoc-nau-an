@@ -9,7 +9,7 @@ export default async function NhatKyHoatDongPage() {
 
   const { data: danhSachNhatKy } = await supabase
     .from("nhat_ky_hoat_dong")
-    .select("*, nguoi_dung:profiles!nhat_ky_he_thong_nguoi_dung_id_fkey(ho_ten, username, vai_tro)")
+    .select("*, nguoi_dung:profiles(ho_ten, username, vai_tro)")
     .order("created_at", { ascending: false })
     .limit(50);
 

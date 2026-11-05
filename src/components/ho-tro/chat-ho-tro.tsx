@@ -41,14 +41,16 @@ export function ChatHoTro({
   const [noiDung, setNoiDung] = useState("");
   const [laNoiBo, setLaNoiBo] = useState(false);
   const [dangGui, setDangGui] = useState(false);
-  const cuonCuoiRef = useRef<HTMLDivElement>(null);
+  const khungTinNhanRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setDanhSach(tinNhanBanDau);
   }, [tinNhanBanDau]);
 
+  // Chỉ cuộn bên trong khung tin nhắn, không cuộn cả cửa sổ (tránh tiêu đề trang chui xuống dưới header dính)
   useEffect(() => {
-    cuonCuoiRef.current?.scrollIntoView({ behavior: "smooth" });
+    const khung = khungTinNhanRef.current;
+    if (khung) khung.scrollTo({ top: khung.scrollHeight, behavior: "smooth" });
   }, [danhSach]);
 
   // Realtime subscription
@@ -102,7 +104,7 @@ export function ChatHoTro({
   return (
     <div className="flex flex-col h-[580px] rounded-xl border bg-card overflow-hidden">
       {/* Khung tin nhắn */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={khungTinNhanRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {danhSach.length === 0 ? (
           <p className="py-12 text-center text-sm text-muted-foreground">
             Chưa có tin nhắn phản hồi nào
@@ -164,7 +166,6 @@ export function ChatHoTro({
             );
           })
         )}
-        <div ref={cuonCuoiRef} />
       </div>
 
       {/* Form gửi */}
