@@ -22,7 +22,7 @@ export function TheKhoaHoc({ khoaHoc }: { khoaHoc: KhoaHocItem }) {
   const capDoInfo = CAP_DO_MAP[khoaHoc.cap_do] || CAP_DO_MAP.co_ban;
 
   return (
-    <Card className="group overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-xl">
+    <Card className="group h-full overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-xl">
       <Link href={`/khoa-hoc/${khoaHoc.slug}`} className="block">
         <div className="relative aspect-16/9 w-full overflow-hidden bg-muted">
           {khoaHoc.anh_dai_dien ? (

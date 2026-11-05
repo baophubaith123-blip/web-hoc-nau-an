@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { TheKhoaHoc } from "@/components/khoa-hoc/the-khoa-hoc";
 import { taoSupabaseServer } from "@/lib/supabase/server";
+import { GraduationCap, SearchX } from "lucide-react";
+import { TieuDeTrang } from "@/components/layout/tieu-de-trang";
+import { TrangThaiTrong } from "@/components/layout/trang-thai-trong";
+import { HienDan } from "@/components/trang-chu/hien-dan";
 
 interface Props {
   searchParams: Promise<{ [khoa: string]: string | string[] | undefined }>;
@@ -33,20 +37,23 @@ export default async function DanhSachKhoaHoc({ searchParams }: Props) {
 
   return (
     <div className="space-y-8 pb-16">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-extrabold tracking-tight">Khóa học nấu ăn</h1>
-        <p className="text-sm text-muted-foreground">
-          Nâng cao kỹ năng làm bếp từ cơ bản đến chuyên nghiệp qua các khóa học thực tế
-        </p>
-      </div>
+      <TieuDeTrang
+        icon={GraduationCap}
+        tieuDe="Khóa học nấu ăn"
+        moTa="Nâng cao kỹ năng làm bếp từ cơ bản đến chuyên nghiệp qua các khóa học video thực tế, có bài tập chấm điểm và chứng chỉ hoàn thành."
+      >
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur-sm">
+          {(danhSach || []).length} khóa học đang mở
+        </span>
+      </TieuDeTrang>
 
       {/* Bộ lọc nhanh theo thẻ */}
-      <div className="flex flex-wrap items-center gap-2 border-b pb-4 text-xs">
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border bg-card/60 p-4 text-xs shadow-xs">
         <span className="font-semibold text-muted-foreground mr-2">Cấp độ:</span>
         <Link
           href="/khoa-hoc"
           className={`rounded-full px-3 py-1 font-medium transition-colors ${
-            capDo === "tat_ca" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-muted/80"
+            capDo === "tat_ca" ? "bg-primary text-primary-foreground" : "border bg-card text-foreground shadow-xs transition-all hover:border-primary/40 hover:text-primary"
           }`}
         >
           Tất cả
@@ -54,7 +61,7 @@ export default async function DanhSachKhoaHoc({ searchParams }: Props) {
         <Link
           href="/khoa-hoc?cap_do=co_ban"
           className={`rounded-full px-3 py-1 font-medium transition-colors ${
-            capDo === "co_ban" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-muted/80"
+            capDo === "co_ban" ? "bg-primary text-primary-foreground" : "border bg-card text-foreground shadow-xs transition-all hover:border-primary/40 hover:text-primary"
           }`}
         >
           Cơ bản
@@ -62,7 +69,7 @@ export default async function DanhSachKhoaHoc({ searchParams }: Props) {
         <Link
           href="/khoa-hoc?cap_do=trung_cap"
           className={`rounded-full px-3 py-1 font-medium transition-colors ${
-            capDo === "trung_cap" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-muted/80"
+            capDo === "trung_cap" ? "bg-primary text-primary-foreground" : "border bg-card text-foreground shadow-xs transition-all hover:border-primary/40 hover:text-primary"
           }`}
         >
           Trung cấp
@@ -70,7 +77,7 @@ export default async function DanhSachKhoaHoc({ searchParams }: Props) {
         <Link
           href="/khoa-hoc?cap_do=nang_cao"
           className={`rounded-full px-3 py-1 font-medium transition-colors ${
-            capDo === "nang_cao" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-muted/80"
+            capDo === "nang_cao" ? "bg-primary text-primary-foreground" : "border bg-card text-foreground shadow-xs transition-all hover:border-primary/40 hover:text-primary"
           }`}
         >
           Chuyên nghiệp
@@ -80,7 +87,7 @@ export default async function DanhSachKhoaHoc({ searchParams }: Props) {
         <Link
           href="/khoa-hoc?loai_gia=mien_phi"
           className={`rounded-full px-3 py-1 font-medium transition-colors ${
-            loaiGia === "mien_phi" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-muted/80"
+            loaiGia === "mien_phi" ? "bg-primary text-primary-foreground" : "border bg-card text-foreground shadow-xs transition-all hover:border-primary/40 hover:text-primary"
           }`}
         >
           Miễn phí
@@ -88,7 +95,7 @@ export default async function DanhSachKhoaHoc({ searchParams }: Props) {
         <Link
           href="/khoa-hoc?loai_gia=tra_phi"
           className={`rounded-full px-3 py-1 font-medium transition-colors ${
-            loaiGia === "tra_phi" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-muted/80"
+            loaiGia === "tra_phi" ? "bg-primary text-primary-foreground" : "border bg-card text-foreground shadow-xs transition-all hover:border-primary/40 hover:text-primary"
           }`}
         >
           Có phí
@@ -98,15 +105,18 @@ export default async function DanhSachKhoaHoc({ searchParams }: Props) {
       {/* Grid danh sách */}
       {danhSach && danhSach.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {danhSach.map((kh) => (
-            <TheKhoaHoc key={kh.id} khoaHoc={kh} />
+          {danhSach.map((kh, i) => (
+            <HienDan key={kh.id} tre={(i % 3) * 70} className="h-full">
+              <TheKhoaHoc khoaHoc={kh} />
+            </HienDan>
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed p-16 text-center space-y-2">
-          <p className="text-base font-semibold">Chưa có khóa học nào theo tiêu chí này</p>
-          <p className="text-xs text-muted-foreground">Vui lòng chọn tiêu chí lọc khác</p>
-        </div>
+        <TrangThaiTrong
+          icon={SearchX}
+          tieuDe="Chưa có khóa học nào theo tiêu chí này"
+          moTa="Vui lòng chọn tiêu chí lọc khác để khám phá thêm các khóa học đang mở."
+        />
       )}
     </div>
   );

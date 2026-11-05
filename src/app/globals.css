@@ -94,6 +94,16 @@
 @keyframes border-flow {
   to { background-position: 200% 0; }
 }
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-page-in { animation: page-in 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+
+::selection {
+  background: oklch(0.553 0.195 38.402 / 0.22);
+}
 
 .animate-kenburns { animation: kenburns 9s ease-out forwards; }
 .animate-marquee { animation: marquee-scroll 38s linear infinite; }
@@ -142,6 +152,7 @@
   .animate-float,
   .animate-float-delay,
   .animate-gradient,
+  .animate-page-in,
   .gradient-border::before {
     animation: none !important;
   }

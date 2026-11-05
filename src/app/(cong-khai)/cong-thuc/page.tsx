@@ -3,7 +3,10 @@ import { TheCongThuc } from "@/components/cong-thuc/the-cong-thuc";
 import { BoLocCongThuc } from "@/components/cong-thuc/bo-loc-cong-thuc";
 import { Button } from "@/components/ui/button";
 import { taoSupabaseServer } from "@/lib/supabase/server";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Utensils, SearchX } from "lucide-react";
+import { TieuDeTrang } from "@/components/layout/tieu-de-trang";
+import { TrangThaiTrong } from "@/components/layout/trang-thai-trong";
+import { HienDan } from "@/components/trang-chu/hien-dan";
 
 interface Props {
   searchParams: Promise<{ [khoa: string]: string | string[] | undefined }>;
@@ -74,12 +77,15 @@ export default async function DanhSachCongThuc({ searchParams }: Props) {
 
   return (
     <div className="space-y-8 pb-16">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-extrabold tracking-tight">Công thức nấu ăn</h1>
-        <p className="text-sm text-muted-foreground">
-          Khám phá hàng trăm công thức chi tiết, nguyên liệu dễ tìm cho bữa cơm gia đình
-        </p>
-      </div>
+      <TieuDeTrang
+        icon={Utensils}
+        tieuDe="Công thức nấu ăn"
+        moTa="Khám phá các công thức chi tiết từng bước, nguyên liệu định lượng chuẩn và dễ tìm — xem là nấu được ngay cho bữa cơm gia đình."
+      >
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur-sm">
+          {tongSo} công thức đang có
+        </span>
+      </TieuDeTrang>
 
       {/* Bộ lọc */}
       <BoLocCongThuc danhMucList={danhMucList || []} />
@@ -87,17 +93,18 @@ export default async function DanhSachCongThuc({ searchParams }: Props) {
       {/* Danh sách */}
       {danhSach && danhSach.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {danhSach.map((ct) => (
-            <TheCongThuc key={ct.id} congThuc={ct} />
+          {danhSach.map((ct, i) => (
+            <HienDan key={ct.id} tre={(i % 4) * 70} className="h-full">
+              <TheCongThuc congThuc={ct} />
+            </HienDan>
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed p-16 text-center space-y-3">
-          <p className="text-base font-semibold">Không tìm thấy công thức nào phù hợp</p>
-          <p className="text-xs text-muted-foreground">
-            Hãy thử tìm kiếm với từ khóa khác hoặc xóa bớt các tiêu chí lọc
-          </p>
-        </div>
+        <TrangThaiTrong
+          icon={SearchX}
+          tieuDe="Không tìm thấy công thức nào phù hợp"
+          moTa="Hãy thử tìm kiếm với từ khóa khác hoặc xóa bớt các tiêu chí lọc để xem thêm món ngon."
+        />
       )}
 
       {/* Phân trang */}

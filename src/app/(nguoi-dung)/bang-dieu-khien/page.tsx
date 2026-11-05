@@ -1,6 +1,7 @@
 import type { Bang } from "@/types";
 import Link from "next/link";
-import { BookOpen, Bookmark, ChefHat, Award, ArrowRight } from "lucide-react";
+import { BookOpen, Bookmark, ChefHat, Award, ArrowRight, Crown } from "lucide-react";
+import { HienDan } from "@/components/trang-chu/hien-dan";
 import { TheThongKe } from "@/components/quan-tri/the-thong-ke";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -41,19 +42,49 @@ export default async function BangDieuKhienNguoiDung() {
   const daLuuList = (congThucLuuRes.data || []).map((x) => x.cong_thuc).filter(Boolean);
   const soCongThucGui = congThucGuiRes.count || 0;
   const soChungChi = chungChiRes.count || 0;
+  const laProHopLe =
+    phien.profile.la_pro &&
+    phien.profile.goi_het_han &&
+    new Date(phien.profile.goi_het_han) > new Date();
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          Xin chào, {phien.profile.ho_ten || "bạn"}! 👋
-        </h1>
-        <p className="text-xs text-muted-foreground mt-1">
-          Theo dõi tiến độ học tập và quản lý các món ăn yêu thích của bạn
-        </p>
+      {/* Dải chào mừng + hạng thành viên */}
+      <div className="relative overflow-hidden rounded-3xl border bg-gradient-to-br from-primary/15 via-amber-500/10 to-background p-6 md:p-8">
+        <div aria-hidden className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/10" />
+        <div className="relative flex flex-wrap items-center justify-between gap-4">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold tracking-tight">
+              Xin chào, {phien.profile.ho_ten || "bạn"}! 👋
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Theo dõi tiến độ học tập và quản lý các món ăn yêu thích của bạn
+            </p>
+            {laProHopLe ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                <Crown className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+                Thành viên Pro — hạn đến{" "}
+                {new Date(phien.profile.goi_het_han as string).toLocaleDateString("vi-VN")}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                Bạn đang là thành viên thường
+              </span>
+            )}
+          </div>
+          {!laProHopLe && (
+            <Button asChild className="gap-2 shadow-md">
+              <Link href="/bang-gia">
+                <Crown className="h-4 w-4" />
+                Nâng cấp Pro
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* STATS CARDS */}
+      <HienDan>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <TheThongKe
           tieuDe="Khóa học đã đăng ký"
@@ -80,6 +111,7 @@ export default async function BangDieuKhienNguoiDung() {
           icon={<Award className="h-4 w-4" />}
         />
       </div>
+      </HienDan>
 
       {/* KHÓA HỌC ĐANG HỌC */}
       <div className="space-y-4">
