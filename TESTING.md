@@ -23,7 +23,7 @@ Cập nhật: 05/11/2026.
 | TypeScript `tsc --noEmit` | 0 lỗi | 0 lỗi |
 | ESLint | 0 lỗi, **72 cảnh báo** | **0 lỗi, 0 cảnh báo** |
 | Kiểu `any` trong `src/` | 27 vị trí | **0** |
-| Types `src/types/database.ts` so với migrations 001 + 003 | — | Khớp 24/24 bảng, đủ cột |
+| Types `src/types/database.ts` so với migrations 001 + 003 + 005 | — | Khớp 24/24 bảng, đủ cột (005 bổ sung `bai_viet.ly_do_tu_choi` + trạng thái `cho_duyet`/`tu_choi`) |
 | Production build `npm run build` | — | (xem mục 5) |
 
 ## 3. Kiểm thử tự động bằng Playwright
@@ -51,21 +51,30 @@ Cấu hình: `playwright.config.ts` (testDir `./tests`, baseURL `http://localhos
 | 11 | Admin mở được trang duyệt nâng cấp Pro | smoke.spec.ts | Đạt |
 | 12 | Trang học bài mở được trình phát video, không lỗi ảnh thu nhỏ YouTube (`img.youtube.com`) | smoke.spec.ts | Đạt |
 | 13 | Ticket: user tạo → nhân viên trả lời → user thấy phản hồi | ticket.spec.ts | Đạt |
+| 14 | Tài khoản Free: `/ho-so` hiện trạng thái thành viên thường, có ô ngày sinh, nút Viết bài viết bị khóa và bật hộp thoại nâng cấp Pro | part-bc.spec.ts | Đạt |
+| 15 | Tài khoản Pro: `/ho-so` hiện thẻ thành viên kèm tên gói, ngày hết hạn, số ngày còn lại; nút chức năng không bị khóa | part-bc.spec.ts | Đạt |
+| 16 | Luồng bài viết người dùng: Pro gửi bài → "Chờ phê duyệt" → Admin duyệt → bài hiện ở danh sách công khai | part-bc.spec.ts | Đạt |
+| 17 | Nội dung seed đợt 2 hiện ở danh sách công khai (Chè ba màu, Lẩu Thái chua cay, Kỹ thuật chiên xào châu Á, Mâm cơm Việt chuẩn vị) | part-bc.spec.ts | Đạt |
+| 18 | Khóa học mới (Món Hàn tại nhà): hiện đủ 3 bài học, mở được bài xem trước với trình phát video, không lỗi trang | part-bc.spec.ts | Đạt |
 
 
-**Kết quả chạy cuối: 13/13 đạt** (smoke 12/12, ticket 1/1, tổng thời gian ~2 phút; cập nhật 2026-11-05 sau đợt viết lại nội dung và làm đẹp giao diện). Lần chạy đầu tiên có 2 test chưa đạt do lỗi ở phía file test (kỳ vọng nhãn chưa khớp form thật và chưa chờ phiên đăng nhập ổn định trước khi chuyển trang), đã sửa trong file test — mã nguồn ứng dụng không phải thay đổi. Lần chạy thứ hai phát hiện thêm test ticket chưa chạy lặp lại được khi còn dữ liệu cũ (trùng tiêu đề), đã đổi sang tiêu đề duy nhất theo thời gian cho mỗi lần chạy. Dữ liệu `TEST_` tạo trong lúc test đã được dọn sạch: 0 ticket `TEST_` còn lại, tin nhắn trong ticket bị xóa tự động theo cascade của khóa ngoại.
+**Kết quả chạy cuối: 18/18 đạt** (smoke 12/12, ticket 1/1, part-bc 5/5, tổng thời gian ~3,3 phút; cập nhật 05/11/2026 sau đợt nâng cấp giao diện, trang cá nhân và seed nội dung đợt 2). Lần chạy đầu tiên có 2 test chưa đạt do lỗi ở phía file test (kỳ vọng nhãn chưa khớp form thật và chưa chờ phiên đăng nhập ổn định trước khi chuyển trang), đã sửa trong file test — mã nguồn ứng dụng không phải thay đổi. Lần chạy thứ hai phát hiện thêm test ticket chưa chạy lặp lại được khi còn dữ liệu cũ (trùng tiêu đề), đã đổi sang tiêu đề duy nhất theo thời gian cho mỗi lần chạy. Dữ liệu `TEST_` tạo trong lúc test đã được dọn sạch: 0 ticket `TEST_` còn lại, tin nhắn trong ticket bị xóa tự động theo cascade của khóa ngoại. Ghi chú đợt 05/11/2026: vòng chạy đầu của file `part-bc.spec.ts` có 3 test chưa đạt, đều do lỗi ở phía file test (nút "Nâng cấp Pro ngay" là thẻ link chứ không phải button; tiêu đề món xuất hiện đồng thời trong mô tả thẻ gây trùng locator; kỳ vọng sai — người chưa ghi danh chỉ thấy bài học xem trước là đúng thiết kế RLS) — đã sửa file test và chạy lại đạt toàn bộ; mã nguồn ứng dụng không phải thay đổi. Bài viết kiểm thử dùng tiêu đề duy nhất theo thời gian (giống test ticket) để chạy lặp lại không đụng dữ liệu cũ, và đã được xóa khỏi database sau khi test xong.
 
 ## 4. Kiểm thử thủ công đã thực hiện
 
 - **Crawl toàn bộ route**: 13/13 route công khai trả 200; 33/33 route bảo vệ trả 307 chuyển `/dang-nhap` khi chưa đăng nhập; URL không tồn tại trả 404; không có lỗi 500.
 - **Đăng nhập 5 vai trò** qua Supabase Auth API: thành công cả 5.
 - **Phân quyền (middleware)**: khách mở trang chi tiết công thức/khóa học/bài viết → `/dang-nhap`; `/quan-tri` chỉ admin; `/nhan-vien` chỉ support + admin; `/bep` chỉ chef + admin; tài khoản bị khóa bị đăng xuất; tạo công thức yêu cầu Pro còn hạn.
-- **Dữ liệu hiển thị**: ảnh món ăn/khóa học/bài viết là ảnh món ăn thật (Unsplash); video 15/15 bài học là video nấu ăn thật trên YouTube (đã kiểm chứng từng link bằng oEmbed); quyền lợi gói ở bảng giá hiển thị tiếng Việt đầy đủ.
+- **Dữ liệu hiển thị**: ảnh món ăn/khóa học/bài viết là ảnh món ăn thật (Unsplash); video 36/36 bài học là video nấu ăn thật trên YouTube (đã kiểm chứng từng link bằng oEmbed, 36/36 trả về 200); quyền lợi gói ở bảng giá hiển thị tiếng Việt đầy đủ.
+- **Giao diện đợt nâng cấp (05/11/2026)**: chuyển trang có hiệu ứng mượt mà, trang danh sách có skeleton khi tải và banner gradient; chụp màn hình trước/sau đối chứng cho trang công thức, khóa học, bài viết và bảng điều khiển thành viên.
+- **Trang cá nhân `/ho-so`**: tải ảnh đại diện lên Storage thành công; tài khoản Pro hiện thẻ thành viên kèm tên gói, ngày hết hạn và thanh tiến độ thời hạn; tài khoản Free hiện trạng thái thành viên thường; form sửa thông tin (kèm ô ngày sinh bổ sung) và form đổi mật khẩu lưu đúng xuống database.
+- **Khóa Pro trên trang cá nhân**: tài khoản Free thấy nút Thêm công thức / Viết bài viết bị làm mờ kèm ổ khóa ở cả trang cá nhân và menu bên; bấm vào hiện hộp thoại thông báo cần nâng cấp Pro; máy chủ cũng chặn truy cập thẳng route tạo nội dung nếu không phải Pro còn hạn.
+- **Luồng bài viết người dùng**: Pro gửi bài → trạng thái "Chờ phê duyệt" ở `/bai-viet-cua-toi` → admin thấy số bài chờ duyệt tại `/quan-tri/bai-viet`, bấm Duyệt → bài xuất hiện công khai ở `/bai-viet` và tác giả nhận được thông báo trong hệ thống. Dữ liệu `TEST_` tạo khi kiểm chứng đã được dọn sạch.
 - **Ảnh chụp đối chứng** trước/sau sửa lỗi lưu trong thư mục kiểm thử của nhóm phát triển.
 
 ## 5. Kiểm thử production build
 
-- Production build `npm run build` **thành công** (05/11/2026): biên dịch 16,6 giây, sinh 63 trang tĩnh, bảng route tổng **78 route** (68 trang giao diện + 7 API route + `robots.txt` + `sitemap.xml` + trang 404). First Load JS dùng chung 209 kB, Middleware 98,4 kB.
+- Production build `npm run build` **thành công** (05/11/2026): bảng route tổng **81 route** (71 trang giao diện — bổ sung `/tao-bai-viet`, `/tao-bai-viet/[id]/sua`, `/bai-viet-cua-toi` — + 7 API route + `robots.txt` + `sitemap.xml` + trang 404). Middleware 98,4 kB.
 - Sau khi build, khởi động lại dev server và crawl kiểm tra: **14/14** route công khai trả 200; **9/9** route bảo vệ mẫu trả 307 về `/dang-nhap` khi chưa đăng nhập; URL không tồn tại trả 404; không có lỗi 500.
 - Ảnh chụp sau hoàn thiện (trang chủ, trang công thức, bảng giá) xác nhận: ảnh món ăn thật hiển thị đúng, bảng giá liệt kê đủ 8 quyền lợi tiếng Việt cho cả 2 gói.
 
@@ -84,6 +93,6 @@ Các mục dưới đây **không phải lỗi code** — code đã hoàn thiệ
 
 ## 7. Ghi chú dữ liệu
 
-Database đang vận hành dùng bộ dữ liệu gọn: 9 công thức, 5 khóa học, 15 bài học, 2 bài viết.
-File `supabase/seed.sql` trong repo chứa bộ dữ liệu đầy đủ hơn (20 công thức, 5 khóa học, 10 bài học, 5 bài viết) dùng khi cài đặt mới.
+Database đang vận hành sau đợt seed nội dung 2 (05/11/2026): **17 công thức** (16 xuất bản + công thức "Mì Ý sốt bò bằm" giữ ở trạng thái chờ duyệt làm dữ liệu demo cho luồng duyệt bài của admin), **12 khóa học, 36 bài học kèm 108 câu hỏi trắc nghiệm, 16 bài viết**.
+File `supabase/seed.sql` trong repo chứa bộ dữ liệu cài đặt mới (20 công thức, 5 khóa học, 10 bài học, 5 bài viết). Nội dung đã áp lên database thật được ghi lại đầy đủ trong repo: đợt 1 ở `supabase/cap-nhat-noi-dung.sql`, đợt 2 ở `supabase/seed-2-noi-dung.sql` (chạy lặp lại không nhân đôi dữ liệu).
 Dữ liệu kiểm thử tạo trong quá trình test đều có tiền tố `TEST_` và đã được dọn sau khi test xong.

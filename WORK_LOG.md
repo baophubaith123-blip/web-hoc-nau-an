@@ -1,8 +1,8 @@
 # 📝 WORK LOG — Web Học Nấu Ăn Online
 
 > **Mục đích:** Lưu lịch sử làm việc để chuyển đổi giữa các AI tool (Claude ↔ Antigravity ↔ Cursor) mà không mất context.
-> **Cập nhật lần cuối:** 14/10/2026
-> **Cập nhật bởi:** Antigravity (Hoàn thành chuyển đổi mô hình Gói Premium + Seed 20 công thức + Build thành công)
+> **Cập nhật lần cuối:** 05/11/2026
+> **Cập nhật bởi:** Muse (Đợt nâng cấp giao diện + trang cá nhân/Pro + seed nội dung đợt 2 — xem mục cuối file)
 
 ---
 
@@ -438,4 +438,38 @@ text
 
 ### 4. Kết quả kiểm tra chất lượng
 - `npx tsc --noEmit`: **0 lỗi** (Exit code 0).
-- `npm run build`: **Build thành công toàn bộ 63 route** (Exit code 0).
+- `npm run build`: **Build thành công toàn bộ 63 route** (Exit code 0).
+
+---
+
+## 🎨 ĐỢT NÂNG CẤP GIAO DIỆN + TRANG CÁ NHÂN/PRO + SEED NỘI DUNG ĐỢT 2 (05/11/2026)
+
+Yêu cầu của chủ đồ án: (A) thiết kế lại giao diện thật đẹp, chuyển động mượt mà — ưu tiên số 1; (B) sửa trang cá nhân đầy đủ chức năng + hiển thị hạng thành viên, Pro mới được tự đăng công thức/bài viết (không đăng khóa học), tài khoản thường thấy nút bị làm mờ kèm khóa và thông báo nâng cấp; (C) seed thêm 7 công thức, 7 khóa học, 14 bài viết đạt chuẩn chi tiết/thực tế như đợt 1; (D) kiểm thử + cập nhật tài liệu.
+
+### Phần A — Thiết kế lại giao diện (commit `393ec2d`)
+- `src/app/template.tsx`: hiệu ứng chuyển trang fade/slide toàn site (tôn trọng `prefers-reduced-motion`).
+- Skeleton loading cho nhóm trang công khai và khu vực thành viên; component dùng chung `TieuDeTrang` (banner gradient đầu trang) và `TrangThaiTrong` (trạng thái trống).
+- Trang danh sách công thức/khóa học/bài viết: banner gradient kèm số lượng thật, thẻ nội dung hiện dần theo thứ tự khi cuộn (`HienDan`), thẻ khóa học/bài viết thêm hiệu ứng hover và huy hiệu chuyên mục.
+- Khu vực thành viên: sidebar có chip người dùng (avatar, tên, hạng thành viên — Pro có vương miện vàng), bảng điều khiển có dải chào mừng gradient hiện trạng thái Pro và nút nâng cấp.
+
+### Phần B — Trang cá nhân + khóa Pro + luồng bài viết người dùng (commit `bbb14e2`)
+- Migration `supabase/migrations/005_bai_viet_nguoi_dung.sql` (chủ đồ án đã chạy trên Supabase): thêm `bai_viet.ly_do_tu_choi`, mở trạng thái `cho_duyet`/`tu_choi`, RLS cho phép tác giả xem/tạo/sửa/xóa bài của mình.
+- `/ho-so` xây lại: banner bìa gradient, tải avatar (bucket `avatars`), huy hiệu vai trò + hạng thành viên, thẻ thành viên (Pro: tên gói, ngày hết hạn, thanh tiến độ thời hạn; Free: nút nâng cấp), bổ sung ô **ngày sinh** còn thiếu trong form sửa thông tin.
+- Khóa Pro kiểu mới: người dùng Free vẫn thấy mục Thêm công thức / Viết bài viết ở trang cá nhân và menu bên nhưng bị làm mờ kèm ổ khóa; bấm vào hiện hộp thoại "Tính năng dành cho thành viên Pro". Máy chủ (server action + trang) cũng chặn truy cập thẳng. Helper `laProConHan()` trong `src/lib/actions/chung.ts`.
+- Luồng bài viết: form `/tao-bai-viet` (Lưu nháp / Gửi duyệt), trang `/bai-viet-cua-toi` theo dõi trạng thái, admin duyệt/từ chối kèm lý do tại `/quan-tri/bai-viet` + gửi thông báo trong hệ thống cho tác giả. Đã kiểm chứng đầu-cuối: Pro gửi → admin duyệt → bài hiện công khai + có thông báo.
+
+### Phần C — Seed nội dung đợt 2 (commit `c380ee8`, file `supabase/seed-2-noi-dung.sql`)
+- 7 công thức mới: Cá kho tộ, Bò lúc lắc, Súp cua, Gà rán vỏ giòn, Cà ri gà, Lẩu Thái chua cay, Chè ba màu (mô tả ~300 ký tự, 13–18 nguyên liệu định lượng, 6–7 bước chi tiết).
+- 7 khóa học mới (mỗi khóa 3 bài học + 3 câu hỏi trắc nghiệm/bài): Món Hàn tại nhà, Ẩm thực Nhật cơ bản, Món Âu cho bữa tối, Ăn sáng kiểu Việt, Tráng miệng & chè Việt, Eat-clean nhẹ nhàng, Kỹ thuật chiên xào châu Á. Toàn bộ 21 video YouTube đã kiểm chứng tồn tại bằng oEmbed; toàn bộ ảnh Unsplash đã kiểm tra hiển thị thật.
+- 14 bài viết mới (6–8 mục nội dung mỗi bài): chọn cá tươi, bảo quản rau củ, kỹ thuật cắt thái, tủ gia vị Việt, nước dùng trong veo, ướp thịt nướng, meal prep, eat-clean, đọc nhãn dinh dưỡng, giảm muối, chọn nồi chảo, an toàn vệ sinh thực phẩm, thay thế nguyên liệu, mâm cơm Việt.
+- Số liệu DB sau đợt 2: **17 công thức, 12 khóa học, 36 bài học, 108 câu hỏi trắc nghiệm, 16 bài viết** (backup trước khi seed: lưu ngoài repo).
+
+### Phần D — Kiểm thử & tài liệu
+- Thêm `tests/part-bc.spec.ts` (5 test): hồ sơ Free/Pro, hộp thoại khóa Pro, luồng duyệt bài viết đầu-cuối, nội dung seed đợt 2 trên trang công khai, khóa học mới mở được bài xem trước.
+- Kết quả cuối: **TypeScript 0 lỗi, ESLint 0/0, production build thành công (81 route), Playwright 18/18 đạt**. Dữ liệu `TEST_` sau test đã dọn sạch.
+- Cập nhật đồng bộ: `TESTING.md`, `AI_CONTEXT.md`, `WORK_LOG.md`.
+
+### Còn tồn đọng (việc của chủ đồ án / giai đoạn sau)
+- Chạy `git push origin master` từ terminal trên máy (phiên SSH không xác thực được GitHub).
+- Đăng ký VNPay sandbox + Resend để điền `VNPAY_TMN_CODE`, `VNPAY_HASH_SECRET`, `RESEND_API_KEY` rồi mới test được thanh toán/IPN và email.
+
