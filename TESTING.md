@@ -49,10 +49,11 @@ Cấu hình: `playwright.config.ts` (testDir `./tests`, baseURL `http://localhos
 | 9 | Tài khoản Free vào `/tao-cong-thuc` bị chuyển `/nang-cap-pro` | smoke.spec.ts | Đạt |
 | 10 | Tài khoản Pro mở được form tạo công thức (có ô Calories (kcal) + chọn danh mục) | smoke.spec.ts | Đạt |
 | 11 | Admin mở được trang duyệt nâng cấp Pro | smoke.spec.ts | Đạt |
-| 12 | Ticket: user tạo → nhân viên trả lời → user thấy phản hồi | ticket.spec.ts | Đạt |
+| 12 | Trang học bài mở được trình phát video, không lỗi ảnh thu nhỏ YouTube (`img.youtube.com`) | smoke.spec.ts | Đạt |
+| 13 | Ticket: user tạo → nhân viên trả lời → user thấy phản hồi | ticket.spec.ts | Đạt |
 
 
-**Kết quả chạy cuối: 12/12 đạt** (smoke 11/11, ticket 1/1, tổng thời gian ~1 phút). Lần chạy đầu tiên có 2 test chưa đạt do lỗi ở phía file test (kỳ vọng nhãn chưa khớp form thật và chưa chờ phiên đăng nhập ổn định trước khi chuyển trang), đã sửa trong file test — mã nguồn ứng dụng không phải thay đổi. Lần chạy thứ hai phát hiện thêm test ticket chưa chạy lặp lại được khi còn dữ liệu cũ (trùng tiêu đề), đã đổi sang tiêu đề duy nhất theo thời gian cho mỗi lần chạy. Dữ liệu `TEST_` tạo trong lúc test đã được dọn sạch: 0 ticket `TEST_` còn lại, tin nhắn trong ticket bị xóa tự động theo cascade của khóa ngoại.
+**Kết quả chạy cuối: 13/13 đạt** (smoke 12/12, ticket 1/1, tổng thời gian ~2 phút; cập nhật 2026-11-05 sau đợt viết lại nội dung và làm đẹp giao diện). Lần chạy đầu tiên có 2 test chưa đạt do lỗi ở phía file test (kỳ vọng nhãn chưa khớp form thật và chưa chờ phiên đăng nhập ổn định trước khi chuyển trang), đã sửa trong file test — mã nguồn ứng dụng không phải thay đổi. Lần chạy thứ hai phát hiện thêm test ticket chưa chạy lặp lại được khi còn dữ liệu cũ (trùng tiêu đề), đã đổi sang tiêu đề duy nhất theo thời gian cho mỗi lần chạy. Dữ liệu `TEST_` tạo trong lúc test đã được dọn sạch: 0 ticket `TEST_` còn lại, tin nhắn trong ticket bị xóa tự động theo cascade của khóa ngoại.
 
 ## 4. Kiểm thử thủ công đã thực hiện
 
