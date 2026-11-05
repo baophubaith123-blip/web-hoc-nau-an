@@ -89,3 +89,18 @@ test.describe("Phân quyền gói Pro", () => {
     await expect(page.getByRole("heading", { name: "Duyệt yêu cầu nâng cấp Pro" })).toBeVisible();
   });
 });
+
+test.describe("Trang học bài", () => {
+  test("Bài học mở được trình phát video, không lỗi ảnh thu nhỏ YouTube", async ({ page }) => {
+    const loiTrang: string[] = [];
+    page.on("pageerror", (e) => loiTrang.push(String(e)));
+    await dangNhap(page, "user1@naungon.vn");
+    await expect(page).toHaveURL(/\/bang-dieu-khien/);
+    await page.goto(
+      "/hoc-bai/cd5ce0af-ebdb-45cb-85b1-b19eac4c0a76/3262a323-39fc-4a20-9ed5-7c082df69a96"
+    );
+    await expect(page.getByText("Video chưa khả dụng")).toHaveCount(0);
+    await expect(page.locator('img[src*="img.youtube.com"]').first()).toBeVisible();
+    expect(loiTrang).toEqual([]);
+  });
+});
