@@ -106,3 +106,21 @@ test.describe("Nội dung seed đợt 2 (Part C)", () => {
     expect(loiTrang).toEqual([]);
   });
 });
+
+test.describe("Menu avatar ở header công khai (hồi quy)", () => {
+  test("Học viên đã đăng nhập mở trang chủ, bấm avatar và vào được Hồ sơ", async ({ page }) => {
+    const loiTrang: string[] = [];
+    page.on("pageerror", (e) => loiTrang.push(String(e)));
+    await dangNhap(page, "user1@naungon.vn");
+    await page.goto("/");
+    await expect(page.getByText("Có sự cố xảy ra")).toHaveCount(0);
+    // Trước đây mở menu avatar là sập trang vì DropdownMenuLabel nằm ngoài Menu.Group (Base UI)
+    await page.getByRole("button", { name: "Học Viên Pro Lê Nam" }).click();
+    const mucHoSo = page.getByRole("menuitem", { name: "Hồ sơ", exact: true });
+    await expect(mucHoSo).toBeVisible();
+    await mucHoSo.click();
+    await expect(page).toHaveURL(/\/ho-so/);
+    await expect(page.getByText("Có sự cố xảy ra")).toHaveCount(0);
+    expect(loiTrang).toEqual([]);
+  });
+});

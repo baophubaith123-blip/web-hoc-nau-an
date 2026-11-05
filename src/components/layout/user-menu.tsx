@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { taoSupabaseClient } from "@/lib/supabase/client";
@@ -41,6 +41,8 @@ export function UserMenu({ nguoiDung }: { nguoiDung: NguoiDungHeader }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-60">
+        {/* Base UI: GroupLabel bat buoc nam trong Menu.Group, neu khong se nem loi thieu MenuGroupContext */}
+        <DropdownMenuGroup>
         <DropdownMenuLabel className="space-y-1">
           <div className="flex items-center justify-between gap-1">
             <p className="truncate font-medium">{nguoiDung.ho_ten}</p>
@@ -58,6 +60,7 @@ export function UserMenu({ nguoiDung }: { nguoiDung: NguoiDungHeader }) {
             )}
           </div>
         </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href={trangChuTheoVaiTro(nguoiDung.vai_tro)}>{vi.menu.bang_dieu_khien}</Link>

@@ -473,3 +473,9 @@ Yêu cầu của chủ đồ án: (A) thiết kế lại giao diện thật đ�
 - Chạy `git push origin master` từ terminal trên máy (phiên SSH không xác thực được GitHub).
 - Đăng ký VNPay sandbox + Resend để điền `VNPAY_TMN_CODE`, `VNPAY_HASH_SECRET`, `RESEND_API_KEY` rồi mới test được thanh toán/IPN và email.
 
+### Hotfix sau bàn giao (05/11/2026) — lỗi mở menu avatar làm sập trang
+- Chủ đồ án phản ánh: đã đăng nhập, bấm avatar ở header để vào trang cá nhân thì hiện trang "Có sự cố xảy ra".
+- Nguyên nhân: `src/components/layout/user-menu.tsx` dùng `DropdownMenuLabel` (Base UI `Menu.GroupLabel`) nằm ngoài `Menu.Group` — Base UI ném lỗi `MenuGroupContext is missing` làm sập toàn bộ trang cho **mọi người dùng đã đăng nhập khi ở trang công khai**. Lỗi có từ bản gốc, các vòng test trước không bắt được vì sau khi đăng nhập test chỉ ở trong khu vực thành viên (layout sidebar, không có header công khai).
+- Sửa: bọc `DropdownMenuLabel` trong `DropdownMenuGroup` (+ comment cảnh báo trong code). Đã tái hiện lỗi bằng trình duyệt thật trước khi sửa và xác nhận sau khi sửa: cả tài khoản Pro và Free đều mở menu avatar → "Hồ sơ" → vào `/ho-so` bình thường, 0 lỗi JS.
+- Bổ sung test hồi quy vào `tests/part-bc.spec.ts`: đăng nhập → trang chủ → bấm avatar → mục "Hồ sơ" → tới `/ho-so`, không lỗi trang.
+
