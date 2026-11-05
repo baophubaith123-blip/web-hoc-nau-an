@@ -134,14 +134,20 @@ VNPAY_TMN_CODE=TESTCODE
 VNPAY_HASH_SECRET=SECRETKEY
 VNPAY_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
 VNPAY_RETURN_URL=http://localhost:3000/api/thanh-toan/vnpay/ket-qua
+# Đặt true để dùng cổng thanh toán DEMO ngay trong web (không cần mã VNPay thật,
+# toàn bộ luồng IPN/duyệt/kích hoạt Pro vẫn chạy thật); có mã thật thì đặt false.
+VNPAY_DEMO=true
 ```
 
 ### Bước 4: Khởi tạo Database trên Supabase
 1. Mở [Supabase Dashboard](https://supabase.com/dashboard) ➜ Bấm vào mục **SQL Editor**.
 2. Thực thi lần lượt các file trong thư mục `supabase/migrations/`:
-   - `001_khoi_tao.sql`: Khởi tạo 20 bảng cơ sở dữ liệu nền tảng.
+   - `001_initial_schema.sql`: Khởi tạo các bảng cơ sở dữ liệu nền tảng.
+   - `002_rls_policies.sql`: Kích hoạt chính sách bảo mật tầng dòng (RLS).
    - `003_goi_premium.sql`: Tạo 4 bảng Gói Pro, trigger duyệt tự động và hàm kiểm tra.
-   - `004_rls_policies.sql`: Kích hoạt chính sách bảo mật tầng dòng (RLS).
+   - `004_rls_policies.sql`: Bổ sung/chốt chính sách RLS.
+   - `005_bai_viet_nguoi_dung.sql`: Bài viết người dùng gửi duyệt (cột lý do từ chối, trạng thái chờ duyệt/từ chối, RLS cho tác giả).
+   - `006_thanh_toan_bo_sung_cot.sql`: Bổ sung cột `loai_thanh_toan`, `goi_id` cho bảng `thanh_toan` và khóa ngoại cho `yeu_cau_nang_cap` (chạy lặp lại an toàn).
 
 ### Bước 5: Nạp dữ liệu mẫu (Seed Data)
 Mở file `supabase/seed.sql`, copy dán vào **SQL Editor** trên Supabase và bấm **Run**. Thao tác này sẽ tạo:

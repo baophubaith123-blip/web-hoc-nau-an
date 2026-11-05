@@ -243,6 +243,8 @@ Hệ thống loại bỏ hoàn toàn việc bán lẻ từng khóa học nhằm 
    - Bắn thông báo hệ thống chúc mừng tới chuông thông báo của học viên.
 6. Khi học viên tải lại trang hoặc điều hướng, giao diện lập tức hiển thị **Huy hiệu Pro**, mở khóa toàn bộ bài học HD và nút Tạo công thức.
 
+> **Ghi chú — Chế độ demo thanh toán (cập nhật 05/11/2026):** VNPay yêu cầu đăng ký merchant mới cấp mã thật, nên hệ thống có thêm chế độ mô phỏng qua biến môi trường `VNPAY_DEMO=true`: học viên được chuyển tới trang cổng mô phỏng `/thanh-toan-demo` ngay trong website (giao diện giống cổng VNPay, có nhãn "MÔI TRƯỜNG DEMO") với 2 lựa chọn thanh toán thành công / hủy. Từ bước này trở đi mọi xử lý đều là thật: tham số kết quả được ký HMAC-SHA512 bằng cùng hàm dùng cho VNPay, gọi IPN thật, ghi giao dịch, tạo yêu cầu chờ duyệt và Admin duyệt như mô tả ở trên. Khi có mã VNPay thật, chỉ cần điền `VNPAY_TMN_CODE`/`VNPAY_HASH_SECRET` và đặt `VNPAY_DEMO=false` là hệ thống dùng cổng VNPay Sandbox/Production, không phải sửa mã nguồn. Chi tiết kiểm chứng xem `TESTING.md` mục kiểm thử cổng thanh toán demo.
+
 ---
 
 ### 4.4. Luồng 4: Admin Cấp Gói Pro Thủ Công
