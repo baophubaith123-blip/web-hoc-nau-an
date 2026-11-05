@@ -5,6 +5,58 @@ const vnpHashSecret = process.env.VNPAY_HASH_SECRET || "DEMOSECRET";
 const vnpUrl = process.env.VNPAY_URL || "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 const vnpReturnUrl =
   process.env.VNPAY_RETURN_URL || "http://localhost:3000/api/thanh-toan/vnpay/ket-qua";
+// Che do demo: khi VNPAY_DEMO=true, URL thanh toan tro ve trang cong thanh toan
+// mo phong ngay trong website thay vi cong sandbox cua VNPay. Toan bo tham so,
+// chu ky HMAC-SHA512, IPN va trang ket qua van la code that — chi thay noi
+// nguoi dung nhap thong tin thanh toan. Co ma TMN that thi dat VNPAY_DEMO=false.
+const vnpDemo = process.env.VNPAY_DEMO === "true";
+const vnpSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+export function laCheDoDemoVNPay(): boolean {
+  return vnpDemo;
+}
+
+// Ky mot bo tham so VNPay (dung cho ca URL thanh toan, IPN mo phong va URL ket qua)
+export function kyThamSoVNPay(params: Record<string, string | number>): string {
+  const sortedParams = sapXepObject(params);
+  const signData = Object.entries(sortedParams)
+    .map(([k, v]) => `${k}=${v}`)
+    .join("&");
+  const hmac = crypto.createHmac("sha512", vnpHashSecret);
+  const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
+  return `${signData}&vnp_SecureHash=${signed}`;
+}
+
+// Tao bo tham so ket qua ma cong thanh toan (that hoac demo) gui ve IPN + ReturnURL
+export function taoThamSoKetQuaVNPay({
+  maGiaoDich,
+  soTien,
+  noiDung,
+  thanhCong,
+  maNganHang = "NCB",
+}: {
+  maGiaoDich: string;
+  soTien: number;
+  noiDung: string;
+  thanhCong: boolean;
+  maNganHang?: string;
+}): string {
+  const maPhanHoi = thanhCong ? "00" : "24"; // 24 = nguoi dung huy giao dich
+  const params: Record<string, string | number> = {
+    vnp_TmnCode: vnpTmnCode,
+    vnp_Amount: Math.round(soTien * 100),
+    vnp_BankCode: maNganHang,
+    vnp_BankTranNo: `VNP${Date.now()}`,
+    vnp_CardType: "ATM",
+    vnp_OrderInfo: noiDung,
+    vnp_PayDate: dinhDangThoiGianVNPay(new Date()),
+    vnp_ResponseCode: maPhanHoi,
+    vnp_TransactionNo: Math.floor(10_000_000 + Math.random() * 89_999_999).toString(),
+    vnp_TransactionStatus: thanhCong ? "00" : "02",
+    vnp_TxnRef: maGiaoDich,
+  };
+  return kyThamSoVNPay(params);
+}
 
 function dinhDangThoiGianVNPay(date: Date): string {
   const yyyy = date.getFullYear().toString();
@@ -57,15 +109,9 @@ export function taoUrlThanhToanVNPay({
     vnp_CreateDate: createDate,
   };
 
-  const sortedParams = sapXepObject(rawParams);
-  const signData = Object.entries(sortedParams)
-    .map(([k, v]) => `${k}=${v}`)
-    .join("&");
-
-  const hmac = crypto.createHmac("sha512", vnpHashSecret);
-  const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
-
-  return `${vnpUrl}?${signData}&vnp_SecureHash=${signed}`;
+  const chuoiDaKy = kyThamSoVNPay(rawParams);
+  const urlGoc = vnpDemo ? `${vnpSiteUrl}/thanh-toan-demo` : vnpUrl;
+  return `${urlGoc}?${chuoiDaKy}`;
 }
 
 export function xacMinhChuKyVNPay(params: Record<string, string>): {

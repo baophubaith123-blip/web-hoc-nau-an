@@ -71,7 +71,7 @@ test.describe("Luồng bài viết người dùng gửi duyệt", () => {
     const ctxKhach = await browser.newContext();
     const trangKhach = await ctxKhach.newPage();
     await trangKhach.goto("/bai-viet");
-    await expect(trangKhach.getByText(TIEU_DE)).toBeVisible();
+    await expect(trangKhach.getByText(TIEU_DE).first()).toBeVisible();
     await ctxKhach.close();
   });
 });
@@ -122,5 +122,38 @@ test.describe("Menu avatar ở header công khai (hồi quy)", () => {
     await expect(page).toHaveURL(/\/ho-so/);
     await expect(page.getByText("Có sự cố xảy ra")).toHaveCount(0);
     expect(loiTrang).toEqual([]);
+  });
+});
+
+test.describe("Cổng thanh toán demo (VNPay mô phỏng)", () => {
+  // Yêu cầu máy chạy test đặt VNPAY_DEMO=true trong .env.local (đang bật trên máy đồ án).
+  // Hai test này tạo giao dịch thật cho user2 — dữ liệu phát sinh được dọn sau khi chạy suite.
+  async function chonGoi(page: Page, tenGoi: string) {
+    await page.goto("/nang-cap-pro");
+    const tomTat = page.locator("h4").first();
+    if (!((await tomTat.textContent()) || "").includes(tenGoi)) {
+      await page.getByRole("button", { name: "Chọn gói", exact: true }).click();
+    }
+    await expect(tomTat).toContainText(tenGoi);
+    await page.getByRole("button", { name: "Thanh toán qua VNPay" }).click();
+    await expect(page).toHaveURL(/thanh-toan-demo/);
+    await expect(page.getByText("MÔI TRƯỜNG DEMO", { exact: true })).toBeVisible();
+  }
+
+  test("Free mua Pro Tháng qua cổng demo: thanh toán thành công -> yêu cầu chờ duyệt", async ({ page }) => {
+    await dangNhap(page, "user2@naungon.vn");
+    await chonGoi(page, "Pro Tháng");
+    await expect(page.getByText("99.000 ₫")).toBeVisible();
+    await page.getByRole("button", { name: "Thanh toán thành công" }).click();
+    await expect(page).toHaveURL(/goi-cua-toi/);
+    await expect(page.getByText("Chờ duyệt").first()).toBeVisible();
+  });
+
+  test("Hủy thanh toán tại cổng demo -> giao dịch thất bại", async ({ page }) => {
+    await dangNhap(page, "user2@naungon.vn");
+    await chonGoi(page, "Pro Năm");
+    await expect(page.getByText("799.000 ₫")).toBeVisible();
+    await page.getByRole("button", { name: "Hủy thanh toán" }).click();
+    await expect(page).toHaveURL(/thanh_toan=that_bai/);
   });
 });

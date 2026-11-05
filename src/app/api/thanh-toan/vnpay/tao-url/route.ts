@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { layPhienHienTai, taoSupabaseServer } from "@/lib/supabase/server";
+import { taoSupabaseAdmin } from "@/lib/supabase/admin";
 import { taoUrlThanhToanVNPay } from "@/lib/thanh-toan/vnpay";
 import { customAlphabet } from "nanoid";
 
@@ -20,6 +21,10 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await taoSupabaseServer();
+    // Ghi thanh_toan/yeu_cau bang service role: RLS cua thanh_toan chi cho phep
+    // SERVER tao ban ghi (migration 002 muc 19) — client phien nguoi dung bi chan 42501.
+    // nguoi_dung_id luon lay tu phien dang nhap da xac thuc, khong nhan tu body.
+    const supabaseAdmin = taoSupabaseAdmin();
     const maGiaoDich = `VN${Date.now()}${nanoid()}`;
     const ipAddr = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
 
@@ -36,7 +41,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Lưu bảng thanh_toan
-      const { data: ttData, error: errThanhToan } = await supabase
+      const { data: ttData, error: errThanhToan } = await supabaseAdmin
         .from("thanh_toan")
         .insert({
           ma_giao_dich: maGiaoDich,
@@ -59,7 +64,7 @@ export async function POST(request: NextRequest) {
 
       // Tạo bản ghi yeu_cau_nang_cap chờ duyệt
       const maYeuCau = `YC-${nanoid()}`;
-      await supabase.from("yeu_cau_nang_cap").insert({
+      await supabaseAdmin.from("yeu_cau_nang_cap").insert({
         ma_yeu_cau: maYeuCau,
         nguoi_dung_id: phien.user.id,
         goi_id: goi.id,
@@ -90,7 +95,7 @@ export async function POST(request: NextRequest) {
 
     const giaKhoaHoc = 299000; // Giá mặc định nếu mua riêng
 
-    const { error: errThanhToan } = await supabase.from("thanh_toan").insert({
+    const { error: errThanhToan } = await supabaseAdmin.from("thanh_toan").insert({
       ma_giao_dich: maGiaoDich,
       nguoi_dung_id: phien.user.id,
       khoa_hoc_id: kh.id,
