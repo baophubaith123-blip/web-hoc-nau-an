@@ -45,7 +45,7 @@ export function TheGoi({
       className={cn(
         "relative flex flex-col rounded-2xl p-6 transition-all duration-300",
         noi_bat
-          ? "border-2 border-amber-500 bg-gradient-to-b from-amber-500/[0.07] via-background to-background shadow-xl shadow-amber-500/10 scale-[1.02]"
+          ? "gradient-border border-2 border-transparent bg-gradient-to-b from-amber-500/[0.07] via-background to-background shadow-xl shadow-amber-500/10 scale-[1.02]"
           : "border border-border/80 bg-card hover:border-amber-400/50 shadow-sm",
         daChon && "ring-2 ring-amber-500 ring-offset-2"
       )}

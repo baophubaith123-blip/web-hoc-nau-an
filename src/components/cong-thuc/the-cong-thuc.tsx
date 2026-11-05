@@ -26,7 +26,7 @@ export function TheCongThuc({ congThuc }: { congThuc: CongThucItem }) {
   const doKhoInfo = DO_KHO_MAP[congThuc.do_kho] || DO_KHO_MAP.de;
 
   return (
-    <Card className="group overflow-hidden rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+    <Card className="group overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-xl">
       <Link href={`/cong-thuc/${congThuc.slug}`} className="block">
         <div className="relative aspect-4/3 w-full overflow-hidden bg-muted">
           {congThuc.anh_dai_dien ? (
@@ -34,7 +34,7 @@ export function TheCongThuc({ congThuc }: { congThuc: CongThucItem }) {
               src={congThuc.anh_dai_dien}
               alt={congThuc.tieu_de}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
@@ -56,6 +56,8 @@ export function TheCongThuc({ congThuc }: { congThuc: CongThucItem }) {
               {doKhoInfo.nhan}
             </span>
           </div>
+
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/45 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
         </div>
 
         <CardContent className="p-4 space-y-3">

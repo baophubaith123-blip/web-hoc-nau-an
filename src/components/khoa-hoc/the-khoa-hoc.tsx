@@ -22,7 +22,7 @@ export function TheKhoaHoc({ khoaHoc }: { khoaHoc: KhoaHocItem }) {
   const capDoInfo = CAP_DO_MAP[khoaHoc.cap_do] || CAP_DO_MAP.co_ban;
 
   return (
-    <Card className="group overflow-hidden rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+    <Card className="group overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-xl">
       <Link href={`/khoa-hoc/${khoaHoc.slug}`} className="block">
         <div className="relative aspect-16/9 w-full overflow-hidden bg-muted">
           {khoaHoc.anh_dai_dien ? (
@@ -30,7 +30,7 @@ export function TheKhoaHoc({ khoaHoc }: { khoaHoc: KhoaHocItem }) {
               src={khoaHoc.anh_dai_dien}
               alt={khoaHoc.tieu_de}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
@@ -53,6 +53,8 @@ export function TheKhoaHoc({ khoaHoc }: { khoaHoc: KhoaHocItem }) {
               </Badge>
             </div>
           )}
+
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/45 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
         </div>
 
         <CardContent className="p-4 space-y-3">

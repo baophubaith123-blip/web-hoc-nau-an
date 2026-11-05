@@ -54,8 +54,25 @@ export default async function ChiTietKhoaHoc({ params }: Props) {
 
   return (
     <div className="max-w-5xl mx-auto space-y-10 pb-16">
-      {/* HEADER & HERO GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      {/* HEADER: DẢI NỀN ẢNH BÌA + LƯỚI THÔNG TIN */}
+      <div className="relative">
+        {kh.anh_dai_dien && (
+          <div aria-hidden className="relative h-44 overflow-hidden rounded-3xl md:h-56">
+            <Image
+              src={kh.anh_dai_dien}
+              alt=""
+              fill
+              priority
+              className="scale-110 object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/25 via-background/60 to-background" />
+          </div>
+        )}
+        <div
+          className={`grid grid-cols-1 items-start gap-8 lg:grid-cols-3 ${
+            kh.anh_dai_dien ? "relative -mt-24 px-1 md:-mt-32 md:px-4" : ""
+          }`}
+        >
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-primary border-primary">
@@ -178,6 +195,7 @@ export default async function ChiTietKhoaHoc({ params }: Props) {
               </div>
             </CardContent>
           </Card>
+        </div>
         </div>
       </div>
 
