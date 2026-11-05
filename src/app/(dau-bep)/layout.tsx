@@ -7,7 +7,7 @@ import { vi } from "@/lib/i18n/vi";
 export default async function DauBepLayout({ children }: { children: React.ReactNode }) {
   const phien = await yeuCauVaiTro(["chef", "admin"]);
   return (
-    <KhungDashboard nguoiDung={taoNguoiDungHeader(phien)} menu={MENU_DAU_BEP} tieuDe={vi.dau_bep_dash.tieu_de}>
+    <KhungDashboard khuVaiTro nguoiDung={taoNguoiDungHeader(phien)} menu={MENU_DAU_BEP} tieuDe={vi.dau_bep_dash.tieu_de}>
       {children}
     </KhungDashboard>
   );

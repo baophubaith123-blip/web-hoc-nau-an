@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut, User, Crown } from "lucide-react";
+import { ChefHat, LayoutDashboard, LifeBuoy, LogOut, ShieldCheck, User, Crown } from "lucide-react";
 import { BadgePro } from "@/components/goi/BadgePro";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { taoSupabaseClient } from "@/lib/supabase/client";
-import { trangChuTheoVaiTro } from "@/lib/utils/vai-tro";
+import { thongTinKhuVaiTro, trangChuTheoVaiTro } from "@/lib/utils/vai-tro";
 import { MAU_BADGE, TONG_VAI_TRO, nhanCua } from "@/lib/utils/hang-so";
 import { cn } from "@/lib/utils/cn";
 import { vi } from "@/lib/i18n/vi";
@@ -21,8 +21,16 @@ import type { NguoiDungHeader } from "./nguoi-dung-header";
 const chuCaiDau = (ten: string) =>
   ten.split(" ").filter(Boolean).slice(-2).map((t) => t[0]?.toUpperCase()).join("") || "U";
 
+const ICON_KHU_VAI_TRO = { admin: ShieldCheck, chef: ChefHat, support: LifeBuoy } as const;
+
 export function UserMenu({ nguoiDung }: { nguoiDung: NguoiDungHeader }) {
   const router = useRouter();
+  // Nhãn lối quay về khu vực làm việc theo đúng vai trò (staff), học viên thường giữ "Bảng điều khiển"
+  const khuVaiTro = thongTinKhuVaiTro(nguoiDung.vai_tro);
+  const IconKhuVaiTro =
+    nguoiDung.vai_tro === "admin" || nguoiDung.vai_tro === "chef" || nguoiDung.vai_tro === "support"
+      ? ICON_KHU_VAI_TRO[nguoiDung.vai_tro]
+      : LayoutDashboard;
 
   async function dangXuat() {
     await taoSupabaseClient().auth.signOut();
@@ -63,7 +71,10 @@ export function UserMenu({ nguoiDung }: { nguoiDung: NguoiDungHeader }) {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={trangChuTheoVaiTro(nguoiDung.vai_tro)}>{vi.menu.bang_dieu_khien}</Link>
+          <Link href={trangChuTheoVaiTro(nguoiDung.vai_tro)}>
+            <IconKhuVaiTro className="mr-2 h-4 w-4" />
+            <span>{khuVaiTro ? khuVaiTro.nhan : vi.menu.bang_dieu_khien}</span>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/goi-cua-toi">

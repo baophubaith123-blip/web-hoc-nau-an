@@ -7,7 +7,7 @@ import { vi } from "@/lib/i18n/vi";
 export default async function HoTroLayout({ children }: { children: React.ReactNode }) {
   const phien = await yeuCauVaiTro(["support", "admin"]);
   return (
-    <KhungDashboard nguoiDung={taoNguoiDungHeader(phien)} menu={MENU_HO_TRO} tieuDe={vi.menu.ho_tro}>
+    <KhungDashboard khuVaiTro nguoiDung={taoNguoiDungHeader(phien)} menu={MENU_HO_TRO} tieuDe={vi.menu.ho_tro}>
       {children}
     </KhungDashboard>
   );

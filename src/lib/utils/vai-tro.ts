@@ -14,6 +14,17 @@ export function trangChuTheoVaiTro(vaiTro: VaiTro): string {
   }
 }
 
+// Tên gọi + đường dẫn khu vực làm việc riêng của từng vai trò staff (null với học viên thường).
+// Dùng cho nhãn "quay về khu vực" ở menu tài khoản và sidebar khu vực thành viên.
+export function thongTinKhuVaiTro(vaiTro: VaiTro): { nhan: string; href: string } | null {
+  switch (vaiTro) {
+    case "admin": return { nhan: "Trang quản trị", href: "/quan-tri" };
+    case "support": return { nhan: "Trang hỗ trợ", href: "/nhan-vien" };
+    case "chef": return { nhan: "Trang đầu bếp", href: "/bep" };
+    default: return null;
+  }
+}
+
 export type MucMenu = { nhan: string; href: string; icon: string; khoa?: boolean };
 
 const m = vi.menu;

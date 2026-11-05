@@ -7,7 +7,7 @@ import { vi } from "@/lib/i18n/vi";
 export default async function QuanTriLayout({ children }: { children: React.ReactNode }) {
   const phien = await yeuCauVaiTro(["admin"]);
   return (
-    <KhungDashboard nguoiDung={taoNguoiDungHeader(phien)} menu={MENU_QUAN_TRI} tieuDe={vi.quan_tri.tieu_de}>
+    <KhungDashboard khuVaiTro nguoiDung={taoNguoiDungHeader(phien)} menu={MENU_QUAN_TRI} tieuDe={vi.quan_tri.tieu_de}>
       {children}
     </KhungDashboard>
   );
