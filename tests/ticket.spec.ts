@@ -35,7 +35,9 @@ test("Ticket hỗ trợ: user tạo, nhân viên trả lời, user thấy phản
   await dangNhap(sup, "support@naungon.vn");
   await expect(sup).toHaveURL(/\/nhan-vien/);
   await sup.goto("/nhan-vien/ticket");
+  try { await sup.waitForLoadState("networkidle", { timeout: 15_000 }); } catch { /* bỏ qua nếu quá thời gian */ }
   await sup.getByText(TIEU_DE).click();
+  try { await sup.waitForLoadState("networkidle", { timeout: 15_000 }); } catch { /* bỏ qua nếu quá thời gian */ }
   const oNhap = sup.getByPlaceholder(/Nhập tin nhắn phản hồi/);
   await oNhap.fill(PHAN_HOI);
   await oNhap.press("Enter");

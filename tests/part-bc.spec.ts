@@ -16,7 +16,7 @@ test.describe("Trang cá nhân theo hạng thành viên", () => {
   test("Tài khoản Free: hiện trạng thành viên thường, có ô ngày sinh, nút Pro bị khóa và bật hộp thoại nâng cấp", async ({ page }) => {
     await dangNhap(page, "user2@naungon.vn");
     await page.goto("/ho-so");
-    await expect(page.getByText("Bạn đang là thành viên thường")).toBeVisible();
+    await expect(page.getByText("Bạn đang là thành viên thường").first()).toBeVisible();
     // Ô nhập ngày sinh (bổ sung ở Part B)
     await expect(page.locator('input[type="date"]')).toBeVisible();
     // Nút "Viết bài viết" ở trạng thái khóa -> bấm vào hiện hộp thoại nâng cấp
@@ -28,7 +28,7 @@ test.describe("Trang cá nhân theo hạng thành viên", () => {
   test("Tài khoản Pro: thẻ thành viên hiện gói và hạn dùng, nút chức năng không bị khóa", async ({ page }) => {
     await dangNhap(page, "user1@naungon.vn");
     await page.goto("/ho-so");
-    await expect(page.getByText(/Bạn đang là thành viên Pro/)).toBeVisible();
+    await expect(page.getByText(/Bạn đang là thành viên Pro/).first()).toBeVisible();
     await expect(page.getByText(/Hết hạn/)).toBeVisible();
     await expect(page.getByText(/còn \d+ ngày/)).toBeVisible();
     // Tile "Viết bài viết" là liên kết mở form (không phải nút khóa)
