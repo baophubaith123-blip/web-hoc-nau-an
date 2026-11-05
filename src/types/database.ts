@@ -583,7 +583,8 @@ export type Database = {
           anh_dai_dien: string | null;
           tac_gia_id: string;
           danh_muc: string | null;
-          trang_thai: "nhap" | "xuat_ban" | "luu_tru";
+          trang_thai: "nhap" | "cho_duyet" | "xuat_ban" | "luu_tru" | "tu_choi";
+          ly_do_tu_choi: string | null;
           luot_xem: number;
           created_at: string;
           updated_at: string;
@@ -597,7 +598,8 @@ export type Database = {
           anh_dai_dien?: string | null;
           tac_gia_id: string;
           danh_muc?: string | null;
-          trang_thai?: "nhap" | "xuat_ban" | "luu_tru";
+          trang_thai?: "nhap" | "cho_duyet" | "xuat_ban" | "luu_tru" | "tu_choi";
+          ly_do_tu_choi?: string | null;
           luot_xem?: number;
           created_at?: string;
           updated_at?: string;
@@ -611,7 +613,8 @@ export type Database = {
           anh_dai_dien?: string | null;
           tac_gia_id?: string;
           danh_muc?: string | null;
-          trang_thai?: "nhap" | "xuat_ban" | "luu_tru";
+          trang_thai?: "nhap" | "cho_duyet" | "xuat_ban" | "luu_tru" | "tu_choi";
+          ly_do_tu_choi?: string | null;
           luot_xem?: number;
           created_at?: string;
           updated_at?: string;

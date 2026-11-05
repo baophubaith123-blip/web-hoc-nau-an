@@ -1,30 +1,49 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   BarChart3, Bell, BookOpen, Bookmark, ChefHat, CreditCard, FolderTree, GraduationCap, Inbox,
-  LayoutDashboard, LifeBuoy, Megaphone, MessageSquare, Newspaper, PlusCircle, ScrollText,
-  Send, Settings, Star, User, Users, Crown, ShieldCheck, type LucideIcon,
+  LayoutDashboard, LifeBuoy, Megaphone, MessageSquare, Newspaper, PenLine, PlusCircle, ScrollText,
+  Send, Settings, Star, User, Users, Crown, ShieldCheck, Lock, type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { MucMenu } from "@/lib/utils/vai-tro";
 import type { NguoiDungHeader } from "./nguoi-dung-header";
+import { HopThoaiNangCapPro } from "./nut-khoa-pro";
 
 // Tên icon (chuỗi, truyền được từ Server) → component lucide
 const ICON: Record<string, LucideIcon> = {
   BarChart3, Bell, BookOpen, Bookmark, ChefHat, CreditCard, FolderTree, GraduationCap, Inbox,
-  LayoutDashboard, LifeBuoy, Megaphone, MessageSquare, Newspaper, PlusCircle, ScrollText,
+  LayoutDashboard, LifeBuoy, Megaphone, MessageSquare, Newspaper, PenLine, PlusCircle, ScrollText,
   Send, Settings, Star, User, Users, Crown, ShieldCheck,
 };
 
 export function DanhSachMenu({ menu, onChon }: { menu: MucMenu[]; onChon?: () => void }) {
   const duongDan = usePathname();
+  const [mucKhoa, setMucKhoa] = useState<MucMenu | null>(null);
   return (
     <nav className="flex flex-col gap-1">
       {menu.map((muc) => {
         const Icon = ICON[muc.icon] ?? LayoutDashboard;
+        // Mục bị khóa Pro: vẫn hiển thị nhưng mờ + ổ khóa, bấm vào hiện thông báo nâng cấp
+        if (muc.khoa) {
+          return (
+            <button
+              key={muc.href}
+              type="button"
+              onClick={() => setMucKhoa(muc)}
+              title="Chỉ dành cho thành viên Pro"
+              className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium text-muted-foreground opacity-60 saturate-50 transition-all duration-200 hover:bg-muted"
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="flex-1">{muc.nhan}</span>
+              <Lock className="h-3.5 w-3.5 shrink-0" />
+            </button>
+          );
+        }
         // Mục gốc (vd /bep) chỉ sáng khi đúng trang, tránh sáng cùng mục con (/bep/cong-thuc)
         const coMucCon = menu.some((m) => m.href !== muc.href && m.href.startsWith(muc.href + "/"));
         const dangChon = duongDan === muc.href || (!coMucCon && duongDan.startsWith(muc.href + "/"));
@@ -44,6 +63,13 @@ export function DanhSachMenu({ menu, onChon }: { menu: MucMenu[]; onChon?: () =>
           </Link>
         );
       })}
+      <HopThoaiNangCapPro
+        mo={!!mucKhoa}
+        onMoChange={(mo) => {
+          if (!mo) setMucKhoa(null);
+        }}
+        tinhNang={mucKhoa?.nhan ?? ""}
+      />
     </nav>
   );
 }

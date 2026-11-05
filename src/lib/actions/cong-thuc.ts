@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { canPhien, ghiNhatKy, laDauBepHoacAdmin, rongThanhNull, type Db } from "@/lib/actions/chung";
+import { canPhien, ghiNhatKy, laDauBepHoacAdmin, laProConHan, rongThanhNull, type Db } from "@/lib/actions/chung";
 import { congThucSchema, type CongThucForm } from "@/lib/validations/cong-thuc";
 import { idUuid, vanBan } from "@/lib/validations/chung";
 import { chuanHoaLoi, thanhCong, thatBai, type KetQua } from "@/lib/utils/phan-hoi-loi";
@@ -49,6 +49,10 @@ export async function taoCongThuc(dauVao: unknown, mucDich: MucDich): Promise<Ke
   try {
     const p = await canPhien();
     if (!p.ok) return p.loi;
+    // Chốt chặn phía server: user thường phải là Pro còn hạn mới được tạo công thức
+    if (p.vaiTro === "user" && !laProConHan(p.profile)) {
+      return thatBai("Tính năng đăng công thức chỉ dành cho thành viên Pro. Hãy nâng cấp tài khoản để sử dụng.");
+    }
     const d = congThucSchema.parse(dauVao);
 
     // User thường gửi → chờ duyệt. Chef/admin gửi → xuất bản luôn
@@ -74,6 +78,10 @@ export async function capNhatCongThuc(id: unknown, dauVao: unknown, mucDich: Muc
   try {
     const p = await canPhien();
     if (!p.ok) return p.loi;
+    // Chốt chặn phía server: user thường phải là Pro còn hạn mới được sửa công thức của mình
+    if (p.vaiTro === "user" && !laProConHan(p.profile)) {
+      return thatBai("Tính năng đăng công thức chỉ dành cho thành viên Pro. Hãy nâng cấp tài khoản để sử dụng.");
+    }
     const idCt = idUuid.parse(id);
     const d = congThucSchema.parse(dauVao);
 

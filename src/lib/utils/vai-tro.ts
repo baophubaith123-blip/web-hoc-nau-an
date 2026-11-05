@@ -14,7 +14,7 @@ export function trangChuTheoVaiTro(vaiTro: VaiTro): string {
   }
 }
 
-export type MucMenu = { nhan: string; href: string; icon: string };
+export type MucMenu = { nhan: string; href: string; icon: string; khoa?: boolean };
 
 const m = vi.menu;
 
@@ -26,6 +26,8 @@ export const MENU_NGUOI_DUNG: MucMenu[] = [
   { nhan: m.khoa_hoc_cua_toi, href: "/khoa-hoc-cua-toi", icon: "GraduationCap" },
   { nhan: m.tao_cong_thuc, href: "/tao-cong-thuc", icon: "PlusCircle" },
   { nhan: m.cong_thuc_da_gui, href: "/cong-thuc-da-gui", icon: "Send" },
+  { nhan: "Viết bài viết", href: "/tao-bai-viet", icon: "PenLine" },
+  { nhan: "Bài viết của tôi", href: "/bai-viet-cua-toi", icon: "Newspaper" },
   { nhan: m.thong_bao, href: "/thong-bao", icon: "Bell" },
   { nhan: m.ho_tro, href: "/ho-tro", icon: "LifeBuoy" },
   { nhan: m.ho_so, href: "/ho-so", icon: "User" },

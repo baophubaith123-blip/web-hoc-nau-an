@@ -22,6 +22,10 @@ export async function canPhien(cho?: VaiTro[]) {
 export const laNhanVien = (v: VaiTro) => v === "support" || v === "admin";
 export const laDauBepHoacAdmin = (v: VaiTro) => v === "chef" || v === "admin";
 
+// Thành viên Pro còn hạn sử dụng (dùng cho các chốt chặn ở Server Action)
+export const laProConHan = (profile: { la_pro: boolean; goi_het_han: string | null }) =>
+  !!profile.la_pro && !!profile.goi_het_han && new Date(profile.goi_het_han) > new Date();
+
 // Chuỗi rỗng → null khi ghi DB
 export const rongThanhNull = (s: string | null | undefined) => (s && s.trim() !== "" ? s : null);
 

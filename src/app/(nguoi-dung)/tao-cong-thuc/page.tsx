@@ -1,8 +1,15 @@
 import { FormCongThuc } from "@/components/cong-thuc/form-cong-thuc";
+import { TrangKhoaPro } from "@/components/layout/trang-khoa-pro";
+import { laProConHan } from "@/lib/actions/chung";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 
 export default async function TrangTaoCongThuc() {
-  await yeuCauVaiTro();
+  const phien = await yeuCauVaiTro();
+  // Tài khoản thường: hiện trang khóa Pro thay vì biểu mẫu
+  const quyenCao = phien.profile.vai_tro === "chef" || phien.profile.vai_tro === "admin";
+  if (!quyenCao && !laProConHan(phien.profile)) {
+    return <TrangKhoaPro tinhNang="Tạo công thức" />;
+  }
   const supabase = await taoSupabaseServer();
 
   const { data: danhMucList } = await supabase

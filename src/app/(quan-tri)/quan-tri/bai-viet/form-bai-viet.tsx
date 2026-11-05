@@ -27,7 +27,7 @@ export function FormBaiViet({ baiVietHienTai }: FormBaiVietProps) {
   const [noiDung, setNoiDung] = useState(baiVietHienTai?.noi_dung || "");
   const [anhDaiDien, setAnhDaiDien] = useState(baiVietHienTai?.anh_dai_dien || "");
   const [danhMuc, setDanhMuc] = useState(baiVietHienTai?.danh_muc || "Cẩm nang ẩm thực");
-  const [trangThai, setTrangThai] = useState<"nhap" | "xuat_ban" | "luu_tru">(
+  const [trangThai, setTrangThai] = useState<"nhap" | "cho_duyet" | "xuat_ban" | "luu_tru" | "tu_choi">(
     baiVietHienTai?.trang_thai || "xuat_ban"
   );
 

@@ -174,13 +174,25 @@ export function FormHoSoClient({ profile }: FormHoSoClientProps) {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="ngay_sinh">Ngày sinh</Label>
+                <Input
+                  id="ngay_sinh"
+                  type="date"
+                  disabled={dangLuuHoSo}
+                  {...formHoSo.register("ngay_sinh")}
+                />
+              </div>
+
+              <div className="space-y-2">
               <Label htmlFor="dia_chi">Địa chỉ</Label>
               <Input
                 id="dia_chi"
                 disabled={dangLuuHoSo}
                 {...formHoSo.register("dia_chi")}
               />
+              </div>
             </div>
 
             <div className="flex justify-end pt-2">

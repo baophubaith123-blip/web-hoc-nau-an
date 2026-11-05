@@ -6,6 +6,7 @@ import { Plus, Edit2, Eye, Newspaper } from "lucide-react";
 import Image from "next/image";
 import { dinhDangTuongDoi } from "@/lib/utils/dinh-dang";
 import { XoaBaiVietNut } from "./xoa-bai-viet-nut";
+import { DuyetBaiVietNut } from "./duyet-bai-viet-nut";
 
 export default async function QuanLyBaiVietPage() {
   await yeuCauVaiTro(["admin"]);
@@ -16,11 +17,14 @@ export default async function QuanLyBaiVietPage() {
     .select("*, tac_gia:profiles!bai_viet_tac_gia_id_fkey(ho_ten)")
     .order("created_at", { ascending: false });
 
-  const mauTrangThai: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
+  const mauTrangThai: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
     xuat_ban: { label: "Xuất bản", variant: "default" },
+    cho_duyet: { label: "Chờ duyệt", variant: "secondary" },
     nhap: { label: "Bản nháp", variant: "secondary" },
+    tu_choi: { label: "Đã từ chối", variant: "destructive" },
     luu_tru: { label: "Lưu trữ", variant: "outline" },
   };
+  const soChoDuyet = (danhSachBaiViet || []).filter((bv) => bv.trang_thai === "cho_duyet").length;
 
   return (
     <div className="space-y-6">
@@ -29,6 +33,11 @@ export default async function QuanLyBaiVietPage() {
           <h1 className="text-2xl font-bold tracking-tight">Quản Lý Bài Viết Blog</h1>
           <p className="text-sm text-muted-foreground">
             Các bài viết cẩm nang ẩm thực, mẹo làm bếp và tin tức nền tảng
+            {soChoDuyet > 0 && (
+              <span className="ml-2 rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                {soChoDuyet} bài đang chờ duyệt
+              </span>
+            )}
           </p>
         </div>
 
@@ -80,6 +89,9 @@ export default async function QuanLyBaiVietPage() {
                     <p className="text-xs text-muted-foreground pt-1">
                       Chuyên mục: <span className="font-medium text-foreground">{bv.danh_muc || "Chung"}</span> • {dinhDangTuongDoi(bv.created_at)}
                     </p>
+                    <p className="text-xs text-muted-foreground">
+                      Tác giả: <span className="font-medium text-foreground">{bv.tac_gia?.ho_ten || "Không rõ"}</span>
+                    </p>
                   </div>
                 </div>
 
@@ -99,7 +111,11 @@ export default async function QuanLyBaiVietPage() {
                     </Button>
                   </div>
 
-                  <XoaBaiVietNut baiVietId={bv.id} />
+                  {bv.trang_thai === "cho_duyet" ? (
+                    <DuyetBaiVietNut baiVietId={bv.id} tieuDe={bv.tieu_de} />
+                  ) : (
+                    <XoaBaiVietNut baiVietId={bv.id} />
+                  )}
                 </div>
               </div>
             );
