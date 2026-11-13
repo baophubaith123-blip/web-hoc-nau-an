@@ -99,9 +99,11 @@ test.describe("Cokba Đợt 3", () => {
     await page.goto("/quan-tri/nhat-ky-cokba");
     await expect(page.getByTestId("nut-noi-cokba")).toHaveCount(0);
     await expect(
-      page.getByText(/Nhật ký Cokba|chưa được kích hoạt/).first()
+      page.getByText(/Nhật ký Cokba/).first()
     ).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText(/chưa được kích hoạt/).first()).toBeVisible();
+    // Migration 008 đã được chạy vào DB (14/11) -> banner "chưa được kích
+    // hoạt" phải VẮNG mặt và trang hiện danh sách nhật ký thật.
+    await expect(page.getByText(/chưa được kích hoạt/)).toHaveCount(0);
     await page.screenshot({ path: path.join(THU_MUC_ANH, "cokba-nhat-ky-admin.png") });
   });
 });
