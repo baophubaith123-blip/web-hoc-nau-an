@@ -6,6 +6,8 @@ import { canPhien, ghiNhatKy } from "@/lib/actions/chung";
 import { huyYeuCauSchema } from "@/lib/validations/yeu-cau-nang-cap";
 import { chuanHoaLoi, thanhCong, thatBai, type KetQua } from "@/lib/utils/phan-hoi-loi";
 import { t } from "@/lib/i18n/config";
+import { donYeuCauHetHan } from "@/lib/thanh-toan/yeu-cau";
+import { taoSupabaseAdmin } from "@/lib/supabase/admin";
 
 // Lấy danh sách các gói Pro đang hoạt động công khai
 export async function layDanhSachGoiAction(): Promise<KetQua<Bang<"goi_premium">[]>> {
@@ -45,6 +47,8 @@ export async function layGoiCuaToiAction(): Promise<
   try {
     const p = await canPhien();
     if (!p.ok) return p.loi;
+
+    await donYeuCauHetHan(taoSupabaseAdmin());
 
     // 1. Lấy thông tin profile
     const { data: profile } = await p.supabase

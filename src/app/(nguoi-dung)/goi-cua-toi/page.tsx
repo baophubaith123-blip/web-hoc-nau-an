@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { NutNangCap } from "@/components/goi/NutNangCap";
 import { BadgePro } from "@/components/goi/BadgePro";
+import { taoSupabaseAdmin } from "@/lib/supabase/admin";
+import { donYeuCauHetHan } from "@/lib/thanh-toan/yeu-cau";
 import { formatGiaVND } from "@/lib/utils/goi";
 import Link from "next/link";
 import { NutHuyYeuCau } from "./nut-huy-yeu-cau";
@@ -18,6 +20,10 @@ export const metadata: Metadata = {
 
 export default async function GoiCuaToiPage() {
   const phien = await yeuCauVaiTro();
+
+  // Don yeu cau "ma" cua chinh minh truoc khi hien thi (L-01)
+  await donYeuCauHetHan(taoSupabaseAdmin());
+
   const supabase = await taoSupabaseServer();
   const userId = phien.user.id;
 
@@ -38,13 +44,24 @@ export default async function GoiCuaToiPage() {
     .limit(1)
     .maybeSingle();
 
-  // 3. Lấy các yêu cầu nâng cấp đang chờ xử lý
-  const { data: yeuCauChoDuyet } = await supabase
+  // 3. Lấy toàn bộ yêu cầu nâng cấp của người dùng
+  const { data: tatCaYeuCau } = await supabase
     .from("yeu_cau_nang_cap")
     .select("*, goi:goi_premium(*), thanh_toan(*)")
     .eq("nguoi_dung_id", userId)
-    .in("trang_thai", ["cho_duyet"])
     .order("created_at", { ascending: false });
+
+  // Banner "cho duyet" CHI hien khi giao dich da thanh toan thanh cong (L-01/L-02)
+  const yeuCauChoDuyet = (tatCaYeuCau ?? []).filter(
+    (yc) => yc.trang_thai === "cho_duyet" && yc.thanh_toan?.trang_thai === "thanh_cong"
+  );
+  // Yeu cau da huy / bi tu choi / giao dich that bai -> vao lich su nhan "Da huy"
+  const yeuCauDaHuy = (tatCaYeuCau ?? []).filter(
+    (yc) =>
+      yc.trang_thai === "da_huy" ||
+      yc.trang_thai === "tu_choi" ||
+      (yc.trang_thai === "cho_duyet" && yc.thanh_toan?.trang_thai === "that_bai")
+  );
 
   // 4. Lấy lịch sử gói
   const { data: lichSu } = await supabase
@@ -199,6 +216,47 @@ export default async function GoiCuaToiPage() {
                   </div>
 
                   <NutHuyYeuCau yeuCauId={yc.id} />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Yêu cầu nâng cấp đã hủy / bị từ chối */}
+      {yeuCauDaHuy.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Yêu cầu nâng cấp đã hủy</CardTitle>
+            <CardDescription>
+              Các yêu cầu không hoàn tất thanh toán hoặc không được duyệt sẽ nằm ở đây, không còn ở trạng thái chờ duyệt.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {yeuCauDaHuy.map((yc) => (
+                <div
+                  key={yc.id}
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border gap-2"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-sm">{yc.ma_yeu_cau}</span>
+                      <Badge variant="outline" className="text-destructive text-xs">
+                        {yc.trang_thai === "tu_choi" ? "Bị từ chối" : "Đã hủy"}
+                      </Badge>
+                    </div>
+                    <p className="text-sm font-medium">
+                      Gói: {yc.goi?.ten || "Gói Pro"}
+                      {yc.thanh_toan && ` • ${formatGiaVND(yc.thanh_toan.so_tien)} • ${yc.thanh_toan.ma_giao_dich}`}
+                    </p>
+                    {yc.ly_do_tu_choi && (
+                      <p className="text-xs text-muted-foreground">Lý do: {yc.ly_do_tu_choi}</p>
+                    )}
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(yc.created_at).toLocaleString("vi-VN")}
+                  </span>
                 </div>
               ))}
             </div>

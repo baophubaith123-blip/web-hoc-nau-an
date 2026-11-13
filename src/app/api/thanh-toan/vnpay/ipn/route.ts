@@ -1,6 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { xacMinhChuKyVNPay } from "@/lib/thanh-toan/vnpay";
 import { taoSupabaseAdmin } from "@/lib/supabase/admin";
+import {
+  huyYeuCauTheoGiaoDich,
+  LY_DO_THANH_TOAN_THAT_BAI,
+} from "@/lib/thanh-toan/yeu-cau";
 
 export async function GET(request: NextRequest) {
   try {
@@ -50,7 +54,7 @@ export async function GET(request: NextRequest) {
       if (gd.loai_thanh_toan === "goi_premium") {
         await supabase.from("thong_bao").insert({
           nguoi_dung_id: gd.nguoi_dung_id,
-          tieu_de: "Thanh toán gói Pro thành công (IPN)",
+          tieu_de: "Thanh toán gói Pro thành công",
           noi_dung: `Giao dịch ${ketQua.maGiaoDich} đã được xác nhận thanh toán. Yêu cầu của bạn đang chờ phê duyệt.`,
           loai: "thanh_toan",
           lien_ket: "/goi-cua-toi",
@@ -83,7 +87,7 @@ export async function GET(request: NextRequest) {
 
         await supabase.from("thong_bao").insert({
           nguoi_dung_id: gd.nguoi_dung_id,
-          tieu_de: "Thanh toán khóa học thành công (IPN)",
+          tieu_de: "Thanh toán khóa học thành công",
           noi_dung: `Giao dịch ${ketQua.maGiaoDich} đã được xác nhận. Chúc bạn học tốt!`,
           loai: "thanh_toan",
           lien_ket: "/khoa-hoc-cua-toi",
@@ -98,6 +102,16 @@ export async function GET(request: NextRequest) {
           chi_tiet: params,
         })
         .eq("id", gd.id);
+
+      // Giao dich goi Pro that bai/huy -> yeu cau nang cap di kem tu huy,
+      // khong de treo "ma" trong hang cho duyet cua admin (L-01).
+      if (gd.loai_thanh_toan === "goi_premium") {
+        await huyYeuCauTheoGiaoDich(
+          supabase,
+          gd.id,
+          `${LY_DO_THANH_TOAN_THAT_BAI} (mã phản hồi ${ketQua.maPhanHoi})`
+        );
+      }
     }
 
     return NextResponse.json({ RspCode: "00", Message: "Confirm Success" });

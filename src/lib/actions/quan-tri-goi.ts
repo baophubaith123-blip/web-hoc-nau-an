@@ -16,6 +16,8 @@ import { idUuid } from "@/lib/validations/chung";
 import { chuanHoaLoi, thanhCong, thatBai, type KetQua } from "@/lib/utils/phan-hoi-loi";
 import { tinhNgayHetHan } from "@/lib/utils/goi";
 import { guiEmailChucMungPro } from "@/lib/email/gui-email";
+import { donYeuCauHetHan } from "@/lib/thanh-toan/yeu-cau";
+import { taoSupabaseAdmin } from "@/lib/supabase/admin";
 import type { Bang } from "@/types";
 
 // 1. Lấy tất cả các gói dành cho admin
@@ -172,6 +174,9 @@ export async function layDanhSachYeuCauNangCapAction({
     const p = await canPhien(["admin"]);
     if (!p.ok) return p.loi;
 
+    // Don yeu cau "ma" (giao dich that bai / treo qua 30 phut) truoc khi liet ke
+    await donYeuCauHetHan(taoSupabaseAdmin());
+
     const offset = (trang - 1) * gioiHan;
     let query = p.supabase
       .from("yeu_cau_nang_cap")
@@ -215,6 +220,21 @@ export async function duyetYeuCauNangCapAction(dauVao: unknown): Promise<KetQua>
     if (ycErr || !yc) return thatBai("Không tìm thấy yêu cầu nâng cấp");
     if (yc.trang_thai !== "cho_duyet") {
       return thatBai("Yêu cầu này đã được xử lý trước đó.");
+    }
+
+    // KHOA DUYET O TANG SERVER (L-02): chi duyet khi giao dich da thanh toan
+    // thanh cong. Chan ca truong hop goi thang API, khong chi khoa o giao dien.
+    if (yc.thanh_toan_id) {
+      const { data: gdDuyet } = await p.supabase
+        .from("thanh_toan")
+        .select("ma_giao_dich, trang_thai")
+        .eq("id", yc.thanh_toan_id)
+        .maybeSingle();
+      if (!gdDuyet || gdDuyet.trang_thai !== "thanh_cong") {
+        return thatBai(
+          `Không thể duyệt: giao dịch ${gdDuyet?.ma_giao_dich ?? ""} chưa thanh toán thành công (trạng thái hiện tại: ${gdDuyet?.trang_thai ?? "không tìm thấy"}).`
+        );
+      }
     }
 
     const goi = yc.goi;

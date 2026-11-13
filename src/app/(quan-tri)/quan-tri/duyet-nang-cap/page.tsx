@@ -5,6 +5,8 @@ import { ShieldCheck, Clock, CheckCircle2, XCircle, Filter } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card";
 import { BangDuyetNangCap } from "@/components/quan-tri/BangDuyetNangCap";
 import { Button } from "@/components/ui/button";
+import { taoSupabaseAdmin } from "@/lib/supabase/admin";
+import { donYeuCauHetHan } from "@/lib/thanh-toan/yeu-cau";
 
 export const metadata: Metadata = {
   title: "Phê duyệt nâng cấp Pro | Quản trị",
@@ -18,6 +20,10 @@ export default async function DuyetNangCapPage({ searchParams }: DuyetNangCapPag
   await yeuCauVaiTro(["admin"]);
   const params = await searchParams;
   const trangThaiLoc = params?.trang_thai || "cho_duyet";
+
+  // Don yeu cau "ma" truoc khi dem/hien thi: giao dich that bai hoac treo
+  // qua 30 phut thi yeu cau tu chuyen Da huy, khong con o hang cho (L-01).
+  await donYeuCauHetHan(taoSupabaseAdmin());
 
   const supabase = await taoSupabaseServer();
 
@@ -122,6 +128,16 @@ export default async function DuyetNangCapPage({ searchParams }: DuyetNangCapPag
 
       {/* Tabs lọc */}
       <div className="flex flex-wrap items-center gap-2 border-b pb-3">
+        <Button
+          variant={trangThaiLoc === "da_huy" ? "default" : "outline"}
+          size="sm"
+          asChild
+          className="h-8 text-xs font-semibold"
+        >
+          <Link href="/quan-tri/duyet-nang-cap?trang_thai=da_huy">
+            Đã hủy
+          </Link>
+        </Button>
         <Button
           variant={trangThaiLoc === "cho_duyet" ? "default" : "outline"}
           size="sm"

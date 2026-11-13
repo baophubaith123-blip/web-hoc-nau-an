@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     // 2. THANH TOÁN KHÓA HỌC (NẾU CÓ)
     const { data: kh, error: errKh } = await supabase
       .from("khoa_hoc")
-      .select("id, tieu_de, trang_thai")
+      .select("id, tieu_de, trang_thai, gia, mien_phi")
       .eq("id", khoaHocId)
       .single();
 
@@ -93,7 +93,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ loi: "Khóa học không tồn tại hoặc chưa xuất bản" }, { status: 404 });
     }
 
-    const giaKhoaHoc = 299000; // Giá mặc định nếu mua riêng
+    // Gia thanh toan lay DUNG tu DB (khoa_hoc.gia) — nguon duy nhat, khong
+    // hard-code lech voi gia hien thi tren trang khoa hoc (truoc day co dinh
+    // 299000 trong khi trang hien 499000).
+    const giaKhoaHoc = kh.gia;
+    if (!giaKhoaHoc || giaKhoaHoc <= 0) {
+      return NextResponse.json(
+        { loi: "Khóa học này là khóa miễn phí hoặc chưa có giá bán riêng, không cần thanh toán" },
+        { status: 400 }
+      );
+    }
 
     const { error: errThanhToan } = await supabaseAdmin.from("thanh_toan").insert({
       ma_giao_dich: maGiaoDich,
@@ -104,7 +113,7 @@ export async function POST(request: NextRequest) {
       so_tien: giaKhoaHoc,
       phuong_thuc: "vnpay",
       trang_thai: "cho_xu_ly",
-      chi_tiet: { tieu_de_khoa_hoc: kh.tieu_de },
+      chi_tiet: { tieu_de_khoa_hoc: kh.tieu_de, gia_khoa_hoc: giaKhoaHoc },
     });
 
     if (errThanhToan) {

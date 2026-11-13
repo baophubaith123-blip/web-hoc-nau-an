@@ -63,6 +63,24 @@ interface BangDuyetNangCapProps {
   danhSach: YeuCauItem[];
 }
 
+// Dinh dang ngay gio CO DINH mui gio Asia/Ho_Chi_Minh o ca server lan client.
+// Truoc day dung toLocaleString mac dinh: server (UTC) va trinh duyet (GMT+7)
+// tra chuoi khac nhau -> React hydration mismatch #418 tren trang nay.
+const boDinhDangNgayGio = new Intl.DateTimeFormat("vi-VN", {
+  timeZone: "Asia/Ho_Chi_Minh",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+
+function dinhDangNgayGio(iso: string): string {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? iso : boDinhDangNgayGio.format(d);
+}
+
 export function BangDuyetNangCap({ danhSach }: BangDuyetNangCapProps) {
   const router = useRouter();
 
@@ -234,25 +252,54 @@ export function BangDuyetNangCap({ danhSach }: BangDuyetNangCapProps) {
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {item.thanh_toan?.phuong_thuc?.toUpperCase() || "VNPAY"}
+                      {item.thanh_toan?.ma_giao_dich && (
+                        <span className="font-mono"> · {item.thanh_toan.ma_giao_dich}</span>
+                      )}
+                    </div>
+                    <div className="mt-1">
+                      {!item.thanh_toan ? (
+                        <Badge variant="outline" className="bg-muted text-muted-foreground gap-1 font-semibold">
+                          Không có giao dịch
+                        </Badge>
+                      ) : item.thanh_toan.trang_thai === "thanh_cong" ? (
+                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-300 gap-1 font-semibold">
+                          <Check className="w-3 h-3" />
+                          Đã thanh toán
+                        </Badge>
+                      ) : item.thanh_toan.trang_thai === "that_bai" ? (
+                        <Badge variant="outline" className="bg-rose-500/10 text-rose-600 border-rose-300 gap-1 font-semibold">
+                          <X className="w-3 h-3" />
+                          Thanh toán thất bại
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-300 gap-1 font-semibold">
+                          <Clock className="w-3 h-3" />
+                          Chưa thanh toán
+                        </Badge>
+                      )}
                     </div>
                   </TableCell>
 
                   <TableCell className="text-xs text-muted-foreground">
-                    {new Date(item.created_at).toLocaleString("vi-VN", {
-                      dateStyle: "short",
-                      timeStyle: "short",
-                    })}
+                    {dinhDangNgayGio(item.created_at)}
                   </TableCell>
 
                   <TableCell>{layBadgeTrangThai(item.trang_thai)}</TableCell>
 
                   <TableCell className="text-right">
                     {item.trang_thai === "cho_duyet" ? (
-                      <div className="flex items-center justify-end gap-1.5">
+                      <div className="flex flex-col items-end gap-1">
+                        <div className="flex items-center justify-end gap-1.5">
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-8 border-emerald-500/50 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 font-semibold gap-1"
+                          disabled={item.thanh_toan?.trang_thai !== "thanh_cong"}
+                          title={
+                            item.thanh_toan?.trang_thai === "thanh_cong"
+                              ? "Duyệt yêu cầu"
+                              : "Chỉ duyệt được khi giao dịch đã thanh toán thành công"
+                          }
+                          className="h-8 border-emerald-500/50 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 font-semibold gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                           onClick={() => setYeuCauDangDuyet(item)}
                         >
                           <Check className="w-3.5 h-3.5" />
@@ -267,6 +314,12 @@ export function BangDuyetNangCap({ danhSach }: BangDuyetNangCapProps) {
                           <X className="w-3.5 h-3.5" />
                           <span>Từ chối</span>
                         </Button>
+                        </div>
+                        {item.thanh_toan?.trang_thai !== "thanh_cong" && (
+                          <span className="text-[11px] text-amber-600">
+                            Chưa thanh toán — không thể duyệt
+                          </span>
+                        )}
                       </div>
                     ) : (
                       <span className="text-xs text-muted-foreground italic">

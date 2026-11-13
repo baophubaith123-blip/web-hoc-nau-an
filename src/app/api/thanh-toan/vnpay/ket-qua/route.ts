@@ -1,6 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { xacMinhChuKyVNPay } from "@/lib/thanh-toan/vnpay";
 import { taoSupabaseAdmin } from "@/lib/supabase/admin";
+import {
+  huyYeuCauTheoGiaoDich,
+  LY_DO_THANH_TOAN_THAT_BAI,
+} from "@/lib/thanh-toan/yeu-cau";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -40,17 +44,10 @@ export async function GET(request: NextRequest) {
       })
       .eq("id", gd.id);
 
-    // Xử lý theo loại thanh toán
+    // Xử lý theo loại thanh toán.
+    // LUU Y (A3): thong bao thanh cong chi tao DUY NHAT o IPN — route ket qua
+    // nay khong tao thong bao nua de tranh trung 2 thong bao/giao dich (L-03).
     if (gd.loai_thanh_toan === "goi_premium") {
-      // Cập nhật thông báo cho học viên
-      await supabase.from("thong_bao").insert({
-        nguoi_dung_id: gd.nguoi_dung_id,
-        tieu_de: "Thanh toán gói Pro thành công",
-        noi_dung: `Giao dịch ${ketQua.maGiaoDich} đã được thanh toán. Yêu cầu nâng cấp của bạn đang được ban quản trị xét duyệt nhanh chóng!`,
-        loai: "thanh_toan",
-        lien_ket: "/goi-cua-toi",
-      });
-
       return NextResponse.redirect(
         `${origin}/goi-cua-toi?thanh_toan=thanh_cong&ma=${ketQua.maGiaoDich}`
       );
@@ -83,13 +80,7 @@ export async function GET(request: NextRequest) {
         });
       }
 
-      await supabase.from("thong_bao").insert({
-        nguoi_dung_id: gd.nguoi_dung_id,
-        tieu_de: "Thanh toán khóa học thành công",
-        noi_dung: `Giao dịch ${ketQua.maGiaoDich} đã hoàn tất. Bạn có thể bắt đầu học ngay bây giờ!`,
-        loai: "thanh_toan",
-        lien_ket: "/khoa-hoc-cua-toi",
-      });
+      // Thong bao khoa hoc cung chi tao o IPN (A3) — khong tao o day.
     }
 
     return NextResponse.redirect(
@@ -105,6 +96,15 @@ export async function GET(request: NextRequest) {
         chi_tiet: params,
       })
       .eq("id", gd.id);
+
+    // Huy luon yeu cau nang cap di kem (phong khi IPN chua kip xu ly) — L-01.
+    if (gd.loai_thanh_toan === "goi_premium") {
+      await huyYeuCauTheoGiaoDich(
+        supabase,
+        gd.id,
+        `${LY_DO_THANH_TOAN_THAT_BAI} (mã phản hồi ${ketQua.maPhanHoi})`
+      );
+    }
 
     const redirectPath = gd.loai_thanh_toan === "goi_premium" ? "/goi-cua-toi" : "/khoa-hoc-cua-toi";
     return NextResponse.redirect(
