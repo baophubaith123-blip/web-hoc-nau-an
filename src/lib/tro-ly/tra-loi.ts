@@ -145,9 +145,11 @@ const TU_DUNG = new Set([
   "cua", "trong", "nay", "do", "cac", "nhung", "mot", "voi", "ve", "the", "lam",
   "bang", "hay", "biet", "tim", "xem", "hoc", "nau", "an", "khoa", "bai", "dau",
   "bep", "muon", "can", "muon", "ra", "sao", "ne", "nhe", "oi", "ah", "ma",
-  // "gia" (giá/gia vị đều mơ hồ) và "bao" (bao nhiêu = từ hỏi) không mang
-  // nghĩa nội dung khi đứng một mình (vòng rèn luyện 1).
-  "gia", "bao",
+  // "bao" (bao nhiêu = từ hỏi) không mang nghĩa nội dung khi đứng một mình
+  // (vòng rèn luyện 1). Lưu ý: "gia" KHÔNG được đưa vào đây — tuy mơ hồ ở
+  // tầng tìm kiếm toàn văn, nó là từ nội dung chính của chủ đề "gia vị"
+  // ở intent bài viết (vòng rèn luyện 2).
+  "bao",
 ]);
 
 function timKiemToanVan(duLieu: DuLieuTroLy, chiMuc: ChiMucTroLy, khoaCau: string): TheHienThi[] {
@@ -157,32 +159,38 @@ function timKiemToanVan(duLieu: DuLieuTroLy, chiMuc: ChiMucTroLy, khoaCau: strin
   // Đếm theo BIÊN TỪ (vòng rèn luyện 1): trước đây đếm chuỗi con nên từ
   // ngắn khớp lọt vào giữa từ khác ("hom" trong "thom"...) khiến câu
   // ngoài phạm vi cũng "tìm thấy" kết quả. Nay chỉ tính khi thuật ngữ
-  // đứng độc lập thành một từ, và một mục chỉ được coi là LIÊN QUAN khi:
-  // có >= 2 thuật ngữ KHÁC NHAU cùng khớp, tổng điểm >= 6, và ít nhất
-  // 1 thuật ngữ khớp ngay trong TIÊU ĐỀ của mục (trước đây chỉ cần 1 từ
-  // phổ thông xuất hiện trong nội dung là đã trả thẻ — vòng 1 corpus:
-  // 12/12 câu ngoài phạm vi bị trả sai sang mục liên quan).
-  const demDiem = (tieuDe: string, noiDung: string): { diem: number; soThuatNguKhop: number; khopTieuDe: boolean } => {
+  // đứng độc lập thành một từ, và một mục chỉ được coi là LIÊN QUAN khi
+  // câu hỏi khớp được ÍT NHẤT MỘT NỬA số từ nội dung của TIÊU ĐỀ mục đó
+  // (và >= 2 thuật ngữ tiêu đề khác nhau, tổng điểm >= 6). Lý do (vòng
+  // rèn luyện 2): các từ phổ thông như "viet", "da", "tuan", "cung"
+  // xuất hiện trong hầu hết văn bản dài, nên chỉ cần 1-2 từ khớp tiêu
+  // đề là câu ngoài phạm vi (thơ, bóng đá, vé máy bay...) vẫn bị gán
+  // sang mục ẩm thực; khớp >= 1/2 tiêu đề mới đúng nghĩa "mục này nói
+  // về đúng thứ người dùng nhắc tới".
+  const demDiem = (
+    tieuDe: string,
+    noiDung: string
+  ): { diem: number; soThuatNguKhopTieuDe: number; soTuTieuDe: number } => {
     const td = " " + khoaChuanHoa(tieuDe) + " ";
     const nd = " " + khoaChuanHoa(noiDung) + " ";
+    const tuTieuDe = [...new Set(tachTu(khoaChuanHoa(tieuDe)).filter((t) => t.length >= 2 && !TU_DUNG.has(t)))];
     let diem = 0;
-    let soThuatNguKhop = 0;
-    let khopTieuDe = false;
+    let soThuatNguKhopTieuDe = 0;
     for (const tn of thuatNgu) {
       const trongTieuDe = td.includes(" " + tn + " ");
       const soLan = nd.split(" " + tn + " ").length - 1;
       if (trongTieuDe) {
         diem += 3;
-        khopTieuDe = true;
+        soThuatNguKhopTieuDe += 1;
       }
       diem += Math.min(soLan, 5);
-      if (trongTieuDe || soLan > 0) soThuatNguKhop += 1;
     }
-    return { diem, soThuatNguKhop, khopTieuDe };
+    return { diem, soThuatNguKhopTieuDe, soTuTieuDe: tuTieuDe.length };
   };
   const lienQuan = (tieuDe: string, noiDung: string): number => {
     const kq = demDiem(tieuDe, noiDung);
-    return kq.soThuatNguKhop >= 2 && kq.khopTieuDe && kq.diem >= 6 ? kq.diem : 0;
+    const baoPhu = kq.soTuTieuDe === 0 ? 0 : kq.soThuatNguKhopTieuDe / kq.soTuTieuDe;
+    return kq.soThuatNguKhopTieuDe >= 2 && baoPhu >= 0.5 && kq.diem >= 6 ? kq.diem : 0;
   };
 
   const ungVien: { the: TheHienThi; diem: number }[] = [];

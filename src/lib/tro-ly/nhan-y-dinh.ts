@@ -109,7 +109,12 @@ function timNguyenLieu(chiMuc: ChiMucTroLy, khoaCau: string): { khoa: string; te
   const nguonDaKhop: string[] = [];
 
   // 1) Khớp trực tiếp với danh mục nguyên liệu trong dữ liệu.
+  //    Ngoại lệ: khóa trơn "nuoc" (từ nguyên liệu "Nước (làm caramel)")
+  //    không phải nguyên liệu tra món được — nó khớp mọi câu có chữ
+  //    "nước" (VD "tổng thống của nước Mỹ" — vòng rèn luyện 2). Các dạng
+  //    đầy đủ như "nuoc loc", "nuoc mam" vẫn khớp bình thường.
   for (const muc of chiMuc.danhMucNguyenLieu) {
+    if (muc.khoa === "nuoc") continue;
     if (chuaCum(khoaCau, muc.khoa)) {
       timDuoc.set(muc.khoa, muc.ten);
       nguonDaKhop.push(muc.khoa);
