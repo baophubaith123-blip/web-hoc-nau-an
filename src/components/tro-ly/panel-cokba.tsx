@@ -203,6 +203,7 @@ export function PanelCokba({
   const demRef = useRef(0);
   const cuoiRef = useRef<HTMLDivElement | null>(null);
   const cauHoiChoGiaViRef = useRef<string>("");
+  const napTriNhoRef = useRef<Promise<void> | null>(null);
 
   const idMoi = () => ++demRef.current;
 
@@ -218,7 +219,7 @@ export function PanelCokba({
       // localStorage không khả dụng -> dùng slot trống.
     }
     if (nguoiDungId) {
-      void docTriNhoCokba()
+      napTriNhoRef.current = docTriNhoCokba()
         .then((slotServer) => {
           if (slotServer) {
             slotRef.current = slotServer;
@@ -250,11 +251,17 @@ export function PanelCokba({
     if (nguoiDungId) void ghiTriNhoCokba(slotMoi).catch(() => undefined);
   };
 
-  const guiLuat = async (vanBanHienThi: string, cauHoiGui: string, slotDung: SlotTriNho) => {
+  const guiLuat = async (vanBanHienThi: string, cauHoiGui: string) => {
     setTinNhan((ds) => [...ds, { id: idMoi(), vai: "nguoi", vanBan: vanBanHienThi }]);
     setDangGui(true);
     try {
-      const kq = await hoiCokba({ cauHoi: cauHoiGui, slot: slotDung });
+      // Chờ nạp xong trí nhớ server (khi đã đăng nhập) rồi mới gửi kèm
+      // slot mới nhất: trước đây lượt hỏi gửi ngay khi panel vừa mở có
+      // thể mang slot trống (localStorage trống) và server action ghi đè
+      // slot trống đó lên trí nhớ đã lưu, làm mất ngữ cảnh (phát hiện ở
+      // kiểm chứng live đợt 5B).
+      if (napTriNhoRef.current) await napTriNhoRef.current;
+      const kq = await hoiCokba({ cauHoi: cauHoiGui, slot: slotRef.current });
       if (kq.ok) {
         luuSlot(kq.traLoi.slotDaCapNhat);
         if (kq.traLoi.canHoiGiaVi) {
@@ -281,7 +288,7 @@ export function PanelCokba({
     const cau = oNhap.trim();
     if (!cau || dangGui) return;
     setONhap("");
-    void guiLuat(cau, cau, slotRef.current);
+    void guiLuat(cau, cau);
   };
 
   const xacNhanGiaVi = () => {
@@ -293,7 +300,7 @@ export function PanelCokba({
     setGiaViChon(null);
     // Gửi lại CÂU GỐC kèm slot đã có giaViDaXacNhan: bộ não bỏ qua bước
     // hỏi gia vị và chấm % khớp ngay (intent "có gì nấu nấy").
-    void guiLuat(t.du_roi_goi_y, cauHoiChoGiaViRef.current, slotMoi);
+    void guiLuat(t.du_roi_goi_y, cauHoiChoGiaViRef.current);
   };
 
   const tinCuoiLaCokbaHoiGiaVi =
@@ -347,7 +354,7 @@ export function PanelCokba({
                     key={cau}
                     type="button"
                     disabled={dangGui}
-                    onClick={() => void guiLuat(cau, cau, slotRef.current)}
+                    onClick={() => void guiLuat(cau, cau)}
                     className="rounded-full border bg-background px-3 py-1.5 text-left text-xs font-medium shadow-xs transition hover:bg-muted disabled:opacity-50"
                   >
                     {cau}
@@ -394,7 +401,7 @@ export function PanelCokba({
                         key={gy}
                         type="button"
                         disabled={dangGui}
-                        onClick={() => void guiLuat(gy, gy, slotRef.current)}
+                        onClick={() => void guiLuat(gy, gy)}
                         className="rounded-full border bg-background px-3 py-1.5 text-xs font-medium shadow-xs transition hover:bg-muted disabled:opacity-50"
                       >
                         {gy}
