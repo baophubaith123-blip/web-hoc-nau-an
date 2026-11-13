@@ -769,3 +769,12 @@ Sau khi Antigravity viết xong file `003_goi_premium.sql` và `seed.sql`:
 - Chi tiết đầu bếp `/dau-bep/[id]` là trang **công khai** (đã gỡ khỏi `CHI_TIET_CAN_DANG_NHAP` trong `src/middleware.ts`) — khác với chi tiết công thức/khóa học/bài viết vẫn cần đăng nhập.
 - Tra cứu chứng chỉ: route công khai `/tra-cuu-chung-chi` (form GET `?ma=`), tra `chung_chi` bằng admin client khớp mã chính xác; footer có link "Tra cứu chứng chỉ" trong `LIEN_KET_PHU` (`src/components/layout/lien-ket.ts`). PDF chứng chỉ vẫn qua `/api/chung-chi/[ma]/pdf`.
 - Đăng nhập nhanh demo: component `src/components/auth/dang-nhap-nhanh-demo.tsx` + server action `dangNhapNhanhDemo` trong `src/lib/actions/auth.ts` — 4 nút dùng tài khoản mẫu công khai (README): admin → `/quan-tri`, user1 (Pro) → `/bang-dieu-khien`, chef → `/bep`, support → `/nhan-vien` (khu hỗ trợ là `/nhan-vien`, còn `/ho-tro` là trang ticket phía học viên). Đây là tính năng demo phục vụ bảo vệ đồ án — xóa cả hai khi triển khai thật.
+
+
+---
+
+## 📌 CẬP NHẬT TỐI 13/11/2026 — REALTIME CHO TRANG STAFF
+
+- Component realtime dùng chung: `src/components/realtime/tu-cap-nhat-danh-sach.tsx` — props `cacBang`, subscribe `postgres_changes` INSERT/UPDATE, debounce 1000ms → `router.refresh()`, cleanup bằng `removeChannel`. Đã gắn ở `/quan-tri/duyet-nang-cap` (bảng `yeu_cau_nang_cap` + `thanh_toan`) và `/nhan-vien/ticket` (bảng `ticket_ho_tro`). KHÔNG gắn ở `/ho-tro` phía học viên (tránh refresh cắt ngang server action tạo ticket của chính người xem).
+- Publication `supabase_realtime`: `ticket_ho_tro` đã có từ migration 002; `yeu_cau_nang_cap` + `thanh_toan` thêm bằng **migration 007** (idempotent) — migration này phải do chủ đồ án chạy tay trong Supabase SQL Editor; tới thời điểm ghi chú này CHƯA chạy nên realtime trang duyệt Pro chưa có event (code + spec đã sẵn, spec `tests/realtime.spec.ts` sẽ đạt ngay sau khi chạy 007). Không cần thêm RLS policy nào: probe đã chứng minh phiên admin/support nhận event của mọi dòng thuộc quyền xem.
+- DB có sẵn rate limit bằng trigger `public.gioi_han_tan_suat` (`trg_gioi_han`, migration 002): ticket 5 lần/60 phút/người dùng, tin nhắn ticket 30/phút, bình luận 10/phút — vượt giới hạn trả lỗi P0001 với message tiếng Việt qua `chuanHoaLoi`. Khi test tự động tạo nhiều ticket bằng một tài khoản sẽ bị chặn; dọn dữ liệu TEST_ là hết.
