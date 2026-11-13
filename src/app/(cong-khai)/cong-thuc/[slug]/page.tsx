@@ -36,51 +36,56 @@ export default async function ChiTietCongThuc({ params }: Props) {
     notFound();
   }
 
-  // Tăng lượt xem ngầm
-  await supabase.rpc("tang_luot_xem_cong_thuc", { p_id: ct.id });
+  // Đợt 6 — tối ưu tốc độ: sau khi có ct, bốn nhóm truy vấn dưới đây độc
+  // lập nhau (tăng lượt xem · đã lưu/đánh giá của tôi · toàn bộ đánh giá
+  // · bình luận) → chạy song song một lượt thay vì 3 vòng chờ tuần tự
+  // như trước (trang này có TTFB đo nền cao nhất, 243ms).
+  const [luuVaDanhGiaCuaToi, tatCaDanhGiaRes, binhLuanRes] = await Promise.all([
+    userId
+      ? Promise.all([
+          supabase
+            .from("cong_thuc_da_luu")
+            .select("id")
+            .eq("nguoi_dung_id", userId)
+            .eq("cong_thuc_id", ct.id)
+            .maybeSingle(),
+          supabase
+            .from("danh_gia")
+            .select("diem, nhan_xet")
+            .eq("nguoi_dung_id", userId)
+            .eq("cong_thuc_id", ct.id)
+            .maybeSingle(),
+          // Tăng lượt xem ngầm chạy kèm cùng lượt song song
+          supabase.rpc("tang_luot_xem_cong_thuc", { p_id: ct.id }),
+        ])
+      : supabase.rpc("tang_luot_xem_cong_thuc", { p_id: ct.id }),
+    // 3. Lấy đánh giá trung bình
+    supabase.from("danh_gia").select("diem").eq("cong_thuc_id", ct.id),
+    // 4. Lấy bình luận kèm phân cấp con
+    supabase
+      .from("binh_luan")
+      .select("*, nguoi_dung:profiles(id, ho_ten, avatar_url)")
+      .eq("cong_thuc_id", ct.id)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false }),
+  ]);
 
-  // 2. Kiểm tra đã lưu chưa
   let daLuu = false;
   let danhGiaCuaToi = null;
-
-  if (userId) {
-    const [luuRes, dgRes] = await Promise.all([
-      supabase
-        .from("cong_thuc_da_luu")
-        .select("id")
-        .eq("nguoi_dung_id", userId)
-        .eq("cong_thuc_id", ct.id)
-        .maybeSingle(),
-      supabase
-        .from("danh_gia")
-        .select("diem, nhan_xet")
-        .eq("nguoi_dung_id", userId)
-        .eq("cong_thuc_id", ct.id)
-        .maybeSingle(),
-    ]);
+  if (userId && Array.isArray(luuVaDanhGiaCuaToi)) {
+    const [luuRes, dgRes] = luuVaDanhGiaCuaToi;
     daLuu = !!luuRes.data;
     danhGiaCuaToi = dgRes.data;
   }
 
-  // 3. Lấy đánh giá trung bình
-  const { data: tatCaDanhGia } = await supabase
-    .from("danh_gia")
-    .select("diem")
-    .eq("cong_thuc_id", ct.id);
+  const tatCaDanhGia = tatCaDanhGiaRes.data;
+  const binhLuanRaw = binhLuanRes.data;
 
   const soDanhGia = tatCaDanhGia?.length || 0;
   const diemTrungBinh =
     soDanhGia > 0
       ? Math.round((tatCaDanhGia!.reduce((a, b) => a + b.diem, 0) / soDanhGia) * 10) / 10
       : 0;
-
-  // 4. Lấy bình luận kèm phân cấp con
-  const { data: binhLuanRaw } = await supabase
-    .from("binh_luan")
-    .select("*, nguoi_dung:profiles(id, ho_ten, avatar_url)")
-    .eq("cong_thuc_id", ct.id)
-    .is("deleted_at", null)
-    .order("created_at", { ascending: false });
 
   // Cấu trúc phân cấp cha - con
   const binhLuanList: BinhLuanItem[] = [];

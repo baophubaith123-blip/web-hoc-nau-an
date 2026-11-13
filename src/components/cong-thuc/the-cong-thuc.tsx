@@ -6,7 +6,23 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BadgePro } from "@/components/goi/BadgePro";
 import type { Bang } from "@/types";
 
-type CongThucItem = Bang<"cong_thuc"> & {
+// Chỉ Pick đúng các trường thẻ hiển thị (Đợt 6): các trang danh sách
+// select đúng các trường này thay vì select * kéo cả nguyen_lieu/cac_buoc.
+type CongThucItem = Pick<
+  Bang<"cong_thuc">,
+  | "id"
+  | "slug"
+  | "tieu_de"
+  | "mo_ta"
+  | "anh_dai_dien"
+  | "thoi_gian_chuan_bi"
+  | "thoi_gian_nau"
+  | "do_kho"
+  | "calories"
+  | "luot_xem"
+  | "noi_bat"
+  | "tac_gia_la_pro"
+> & {
   tac_gia?: {
     ho_ten: string | null;
     avatar_url: string | null;

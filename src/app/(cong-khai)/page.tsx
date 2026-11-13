@@ -23,9 +23,13 @@ export default async function TrangChu() {
 
   // Truy vấn song song dữ liệu trang chủ
   const [congThucRes, khoaHocRes, dauBepRes, baiVietRes, demCongThucRes, demKhoaHocRes, thongKeKhoaHocRes] = await Promise.all([
+    // Đợt 6: chỉ select các trường thẻ/hero thật sự hiển thị, không kéo
+    // nguyen_lieu/cac_buoc và các cột dài vào payload trang chủ.
     supabase
       .from("cong_thuc")
-      .select("*, tac_gia:profiles(ho_ten, avatar_url)")
+      .select(
+        "id, slug, tieu_de, mo_ta, anh_dai_dien, thoi_gian_chuan_bi, thoi_gian_nau, do_kho, calories, luot_xem, noi_bat, tac_gia_la_pro, tac_gia:profiles(ho_ten, avatar_url)"
+      )
       .eq("trang_thai", "xuat_ban")
       .is("deleted_at", null)
       .order("noi_bat", { ascending: false })
@@ -33,7 +37,9 @@ export default async function TrangChu() {
       .limit(6),
     supabase
       .from("khoa_hoc")
-      .select("*, dau_bep:profiles(ho_ten, avatar_url)")
+      .select(
+        "id, slug, tieu_de, mo_ta, anh_dai_dien, cap_do, co_chung_chi, so_bai_hoc, tong_thoi_gian, mien_phi, gia, dau_bep:profiles(ho_ten, avatar_url)"
+      )
       .eq("trang_thai", "xuat_ban")
       .order("created_at", { ascending: false })
       .limit(3),

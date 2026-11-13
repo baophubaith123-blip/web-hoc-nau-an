@@ -24,9 +24,12 @@ export default async function DanhSachKhoaHoc({ searchParams }: Props) {
 
   const supabase = await taoSupabaseServer();
 
+  // Đợt 6: chỉ select các trường thẻ hiển thị thay vì select *.
   let query = supabase
     .from("khoa_hoc")
-    .select("*, dau_bep:profiles(ho_ten, avatar_url)")
+    .select(
+      "id, slug, tieu_de, mo_ta, anh_dai_dien, cap_do, co_chung_chi, so_bai_hoc, tong_thoi_gian, mien_phi, gia, dau_bep:profiles(ho_ten, avatar_url)"
+    )
     .eq("trang_thai", "xuat_ban")
     .order("created_at", { ascending: false });
 

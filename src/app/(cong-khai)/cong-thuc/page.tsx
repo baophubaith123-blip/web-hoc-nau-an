@@ -31,8 +31,10 @@ export default async function DanhSachCongThuc({ searchParams }: Props) {
 
   const supabase = await taoSupabaseServer();
 
-  // 1. Lấy danh mục cho bộ lọc
-  const { data: danhMucList } = await supabase
+  // Đợt 6 — tối ưu tốc độ: truy vấn danh mục và truy vấn công thức độc
+  // lập nhau → chạy song song bằng Promise.all thay vì chờ tuần tự.
+  // Đồng thời chỉ select các trường thẻ hiển thị (bỏ nguyen_lieu/cac_buoc).
+  const truyVanDanhMuc = supabase
     .from("danh_muc")
     .select("*")
     .eq("trang_thai", "hoat_dong")
@@ -41,7 +43,10 @@ export default async function DanhSachCongThuc({ searchParams }: Props) {
   // 2. Xây dựng truy vấn công thức
   let query = supabase
     .from("cong_thuc")
-    .select("*, tac_gia:profiles(ho_ten, avatar_url)", { count: "exact" })
+    .select(
+      "id, slug, tieu_de, mo_ta, anh_dai_dien, thoi_gian_chuan_bi, thoi_gian_nau, do_kho, calories, luot_xem, noi_bat, tac_gia_la_pro, tac_gia:profiles(ho_ten, avatar_url)",
+      { count: "exact" }
+    )
     .eq("trang_thai", "xuat_ban")
     .is("deleted_at", null);
 
@@ -67,7 +72,10 @@ export default async function DanhSachCongThuc({ searchParams }: Props) {
   const to = from + SO_LUONG_MOI_TRANG - 1;
   query = query.range(from, to);
 
-  const { data: danhSach, count } = await query;
+  const [{ data: danhMucList }, { data: danhSach, count }] = await Promise.all([
+    truyVanDanhMuc,
+    query,
+  ]);
 
   const tongSo = count || 0;
   const tongTrang = Math.ceil(tongSo / SO_LUONG_MOI_TRANG) || 1;

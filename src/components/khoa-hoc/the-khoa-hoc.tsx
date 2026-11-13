@@ -5,7 +5,21 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Bang } from "@/types";
 
-type KhoaHocItem = Bang<"khoa_hoc"> & {
+// Chỉ Pick đúng các trường thẻ hiển thị (Đợt 6) — xem the-cong-thuc.tsx.
+type KhoaHocItem = Pick<
+  Bang<"khoa_hoc">,
+  | "id"
+  | "slug"
+  | "tieu_de"
+  | "mo_ta"
+  | "anh_dai_dien"
+  | "cap_do"
+  | "co_chung_chi"
+  | "so_bai_hoc"
+  | "tong_thoi_gian"
+  | "mien_phi"
+  | "gia"
+> & {
   dau_bep?: {
     ho_ten: string | null;
     avatar_url: string | null;
