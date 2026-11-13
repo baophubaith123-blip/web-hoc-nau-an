@@ -15,7 +15,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ChuongThongBao } from "@/components/thong-bao/chuong-thong-bao";
 import { taoSupabaseClient } from "@/lib/supabase/client";
-import { thongTinKhuVaiTro, type MucMenu } from "@/lib/utils/vai-tro";
+import { mauNhanVaiTro, thongTinKhuVaiTro, type MucMenu } from "@/lib/utils/vai-tro";
 import { MAU_BADGE, TONG_VAI_TRO, nhanCua } from "@/lib/utils/hang-so";
 import { cn } from "@/lib/utils/cn";
 import { vi } from "@/lib/i18n/vi";
@@ -106,6 +106,7 @@ export function TopbarVaiTro({
 }) {
   const [moMenu, setMoMenu] = useState(false);
   const IconKhu = ICON_VAI_TRO[nguoiDung.vai_tro] ?? LayoutDashboard;
+  const mauNhan = mauNhanVaiTro(nguoiDung.vai_tro);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -122,14 +123,20 @@ export function TopbarVaiTro({
               <SheetTitle>{tieuDe}</SheetTitle>
             </SheetHeader>
             <div className="p-4">
-              <DanhSachMenu menu={menu} onChon={() => setMoMenu(false)} />
+              <DanhSachMenu menu={menu} onChon={() => setMoMenu(false)} mauDangChon={mauNhan?.mucDangChon} />
             </div>
           </SheetContent>
         </Sheet>
 
         <div className="flex items-center gap-2 font-bold">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-            <IconKhu className="h-5 w-5 text-primary" />
+          <span
+            data-mau-khu={nguoiDung.vai_tro}
+            className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-lg",
+              mauNhan?.chip ?? "bg-primary/10"
+            )}
+          >
+            <IconKhu className="h-5 w-5" />
           </span>
           <span>{tieuDe}</span>
           <Badge variant="secondary" className={cn("hidden text-[10px] sm:inline-flex", MAU_BADGE[TONG_VAI_TRO[nguoiDung.vai_tro]])}>

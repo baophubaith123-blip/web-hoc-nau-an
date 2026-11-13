@@ -15,10 +15,14 @@ async function dangNhap(page: Page, email: string) {
 }
 
 const CAC_VAI_TRO = [
-  { ten: "Admin", email: "admin@naungon.vn", nha: "/quan-tri", nhanVe: "Về trang quản trị", nhanMenu: "Trang quản trị", huyHieu: "Quản trị viên" },
-  { ten: "Đầu bếp", email: "chef@naungon.vn", nha: "/bep", nhanVe: "Về trang đầu bếp", nhanMenu: "Trang đầu bếp", huyHieu: "Đầu bếp" },
-  { ten: "Hỗ trợ", email: "support@naungon.vn", nha: "/nhan-vien", nhanVe: "Về trang hỗ trợ", nhanMenu: "Trang hỗ trợ", huyHieu: "Hỗ trợ" },
+  { ten: "Admin", email: "admin@naungon.vn", nha: "/quan-tri", nhanVe: "Về trang quản trị", nhanMenu: "Trang quản trị", huyHieu: "Quản trị viên", tieuDeKhu: "Quản trị hệ thống", mauKhu: "admin" },
+  { ten: "Đầu bếp", email: "chef@naungon.vn", nha: "/bep", nhanVe: "Về trang đầu bếp", nhanMenu: "Trang đầu bếp", huyHieu: "Đầu bếp", tieuDeKhu: "Bảng điều khiển đầu bếp", mauKhu: "chef" },
+  { ten: "Hỗ trợ", email: "support@naungon.vn", nha: "/nhan-vien", nhanVe: "Về trang hỗ trợ", nhanMenu: "Trang hỗ trợ", huyHieu: "Hỗ trợ", tieuDeKhu: "Hỗ trợ", mauKhu: "support" },
 ];
+
+// Liên kết thuộc giao diện người dùng/học viên — không được xuất hiện trong
+// sidebar và menu di động của 3 khu vực staff.
+const LIEN_KET_NGUOI_DUNG = ["/cong-thuc", "/khoa-hoc", "/bang-gia", "/bai-viet", "/bang-dieu-khien", "/goi-cua-toi"];
 
 for (const vt of CAC_VAI_TRO) {
   test(`Khung riêng ${vt.ten}: không còn header công khai, lạc ra ngoài quay về được`, async ({ page }) => {
@@ -32,6 +36,15 @@ for (const vt of CAC_VAI_TRO) {
     await expect(header.getByRole("link", { name: "Liên hệ" })).toHaveCount(0);
     // Topbar riêng hiện huy hiệu vai trò
     await expect(header.getByText(vt.huyHieu).first()).toBeVisible();
+    // Nhận diện khu vực: tiêu đề khu + chip màu nhấn riêng theo vai trò
+    await expect(header.getByText(vt.tieuDeKhu).first()).toBeVisible();
+    await expect(header.locator(`[data-mau-khu='${vt.mauKhu}']`)).toHaveCount(1);
+
+    // Sidebar desktop chỉ chứa chức năng của vai trò, không trộn liên kết học viên
+    const aside = page.locator("aside");
+    for (const href of LIEN_KET_NGUOI_DUNG) {
+      await expect(aside.locator(`a[href='${href}']`)).toHaveCount(0);
+    }
 
     // Lạc sang trang Hồ sơ (khu vực thành viên): sidebar có mục quay về ở đầu menu
     await page.goto("/ho-so");
@@ -47,3 +60,18 @@ for (const vt of CAC_VAI_TRO) {
     await expect(page).toHaveURL(new RegExp(vt.nha.replace(/\//g, "\\/") + "$"));
   });
 }
+
+test("Khung riêng Admin trên mobile: menu trượt chỉ có chức năng quản trị", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await dangNhap(page, "admin@naungon.vn");
+  await page.goto("/quan-tri");
+  const header = page.locator("header");
+  await expect(header.locator("a[href='/']")).toHaveCount(0);
+  // Mở menu di động của khu vực
+  await header.getByRole("button", { name: /mở menu|mo menu/i }).first().click();
+  const hopMenu = page.locator("[data-slot='sheet-content']");
+  await expect(hopMenu.getByRole("link", { name: "Duyệt nâng cấp Pro" })).toBeVisible();
+  for (const href of LIEN_KET_NGUOI_DUNG) {
+    await expect(hopMenu.locator(`a[href='${href}']`)).toHaveCount(0);
+  }
+});

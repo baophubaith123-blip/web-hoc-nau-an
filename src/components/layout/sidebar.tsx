@@ -21,7 +21,15 @@ const ICON: Record<string, LucideIcon> = {
   Send, Settings, Star, User, Users, Crown, ShieldCheck,
 };
 
-export function DanhSachMenu({ menu, onChon }: { menu: MucMenu[]; onChon?: () => void }) {
+export function DanhSachMenu({
+  menu,
+  onChon,
+  mauDangChon,
+}: {
+  menu: MucMenu[];
+  onChon?: () => void;
+  mauDangChon?: string;
+}) {
   const duongDan = usePathname();
   const [mucKhoa, setMucKhoa] = useState<MucMenu | null>(null);
   return (
@@ -55,7 +63,9 @@ export function DanhSachMenu({ menu, onChon }: { menu: MucMenu[]; onChon?: () =>
             aria-current={dangChon ? "page" : undefined}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 active:scale-[0.99]",
-              dangChon ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              dangChon
+                ? (mauDangChon ?? "bg-primary text-primary-foreground shadow-sm")
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
             <Icon className="h-4 w-4 shrink-0" />
@@ -132,17 +142,19 @@ export function Sidebar({
   menu,
   tieuDe,
   nguoiDung,
+  mauDangChon,
 }: {
   menu: MucMenu[];
   tieuDe: string;
   nguoiDung?: NguoiDungHeader;
+  mauDangChon?: string;
 }) {
   return (
     <aside className="hidden w-60 shrink-0 border-r md:block">
       <div className="sticky top-14 max-h-[calc(100vh-3.5rem)] space-y-3 overflow-y-auto p-4">
         {nguoiDung && <TheNguoiDungSidebar nguoiDung={nguoiDung} />}
         <p className="px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tieuDe}</p>
-        <DanhSachMenu menu={menu} />
+        <DanhSachMenu menu={menu} mauDangChon={mauDangChon} />
       </div>
     </aside>
   );

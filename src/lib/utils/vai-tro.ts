@@ -27,6 +27,30 @@ export function thongTinKhuVaiTro(vaiTro: VaiTro): { nhan: string; href: string 
 
 export type MucMenu = { nhan: string; href: string; icon: string; khoa?: boolean };
 
+// Mau nhan RIENG cho tung khu vuc staff — giup nhin la biet dang o khu nao,
+// khong khu nao giong khu nao va khong dung tim/violet:
+//  Admin = do, Dau bep = cam, Ho tro = xanh duong. Hoc vien giu mau mac dinh.
+export const MAU_NHAN_VAI_TRO: Record<
+  string,
+  { chip: string; mucDangChon: string }
+> = {
+  admin: {
+    chip: "bg-red-500/10 text-red-600 dark:text-red-400",
+    mucDangChon: "bg-red-600 text-white shadow-sm",
+  },
+  chef: {
+    chip: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
+    mucDangChon: "bg-orange-600 text-white shadow-sm",
+  },
+  support: {
+    chip: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+    mucDangChon: "bg-blue-600 text-white shadow-sm",
+  },
+};
+
+export const mauNhanVaiTro = (vaiTro: string | null | undefined) =>
+  vaiTro ? MAU_NHAN_VAI_TRO[vaiTro] : undefined;
+
 const m = vi.menu;
 
 // Menu sidebar theo khu vực (icon là tên icon lucide-react)

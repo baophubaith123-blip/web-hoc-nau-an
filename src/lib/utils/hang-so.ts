@@ -26,9 +26,9 @@ export const TONG_TRANG_THAI: Record<string, Tong> = {
   // công thức, khóa học, bài viết
   nhap: "xam", cho_duyet: "vang", xuat_ban: "xanh_la", luu_tru: "xam", tu_choi: "do",
   // ticket
-  moi: "xanh_duong", dang_xu_ly: "vang", cho_phan_hoi: "tim", da_giai_quyet: "xanh_la", dong: "xam",
+  moi: "xanh_duong", dang_xu_ly: "vang", cho_phan_hoi: "cam", da_giai_quyet: "xanh_la", dong: "xam",
   // thanh toán
-  cho_xu_ly: "vang", thanh_cong: "xanh_la", that_bai: "do", hoan_tien: "tim",
+  cho_xu_ly: "vang", thanh_cong: "xanh_la", that_bai: "do", hoan_tien: "xanh_duong",
   // người dùng, báo cáo
   hoat_dong: "xanh_la", khoa: "do", da_xu_ly: "xanh_la", bo_qua: "xam",
 };
@@ -38,5 +38,7 @@ export const TONG_UU_TIEN: Record<string, Tong> = {
 };
 
 export const TONG_VAI_TRO: Record<string, Tong> = {
-  user: "xam", chef: "cam", support: "xanh_duong", admin: "tim",
+  // Admin = do (quyen luc), Dau bep = cam (lua bep), Ho tro = xanh duong (tin cay).
+  // Khong dung tim/violet cho nhan dien vai tro.
+  user: "xam", chef: "cam", support: "xanh_duong", admin: "do",
 };
