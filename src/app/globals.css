@@ -115,6 +115,21 @@
   animation: gradient-pan 9s ease infinite;
 }
 
+/* Nhấp nháy tông ấm cho thẻ đồng hồ đã hết giờ (chế độ nấu rảnh tay) */
+@keyframes nhap-nhay-het-gio {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgb(234 88 12 / 0);
+    background-color: rgb(255 237 213);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgb(234 88 12 / 0.35);
+    background-color: rgb(254 215 170);
+  }
+}
+.dong-ho-het-gio {
+  animation: nhap-nhay-het-gio 0.9s ease-in-out infinite;
+}
+
 /* Hiện dần khi cuộn tới (kết hợp component HienDan) */
 .reveal {
   opacity: 0;
@@ -153,6 +168,7 @@
   .animate-float-delay,
   .animate-gradient,
   .animate-page-in,
+  .dong-ho-het-gio,
   .gradient-border::before {
     animation: none !important;
   }
