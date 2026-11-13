@@ -789,3 +789,9 @@ Sau khi Antigravity viết xong file `003_goi_premium.sql` và `seed.sql`:
 - Migration 008 (`supabase/migrations/008_cokba.sql`, đã chạy 14/11): `cau_hoi_chua_tra_loi` (ghi chỉ qua server action/admin client; admin đọc/đổi trạng thái ở `/quan-tri/nhat-ky-cokba`) + `tro_ly_tri_nho` (RLS theo chủ nhân). Cokba chỉ đọc nội dung `xuat_ban` và loại bài tiêu đề bắt đầu bằng `TEST_` khỏi chỉ mục; công thức "Mì Ý sốt bò bằm" đang `cho_duyet` nên Cokba biết 16/17 món.
 - Số liệu nghiệm thu: corpus 151 mục/168 lượt — vòng 3 đạt 167/168 (viết tay 100%, diễn đạt lại 100%); kiểm chứng live 9/9 (5 câu mẫu, nấu trọn, nhật ký thật, trí nhớ tài khoản, mobile). Hai bug đã vá từ live: intent đầu bếp với từ chuyên môn ngắn ("Âu"→"au", "Ý"→"y" khớp theo biên từ + cụm "mon au" trong `tra-loi.ts`) và đua nạp trí nhớ ở panel.
 
+
+## Cập nhật Đợt 6 — Tối ưu tốc độ (14/11/2026)
+
+- Panel Cokba ở layout công khai nay được tải lười: `nut-noi-cokba.tsx` dùng next/dynamic (ssr:false) và chỉ mount panel sau lần bấm mở đầu tiên (state daMoLanDau); sau đó giữ mounted ẩn bằng CSS như cũ để không mất lịch sử chat + trí nhớ phiên. Trang /tro-ly vẫn nạp panel trực tiếp.
+- Hero trang chủ (`hero-trang-chu.tsx`) chỉ tải ảnh của slide đã/sắp hiển thị (set daTai; slide kế nạp trước 4s), không tải cả 4 ảnh full-width ngay từ đầu.
+- Trang danh sách/chi tiết công thức: truy vấn độc lập chạy Promise.all; select đúng trường thẻ hiển thị (kiểu TheCongThuc/TheKhoaHoc đã đổi sang Pick các trường thẻ). Mọi route vẫn dynamic vì layout công khai chờ phiên đăng nhập — không bật ISR cho khu vực nào.
