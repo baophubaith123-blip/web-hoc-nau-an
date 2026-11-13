@@ -4,6 +4,7 @@ import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 import { ShieldCheck, Clock, CheckCircle2, XCircle, Filter } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { BangDuyetNangCap } from "@/components/quan-tri/BangDuyetNangCap";
+import { TuCapNhatDanhSach } from "@/components/realtime/tu-cap-nhat-danh-sach";
 import { Button } from "@/components/ui/button";
 import { taoSupabaseAdmin } from "@/lib/supabase/admin";
 import { donYeuCauHetHan } from "@/lib/thanh-toan/yeu-cau";
@@ -65,6 +66,8 @@ export default async function DuyetNangCapPage({ searchParams }: DuyetNangCapPag
 
   return (
     <div className="space-y-6">
+      {/* Realtime: có yêu cầu mới / giao dịch đổi trạng thái là danh sách tự cập nhật */}
+      <TuCapNhatDanhSach cacBang={["yeu_cau_nang_cap", "thanh_toan"]} />
       <div>
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
           <ShieldCheck className="w-6 h-6 text-amber-500" />
