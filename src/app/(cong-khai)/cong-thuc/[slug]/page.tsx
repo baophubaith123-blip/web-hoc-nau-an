@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Eye, Calendar, CheckSquare } from "lucide-react";
+import Link from "next/link";
+import { Eye, Calendar, CheckSquare, ChevronRight, CookingPot } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { NutLuuCongThuc } from "@/components/cong-thuc/nut-luu-cong-thuc";
@@ -198,6 +199,23 @@ export default async function ChiTietCongThuc({ params }: Props) {
           </p>
         </div>
       </div>
+
+      {/* NẤU RẢNH TAY (Đợt 4 — Cokba): nấu từng bước với đồng hồ hẹn giờ */}
+      <Link
+        href={`/nau/${ct.slug}`}
+        className="group flex items-center gap-4 rounded-2xl bg-primary px-5 py-4 text-primary-foreground shadow-md transition hover:opacity-95"
+      >
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15">
+          <CookingPot className="h-7 w-7" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-base font-bold sm:text-lg">Nấu rảnh tay</span>
+          <span className="block text-xs leading-relaxed opacity-90 sm:text-sm">
+            Nấu từng bước với đồng hồ hẹn giờ, đọc bước bằng giọng nói — không cần chạm màn hình
+          </span>
+        </span>
+        <ChevronRight className="h-6 w-6 shrink-0 transition-transform group-hover:translate-x-1" />
+      </Link>
 
       {/* NGUYÊN LIỆU SCALE */}
       <NguyenLieuScale nguyenLieuGoc={nguyenLieuList} khauPhanGoc={ct.khau_phan || 2} />
