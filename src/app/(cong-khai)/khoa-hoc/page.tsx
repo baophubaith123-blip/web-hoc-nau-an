@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { TheKhoaHoc } from "@/components/khoa-hoc/the-khoa-hoc";
 import { taoSupabaseServer } from "@/lib/supabase/server";
 import { GraduationCap, SearchX } from "lucide-react";
@@ -9,6 +10,12 @@ import { HienDan } from "@/components/trang-chu/hien-dan";
 interface Props {
   searchParams: Promise<{ [khoa: string]: string | string[] | undefined }>;
 }
+
+export const metadata: Metadata = {
+  title: "Khóa học nấu ăn",
+  description:
+    "Các khóa học nấu ăn có lộ trình bài bản, video hướng dẫn và bài kiểm tra — học từ cơ bản đến nâng cao cùng đầu bếp chuyên nghiệp.",
+};
 
 export default async function DanhSachKhoaHoc({ searchParams }: Props) {
   const params = await searchParams;

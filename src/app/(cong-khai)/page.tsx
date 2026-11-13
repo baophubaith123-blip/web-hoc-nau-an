@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { ChefHat, ArrowRight, Utensils, BookOpen, Sparkles, MonitorPlay, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TheCongThuc } from "@/components/cong-thuc/the-cong-thuc";
@@ -9,6 +10,12 @@ import { HienDan } from "@/components/trang-chu/hien-dan";
 import { DemSo } from "@/components/trang-chu/dem-so";
 import { taoSupabaseServer } from "@/lib/supabase/server";
 import { vi } from "@/lib/i18n/vi";
+
+export const metadata: Metadata = {
+  title: "Học nấu ăn online — công thức & khóa học từ đầu bếp",
+  description:
+    "Học nấu ăn online với công thức chi tiết từng bước, khóa học có lộ trình, video hướng dẫn và chứng chỉ hoàn thành tại Học Nấu Ăn.",
+};
 
 export default async function TrangChu() {
   const supabase = await taoSupabaseServer();

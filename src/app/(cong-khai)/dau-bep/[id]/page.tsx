@@ -1,20 +1,40 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { ChefHat, BookOpen, Utensils } from "lucide-react";
 import { TheCongThuc } from "@/components/cong-thuc/the-cong-thuc";
 import { TheKhoaHoc } from "@/components/khoa-hoc/the-khoa-hoc";
 import { taoSupabaseServer } from "@/lib/supabase/server";
+import { taoSupabaseAdmin } from "@/lib/supabase/admin";
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const admin = taoSupabaseAdmin();
+  const { data: dauBep } = await admin
+    .from("profiles")
+    .select("ho_ten, bio")
+    .eq("id", id)
+    .eq("vai_tro", "chef")
+    .eq("trang_thai", "hoat_dong")
+    .maybeSingle();
+  if (!dauBep) return { title: "Đầu bếp" };
+  return {
+    title: `Chef ${dauBep.ho_ten ?? "Đầu bếp"}`,
+    description: dauBep.bio ?? "Hồ sơ đầu bếp tại Học Nấu Ăn — công thức và khóa học nổi bật.",
+  };
 }
 
 export default async function HoSoDauBep({ params }: Props) {
   const { id } = await params;
   const supabase = await taoSupabaseServer();
 
-  // 1. Lấy thông tin đầu bếp
-  const { data: dauBep } = await supabase
+  // 1. Lấy thông tin đầu bếp — RLS profiles chặn đọc hồ sơ người khác qua client
+  // phiên (khách mở trang này từng bị 404 oan) → đọc hồ sơ công khai bằng admin client
+  const { data: dauBep } = await taoSupabaseAdmin()
     .from("profiles")
     .select("*")
     .eq("id", id)

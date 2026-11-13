@@ -95,6 +95,16 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Viết bài viết dùng cùng một cổng Pro như tạo công thức (trước đây trang
+  // chỉ hiện khung khóa còn tạo công thức thì chuyển hướng — thiếu nhất quán)
+  if (khopTienTo(pathname, "/tao-bai-viet")) {
+    const laDauBepHoacAdmin = vaiTro === "chef" || vaiTro === "admin";
+    const laProHopLe = profile.la_pro && profile.goi_het_han && new Date(profile.goi_het_han) > new Date();
+    if (!laDauBepHoacAdmin && !laProHopLe) {
+      return chuyenHuong("/nang-cap-pro?ly_do=tao_bai_viet");
+    }
+  }
+
   return phien.response;
 }
 

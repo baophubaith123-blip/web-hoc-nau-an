@@ -1,11 +1,18 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { BookOpen, Calendar, Eye, Newspaper, LibraryBig } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { taoSupabaseServer } from "@/lib/supabase/server";
 import { TieuDeTrang } from "@/components/layout/tieu-de-trang";
 import { TrangThaiTrong } from "@/components/layout/trang-thai-trong";
 import { HienDan } from "@/components/trang-chu/hien-dan";
+
+export const metadata: Metadata = {
+  title: "Bài viết ẩm thực",
+  description:
+    "Mẹo bếp, kinh nghiệm chọn nguyên liệu và câu chuyện ẩm thực từ cộng đồng Học Nấu Ăn và các đầu bếp.",
+};
 
 export default async function DanhSachBaiViet() {
   const supabase = await taoSupabaseServer();

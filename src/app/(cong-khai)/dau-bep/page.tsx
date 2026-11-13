@@ -1,12 +1,23 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { ChefHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { taoSupabaseServer } from "@/lib/supabase/server";
+import { taoSupabaseAdmin } from "@/lib/supabase/admin";
+
+export const metadata: Metadata = {
+  title: "Đội ngũ đầu bếp",
+  description:
+    "Gặp gỡ các đầu bếp và Master Chef đồng hành cùng Học Nấu Ăn — xem hồ sơ, công thức và khóa học của từng đầu bếp.",
+};
 
 export default async function DanhSachDauBep() {
-  const supabase = await taoSupabaseServer();
+  // RLS của bảng profiles chỉ cho đọc hồ sơ của chính mình nên khách (và cả
+  // người dùng thường) không thấy được đầu bếp nào qua client phiên. Danh sách
+  // đầu bếp là thông tin công khai → đọc bằng admin client, chỉ lấy đúng các
+  // trường hiển thị công khai (không email/số điện thoại).
+  const supabase = taoSupabaseAdmin();
 
   const { data: dauBepList } = await supabase
     .from("profiles")
@@ -23,6 +34,20 @@ export default async function DanhSachDauBep() {
           Gặp gỡ các chuyên gia ẩm thực, Master Chef đồng hành hướng dẫn bạn trong từng món ăn
         </p>
       </div>
+
+      {(dauBepList ?? []).length === 0 && (
+        <div className="rounded-2xl border border-dashed bg-card/50 px-6 py-14 text-center">
+          <ChefHat className="mx-auto h-10 w-10 text-muted-foreground" />
+          <p className="mt-3 font-semibold">Đội ngũ đầu bếp đang được cập nhật</p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
+            Danh sách đầu bếp sẽ sớm xuất hiện tại đây. Trong lúc chờ, bạn có thể khám phá các
+            công thức và khóa học đang có trên Học Nấu Ăn.
+          </p>
+          <Button asChild variant="outline" className="mt-5">
+            <Link href="/cong-thuc">Khám phá công thức</Link>
+          </Button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {(dauBepList || []).map((db) => (

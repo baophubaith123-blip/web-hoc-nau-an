@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { TheCongThuc } from "@/components/cong-thuc/the-cong-thuc";
 import { BoLocCongThuc } from "@/components/cong-thuc/bo-loc-cong-thuc";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,12 @@ interface Props {
 }
 
 const SO_LUONG_MOI_TRANG = 12;
+
+export const metadata: Metadata = {
+  title: "Công thức nấu ăn",
+  description:
+    "Khám phá thư viện công thức nấu ăn chi tiết từng bước — món Việt truyền thống, món Á, món Âu và tráng miệng, có lọc theo danh mục và độ khó.",
+};
 
 export default async function DanhSachCongThuc({ searchParams }: Props) {
   const params = await searchParams;
