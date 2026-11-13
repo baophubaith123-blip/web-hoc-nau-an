@@ -19,6 +19,11 @@ interface HeroTrangChuProps {
 /** Hero trang chủ: trình chiếu ảnh món ăn (hiệu ứng Ken Burns) + thẻ nổi. */
 export function HeroTrangChu({ slides, children }: HeroTrangChuProps) {
   const [dangChieu, setDangChieu] = useState(0);
+  // Đợt 6 — tối ưu tốc độ: đo nền cho thấy cả 4 ảnh hero full-width
+  // (~238KB) tải ngay khi mở trang dù 3 slide đang ẩn. Chỉ tải ảnh của
+  // slide đã/sắp hiển thị: slide đầu tải ngay, slide kế được nạp trước
+  // 4 giây khi sắp tới lượt, các slide còn lại tải khi tới lượt chiếu.
+  const [daTai, setDaTai] = useState<ReadonlySet<number>>(() => new Set([0]));
   const tamDung = useRef(false);
 
   useEffect(() => {
@@ -30,6 +35,16 @@ export function HeroTrangChu({ slides, children }: HeroTrangChuProps) {
     }, 5500);
     return () => clearInterval(id);
   }, [slides.length]);
+
+  useEffect(() => {
+    setDaTai((cu) => (cu.has(dangChieu) ? cu : new Set(cu).add(dangChieu)));
+    if (slides.length < 2) return;
+    const id = setTimeout(() => {
+      const ke = (dangChieu + 1) % slides.length;
+      setDaTai((cu) => (cu.has(ke) ? cu : new Set(cu).add(ke)));
+    }, 4000);
+    return () => clearTimeout(id);
+  }, [dangChieu, slides.length]);
 
   const slideHienTai = slides[dangChieu];
 
@@ -48,14 +63,16 @@ export function HeroTrangChu({ slides, children }: HeroTrangChuProps) {
               i === dangChieu ? "opacity-100" : "opacity-0"
             }`}
           >
-            <Image
-              src={s.anh}
-              alt={s.tieu_de}
-              fill
-              priority={i === 0}
-              sizes="100vw"
-              className={`object-cover ${i === dangChieu ? "animate-kenburns" : ""}`}
-            />
+            {daTai.has(i) && (
+              <Image
+                src={s.anh}
+                alt={s.tieu_de}
+                fill
+                priority={i === 0}
+                sizes="100vw"
+                className={`object-cover ${i === dangChieu ? "animate-kenburns" : ""}`}
+              />
+            )}
           </div>
         ))}
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/15" />
