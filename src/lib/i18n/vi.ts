@@ -41,7 +41,7 @@ export const vi = {
     nguoi_dung: "Người dùng", quan_ly_dau_bep: "Đầu bếp", danh_muc: "Danh mục",
     binh_luan: "Bình luận", danh_gia: "Đánh giá", quan_ly_bai_viet: "Bài viết",
     gui_thong_bao: "Gửi thông báo", bao_cao: "Báo cáo thống kê", cau_hinh: "Cấu hình",
-    nhat_ky: "Nhật ký hoạt động", thanh_toan: "Thanh toán", quan_ly_ticket: "Quản lý ticket",
+    nhat_ky: "Nhật ký hoạt động", nhat_ky_cokba: "Nhật ký Cokba", thanh_toan: "Thanh toán", quan_ly_ticket: "Quản lý ticket",
     che_do: "Giao diện", ve_trang_chu: "Về trang chủ",
   },
 
@@ -309,6 +309,24 @@ export const vi = {
     bat_email_thanh_toan: "Gửi email xác nhận thanh toán", luu_cau_hinh_thanh_cong: "Đã lưu cấu hình",
     nhat_ky: "Nhật ký hoạt động", hanh_dong: "Hành động", doi_tuong: "Đối tượng", ip: "Địa chỉ IP",
     thoi_gian: "Thời gian",
+  },
+
+  tro_ly: {
+    tieu_de: "Cokba · Trợ lý bếp",
+    mo_ta_ngan: "Hỏi đáp món ăn, khóa học, đầu bếp",
+    mo_ta: "Cokba giúp bạn tìm món theo nguyên liệu đang có, tra nguyên liệu và calo theo số người ăn, gợi ý khóa học cho người mới, đầu bếp và bài viết — chỉ từ nội dung thật trên Học Nấu Ăn.",
+    loi_chao: "Chào bạn, mình là Cokba — trợ lý bếp của Học Nấu Ăn. Bạn cứ hỏi mình về món ăn, nguyên liệu, khóa học, đầu bếp hay bài viết nhé!",
+    nhap_cau_hoi: "Hỏi Cokba về món ăn, khóa học...",
+    gui: "Gửi",
+    dang_nghi: "Cokba đang nghĩ...",
+    cau_mau: "Câu hỏi mẫu",
+    loi_gui: "Cokba đang bận một chút, bạn thử hỏi lại sau ít giây nhé.",
+    mo_panel: "Mở trợ lý bếp Cokba",
+    dong: "Đóng",
+    hoi_gia_vi_tieu_de: "Nhà bạn có những gia vị này không?",
+    hoi_gia_vi_mo_ta: "Tích là nhà ĐANG CÓ. Gia vị nào nhà không có thì bỏ tích — Cokba tính phần trăm khớp theo đúng những gì nhà bạn có.",
+    hoi_gia_vi_goi_y_phu: "Thiếu gia vị nào thì bỏ tích gia vị đó rồi bấm nút phía trên.",
+    du_roi_goi_y: "Đủ rồi, gợi ý món cho mình",
   },
 
   nhan: {
