@@ -394,6 +394,13 @@ test("intent 9: đầu bếp theo chuyên môn làm bánh", () => {
   expect(idCacThe(kq)).toEqual(["db2"]);
 });
 
+test("intent 9b: đầu bếp dạy món Âu — từ ngắn 'Âu' vẫn khớp được (hồi quy live 5B)", () => {
+  const kq = traLoi("đầu bếp nào dạy món Âu?", DU_LIEU_MOI, taoSlotTrong());
+  expect(kq.yDinh).toBe("dau_bep_theo_chuyen_mon");
+  expect(kq.khongTraLoiDuoc).not.toBe(true);
+  expect(idCacThe(kq)[0]).toBe("db2");
+});
+
 test("intent 10: hồ sơ đầu bếp + khóa của đầu bếp gọi theo tên riêng", () => {
   const kq = traLoi("đầu bếp Trần Văn Minh có món nào?", DU_LIEU_MOI, taoSlotTrong());
   expect(kq.yDinh).toBe("ho_so_dau_bep");

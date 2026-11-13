@@ -581,6 +581,20 @@ export function traLoi(cauHoi: string, duLieu: DuLieuTroLy, slotIn: SlotTriNho):
       // Khớp chuyên môn: tìm từ khóa trong câu xuất hiện trong bio của bếp
       // hoặc trong tiêu đề nội dung của bếp.
       const tuCau = tachTu(khoa).filter((t) => t.length >= 3 && !TU_DUNG.has(t));
+      // Từ chuyên môn NGẮN ("Âu" -> "au", "Ý" -> "y") bị bộ lọc >= 3 ký tự
+      // loại mất, nên câu "đầu bếp nào dạy món Âu" từng rơi xuống ngoài
+      // phạm vi (phát hiện ở kiểm chứng live đợt 5B). Các từ này rất đặc
+      // trưng nên khớp thêm theo BIÊN TỪ (đứng độc lập) với điểm cao, kèm
+      // điểm cộng cho cụm 2 từ chứa chúng (VD "mon au").
+      const TU_NGAN_DAC_BIET = new Set(["au", "y"]);
+      const tuNgan = tachTu(khoa).filter((t) => TU_NGAN_DAC_BIET.has(t));
+      const cacTuCau = tachTu(khoa);
+      const cumDacBiet: string[] = [];
+      for (let i = 0; i + 1 < cacTuCau.length; i++) {
+        if (TU_NGAN_DAC_BIET.has(cacTuCau[i]) || TU_NGAN_DAC_BIET.has(cacTuCau[i + 1])) {
+          cumDacBiet.push(cacTuCau[i] + " " + cacTuCau[i + 1]);
+        }
+      }
       const chamBep = (db: DauBepTroLy): number => {
         const vanBan = khoaChuanHoa(
           (db.bio ?? "") +
@@ -589,7 +603,11 @@ export function traLoi(cauHoi: string, duLieu: DuLieuTroLy, slotIn: SlotTriNho):
             " " +
             duLieu.khoaHoc.filter((k) => k.dau_bep_id === db.id).map((k) => k.tieu_de).join(" ")
         );
-        return tuCau.reduce((d, t) => d + (vanBan.includes(t) ? 1 : 0), 0);
+        let diem = tuCau.reduce((d, t) => d + (vanBan.includes(t) ? 1 : 0), 0);
+        const tuVanBan = new Set(tachTu(vanBan));
+        for (const tn of tuNgan) if (tuVanBan.has(tn)) diem += 2;
+        for (const cum of cumDacBiet) if (vanBan.includes(cum)) diem += 3;
+        return diem;
       };
       const xep = duLieu.dauBep
         .map((db) => ({ db, diem: chamBep(db) }))
