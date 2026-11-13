@@ -46,10 +46,29 @@ export interface PhanTichCauHoi {
   laNguoiMoi: boolean;
 }
 
-function timTenChuaDu(danhSach: MucThucThe[], khoaCau: string): MucThucThe | undefined {
+function timTenChuaDu(
+  danhSach: MucThucThe[],
+  khoaCau: string,
+  choPhepCumDau = true
+): MucThucThe | undefined {
   let totNhat: MucThucThe | undefined;
   for (const muc of danhSach) {
     if (muc.khoa && chuaCum(khoaCau, muc.khoa)) {
+      if (!totNhat || muc.khoa.length > totNhat.khoa.length) totNhat = muc;
+    }
+  }
+  if (totNhat || !choPhepCumDau) return totNhat;
+  // Cách gọi ngắn bằng 2 từ đầu của tên (vòng rèn luyện 1): người dùng hay
+  // gọi "phở bò", "bánh xèo", "cá kho" thay cho tên đầy đủ "Phở bò Hà Nội",
+  // "Bánh xèo miền Tây", "Cá kho tộ" — nhận khi cụm 2 từ đầu của tên xuất
+  // hiện nguyên vẹn trong câu. KHÔNG áp cho khóa học: nhiều khóa bắt đầu
+  // bằng "Món chay", "Ăn sáng", "Tráng miệng"... trùng đúng cụm danh mục
+  // món, sẽ cướp intent của câu hỏi về món.
+  for (const muc of danhSach) {
+    const tuTen = tachTu(muc.khoa);
+    if (tuTen.length < 3) continue;
+    const cumDau = tuTen.slice(0, 2).join(" ");
+    if (cumDau.length >= 5 && chuaCum(khoaCau, cumDau)) {
       if (!totNhat || muc.khoa.length > totNhat.khoa.length) totNhat = muc;
     }
   }
@@ -84,10 +103,17 @@ function timTenTheoTuTrung(
 
 function timNguyenLieu(chiMuc: ChiMucTroLy, khoaCau: string): { khoa: string; ten: string }[] {
   const timDuoc = new Map<string, string>(); // khoa -> ten hien thi
+  // Các cụm NGUỒN đã khớp ở bước 1-2 (để bước 3 không tách lẻ từ trong đó:
+  // "hoa" trong "hanh hoa" từng bị khớp thêm thành "Hoa hồi", "bap" trong
+  // "dau bap" bị khớp thêm thành "Bắp Mỹ" — vòng rèn luyện 1).
+  const nguonDaKhop: string[] = [];
 
   // 1) Khớp trực tiếp với danh mục nguyên liệu trong dữ liệu.
   for (const muc of chiMuc.danhMucNguyenLieu) {
-    if (chuaCum(khoaCau, muc.khoa)) timDuoc.set(muc.khoa, muc.ten);
+    if (chuaCum(khoaCau, muc.khoa)) {
+      timDuoc.set(muc.khoa, muc.ten);
+      nguonDaKhop.push(muc.khoa);
+    }
   }
   // 2) Khớp qua bảng bí danh: người dùng gõ biến thể ("hanh hoa") ->
   //    map sang tên chuẩn; chỉ nhận nếu tên chuẩn có trong dữ liệu.
@@ -97,15 +123,24 @@ function timNguyenLieu(chiMuc: ChiMucTroLy, khoaCau: string): { khoa: string; te
     const trongDuLieu = chiMuc.danhMucNguyenLieu.find(
       (m) => m.khoa === khoaChuan || m.khoa.startsWith(khoaChuan + " ") || khoaChuan.startsWith(m.khoa + " ")
     );
-    if (trongDuLieu) timDuoc.set(trongDuLieu.khoa, trongDuLieu.ten);
+    if (trongDuLieu) {
+      timDuoc.set(trongDuLieu.khoa, trongDuLieu.ten);
+      nguonDaKhop.push(khoaBienThe);
+    }
   }
   // 3) Khớp tiền tố theo từ đơn: gõ "trứng" (1 từ) khớp "trung ga".
   //    Chỉ áp dụng cho từ >= 3 ký tự để tránh khớp nhầm từ ngắn ("ca"), và
   //    loại các từ MƠ HỒ khi bỏ dấu: "dau" có thể là đầu/dầu/đậu — gõ "đầu
-  //    bếp" không được hiểu là nguyên liệu "dầu ăn".
-  const TU_MO_HO = new Set(["dau"]);
+  //    bếp" không được hiểu là nguyên liệu "dầu ăn". Bổ sung ở vòng rèn
+  //    luyện 1 (đo trên dữ liệu thật): "gia" (giá tiền ~ giá đỗ), "hat"
+  //    (hát ~ hạt), "nuoc" (nước Mỹ/nước ngoài ~ nước lọc), "nam" (Việt
+  //    Nam ~ nấm), "giam" (giảm giá ~ giấm) — các từ này chỉ được khớp khi
+  //    người dùng gõ đủ cụm nguyên liệu ở bước 1/2, không khớp theo 1 từ.
+  const TU_MO_HO = new Set(["dau", "gia", "hat", "nuoc", "nam", "giam", "toi"]);
   for (const tu of tachTu(khoaCau)) {
     if (tu.length < 3 || TU_MO_HO.has(tu) || timDuoc.has(tu)) continue;
+    // Từ nằm TRONG một cụm nguồn đã khớp (bước 1-2) thì không tách lẻ nữa.
+    if (nguonDaKhop.some((cum) => (" " + cum + " ").includes(" " + tu + " "))) continue;
     const ungVien = chiMuc.danhMucNguyenLieu
       .filter((m) => m.khoa === tu || m.khoa.startsWith(tu + " "))
       .sort((a, b) => a.khoa.length - b.khoa.length)[0];
@@ -140,15 +175,27 @@ export function phanTichCauHoi(
   const mGio = khoa.match(/(\d+)\s*(gio|tieng)/);
   if (mGio && thoiGianToiDa === undefined) thoiGianToiDa = parseInt(mGio[1], 10) * 60;
 
+  // Cụm từ của BỘ LỌC không được lọt vào khâu khớp nguyên liệu/thực thể
+  // (vòng rèn luyện 1): "trung bình" từng bị khớp thành nguyên liệu "trứng"
+  // (từ "trung"), và nhãn "độ khó" từng làm câu "độ khó dễ" bị đọc thành
+  // độ khó "kho". khoaSach = câu đã gỡ 2 cụm đó; khoaKhongDoKho = chỉ gỡ
+  // nhãn "độ khó" (vẫn giữ "trung binh" để nhận diện độ khó).
+  const khoaKhongDoKho = (" " + khoa + " ").replace(/ do kho /g, " ").trim().replace(/\s+/g, " ");
+  const khoaSach = (" " + khoaKhongDoKho + " ")
+    .replace(/ trung binh /g, " ")
+    .replace(/ trung cap /g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+
   // ---- Thực thể ----
-  const nguyenLieu = timNguyenLieu(chiMuc, khoa);
+  const nguyenLieu = timNguyenLieu(chiMuc, khoaSach);
 
   const monChuaDu = timTenChuaDu(chiMuc.tenMon, khoa);
   const monTuTrung = monChuaDu ?? timTenTheoTuTrung(chiMuc.tenMon, khoa, 0.75);
   const thamChieuMon = chuaCum(khoa, "mon do") || chuaCum(khoa, "mon nay") || chuaCum(khoa, "no");
   const monId = monTuTrung?.id ?? (thamChieuMon && slot.monDangBan ? slot.monDangBan : undefined);
 
-  const khoaChuaDu = timTenChuaDu(chiMuc.tenKhoaHoc, khoa);
+  const khoaChuaDu = timTenChuaDu(chiMuc.tenKhoaHoc, khoa, false);
   const khoaTuTrung = khoaChuaDu ?? timTenTheoTuTrung(chiMuc.tenKhoaHoc, khoa, 0.6);
   const thamChieuKhoa = chuaCum(khoa, "khoa do") || chuaCum(khoa, "khoa nay");
   const khoaHocId =
@@ -169,10 +216,11 @@ export function phanTichCauHoi(
   const baiViet = timTenChuaDu(chiMuc.tenBaiViet, khoa);
 
   // ---- Bộ lọc ----
+  // Nhận diện trên khoaKhongDoKho để nhãn "độ khó" không tự khớp "kho".
   let doKho: DoKhoMon | undefined;
-  if (chuaCum(khoa, "trung binh") || chuaCum(khoa, "vua vua")) doKho = "trung_binh";
-  else if (chuaCum(khoa, "kho")) doKho = "kho";
-  else if (chuaCum(khoa, "de") || chuaCum(khoa, "don gian")) doKho = "de";
+  if (chuaCum(khoaKhongDoKho, "trung binh") || chuaCum(khoaKhongDoKho, "vua vua")) doKho = "trung_binh";
+  else if (chuaCum(khoaKhongDoKho, "kho")) doKho = "kho";
+  else if (chuaCum(khoaKhongDoKho, "de") || chuaCum(khoaKhongDoKho, "don gian")) doKho = "de";
 
   let danhMucMonKhoa: string | undefined;
   for (const dm of chiMuc.danhMucMon) {
@@ -180,16 +228,33 @@ export function phanTichCauHoi(
       danhMucMonKhoa = dm.khoa;
       break;
     }
-    // Danh mục nhiều từ: khớp theo từ đặc trưng cuối (VD "mon chay" -> "chay").
-    const tuDm = tachTu(dm.khoa);
-    const tuDacTrung = tuDm[tuDm.length - 1];
-    if (tuDacTrung && tuDacTrung.length >= 3 && chuaCum(khoa, tuDacTrung) && dm.khoa.includes(" ")) {
-      danhMucMonKhoa = dm.khoa;
-      break;
+  }
+  // Danh mục nhiều từ: khớp theo từ đặc trưng (cuối, hoặc đầu nếu đầu không
+  // phải "mon") — VD "mon chay" -> "chay", "canh va sup" -> "canh". Chỉ áp
+  // khi câu đang nói về MÓN (có từ "mon"): tránh "Viết..." ("viet" = Việt)
+  // hay "...sang tiếng Anh" ("sang" của "Món ăn sáng") khớp nhầm danh mục
+  // trong câu ngoài bếp (vòng rèn luyện 1).
+  if (!danhMucMonKhoa && chuaCum(khoa, "mon")) {
+    for (const dm of chiMuc.danhMucMon) {
+      if (!dm.khoa.includes(" ")) continue;
+      const tuDm = tachTu(dm.khoa);
+      const tuCuoi = tuDm[tuDm.length - 1];
+      const tuDau = tuDm[0] !== "mon" ? tuDm[0] : undefined;
+      if (
+        (tuCuoi && tuCuoi.length >= 3 && chuaCum(khoa, tuCuoi)) ||
+        (tuDau && tuDau.length >= 3 && chuaCum(khoa, tuDau))
+      ) {
+        danhMucMonKhoa = dm.khoa;
+        break;
+      }
     }
   }
 
-  const mienPhi = chuaCum(khoa, "mien phi") || undefined;
+  const mienPhi =
+    chuaCum(khoa, "mien phi") ||
+    chuaCum(khoa, "khong ton tien") ||
+    chuaCum(khoa, "khong mat tien") ||
+    undefined;
   let capDo: CapDoKhoa | undefined;
   if (chuaCum(khoa, "nang cao")) capDo = "nang_cao";
   else if (chuaCum(khoa, "trung cap")) capDo = "trung_cap";
@@ -209,7 +274,7 @@ export function phanTichCauHoi(
     boLoc: { doKho, thoiGianToiDa, danhMucMonKhoa, mienPhi, capDo },
     soNguoi,
     chiLaConSo,
-    coTuCalo: chuaCum(khoa, "calo") || chuaCum(khoa, "kcal"),
+    coTuCalo: chuaCum(khoa, "calo") || chuaCum(khoa, "kcal") || chuaCum(khoa, "nang luong"),
     hoiMonKhac:
       chuaCum(khoa, "con mon khac") ||
       chuaCum(khoa, "mon khac khong") ||
@@ -223,6 +288,11 @@ export function phanTichCauHoi(
       chuaCum(khoa, "moi hoc nau") ||
       chuaCum(khoa, "hoc gi dau tien") ||
       chuaCum(khoa, "khoa dau tien") ||
-      chuaCum(khoa, "bat dau hoc nau"),
+      chuaCum(khoa, "bat dau hoc nau") ||
+      chuaCum(khoa, "bat dau tu dau") ||
+      chuaCum(khoa, "chua biet bat dau") ||
+      chuaCum(khoa, "khong biet bat dau") ||
+      chuaCum(khoa, "moi tap nau") ||
+      chuaCum(khoa, "tap nau an"),
   };
 }

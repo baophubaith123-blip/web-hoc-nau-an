@@ -145,40 +145,62 @@ const TU_DUNG = new Set([
   "cua", "trong", "nay", "do", "cac", "nhung", "mot", "voi", "ve", "the", "lam",
   "bang", "hay", "biet", "tim", "xem", "hoc", "nau", "an", "khoa", "bai", "dau",
   "bep", "muon", "can", "muon", "ra", "sao", "ne", "nhe", "oi", "ah", "ma",
+  // "gia" (giá/gia vị đều mơ hồ) và "bao" (bao nhiêu = từ hỏi) không mang
+  // nghĩa nội dung khi đứng một mình (vòng rèn luyện 1).
+  "gia", "bao",
 ]);
 
 function timKiemToanVan(duLieu: DuLieuTroLy, chiMuc: ChiMucTroLy, khoaCau: string): TheHienThi[] {
   const thuatNgu = [...new Set(tachTu(khoaCau).filter((t) => t.length >= 3 && !TU_DUNG.has(t)))];
   if (thuatNgu.length === 0) return [];
 
-  const demDiem = (tieuDe: string, noiDung: string): number => {
-    const td = khoaChuanHoa(tieuDe);
-    const nd = khoaChuanHoa(noiDung);
+  // Đếm theo BIÊN TỪ (vòng rèn luyện 1): trước đây đếm chuỗi con nên từ
+  // ngắn khớp lọt vào giữa từ khác ("hom" trong "thom"...) khiến câu
+  // ngoài phạm vi cũng "tìm thấy" kết quả. Nay chỉ tính khi thuật ngữ
+  // đứng độc lập thành một từ, và một mục chỉ được coi là LIÊN QUAN khi:
+  // có >= 2 thuật ngữ KHÁC NHAU cùng khớp, tổng điểm >= 6, và ít nhất
+  // 1 thuật ngữ khớp ngay trong TIÊU ĐỀ của mục (trước đây chỉ cần 1 từ
+  // phổ thông xuất hiện trong nội dung là đã trả thẻ — vòng 1 corpus:
+  // 12/12 câu ngoài phạm vi bị trả sai sang mục liên quan).
+  const demDiem = (tieuDe: string, noiDung: string): { diem: number; soThuatNguKhop: number; khopTieuDe: boolean } => {
+    const td = " " + khoaChuanHoa(tieuDe) + " ";
+    const nd = " " + khoaChuanHoa(noiDung) + " ";
     let diem = 0;
+    let soThuatNguKhop = 0;
+    let khopTieuDe = false;
     for (const tn of thuatNgu) {
-      if (td.includes(tn)) diem += 3;
-      const soLan = nd.split(tn).length - 1;
+      const trongTieuDe = td.includes(" " + tn + " ");
+      const soLan = nd.split(" " + tn + " ").length - 1;
+      if (trongTieuDe) {
+        diem += 3;
+        khopTieuDe = true;
+      }
       diem += Math.min(soLan, 5);
+      if (trongTieuDe || soLan > 0) soThuatNguKhop += 1;
     }
-    return diem;
+    return { diem, soThuatNguKhop, khopTieuDe };
+  };
+  const lienQuan = (tieuDe: string, noiDung: string): number => {
+    const kq = demDiem(tieuDe, noiDung);
+    return kq.soThuatNguKhop >= 2 && kq.khopTieuDe && kq.diem >= 6 ? kq.diem : 0;
   };
 
   const ungVien: { the: TheHienThi; diem: number }[] = [];
   for (const mon of duLieu.congThuc) {
-    const diem = demDiem(mon.tieu_de, (mon.mo_ta ?? "") + " " + mon.cac_buoc.map((b) => b.noi_dung).join(" "));
+    const diem = lienQuan(mon.tieu_de, (mon.mo_ta ?? "") + " " + mon.cac_buoc.map((b) => b.noi_dung).join(" "));
     if (diem > 0) ungVien.push({ the: theMon(mon), diem });
   }
   for (const kh of duLieu.khoaHoc) {
-    const diem = demDiem(kh.tieu_de, (kh.mo_ta ?? "") + " " + (kh.mo_ta_chi_tiet ?? ""));
+    const diem = lienQuan(kh.tieu_de, (kh.mo_ta ?? "") + " " + (kh.mo_ta_chi_tiet ?? ""));
     if (diem > 0) ungVien.push({ the: theKhoaHoc(kh, duLieu), diem });
   }
   for (const bv of duLieu.baiViet) {
     if (!chiMuc.baiVietTheoId.has(bv.id)) continue; // bỏ bài TEST_
-    const diem = demDiem(bv.tieu_de, (bv.tom_tat ?? "") + " " + (bv.noi_dung ?? ""));
+    const diem = lienQuan(bv.tieu_de, (bv.tom_tat ?? "") + " " + (bv.noi_dung ?? ""));
     if (diem > 0) ungVien.push({ the: theBaiViet(bv), diem });
   }
   for (const db of duLieu.dauBep) {
-    const diem = demDiem(db.ho_ten, db.bio ?? "");
+    const diem = lienQuan(db.ho_ten, db.bio ?? "");
     if (diem > 0) ungVien.push({ the: theDauBep(db, duLieu), diem });
   }
   return ungVien
@@ -385,7 +407,7 @@ export function traLoi(cauHoi: string, duLieu: DuLieuTroLy, slotIn: SlotTriNho):
     ) {
       return traLoiNguyenLieuMon(monThucThe, pt.soNguoi, slot);
     }
-    if (chuaCum(khoa, "cach lam") || chuaCum(khoa, "lam the nao") || chuaCum(khoa, "nau the nao") || chuaCum(khoa, "huong dan")) {
+    if (chuaCum(khoa, "cach lam") || chuaCum(khoa, "lam the nao") || chuaCum(khoa, "nau the nao") || chuaCum(khoa, "huong dan") || chuaCum(khoa, "nau sao") || chuaCum(khoa, "lam sao")) {
       return traLoiCachLam(monThucThe, slot);
     }
     // Nhắc tên món kèm số người -> hiểu là hỏi nguyên liệu theo số người đó.
@@ -509,11 +531,18 @@ export function traLoi(cauHoi: string, duLieu: DuLieuTroLy, slotIn: SlotTriNho):
     );
     // Nếu câu hỏi nhắc rõ "khóa" -> ưu tiên trả khóa của bếp.
     if (chuaCum(khoa, "khoa") && !chuaCum(khoa, "mon")) {
+      // Ghép tự do: câu có thêm cấp độ / miễn phí thì lọc khóa của bếp theo
+      // đúng tiêu chí đó (vòng rèn luyện 1: "khóa nâng cao của bếp Tùng"
+      // trước đây trả cả khóa trung cấp của bếp).
+      let khoaLoc = khoaCuaBep;
+      if (pt.boLoc.capDo) khoaLoc = khoaLoc.filter((k) => k.cap_do === pt.boLoc.capDo);
+      if (pt.boLoc.mienPhi) khoaLoc = khoaLoc.filter((k) => k.mien_phi || k.gia === 0);
+      const khoaTra = khoaLoc.length > 0 ? khoaLoc : khoaCuaBep;
       return {
         doanVan: [
-          `Đầu bếp ${bepThucThe.ho_ten} đang phụ trách ${khoaCuaBep.length} khóa học trên Học Nấu Ăn:`,
+          `Đầu bếp ${bepThucThe.ho_ten} đang phụ trách ${khoaTra.length} khóa học trên Học Nấu Ăn:`,
         ],
-        the: [theDauBep(bepThucThe, duLieu), ...khoaCuaBep.slice(0, 3).map((k) => theKhoaHoc(k, duLieu))],
+        the: [theDauBep(bepThucThe, duLieu), ...khoaTra.slice(0, 3).map((k) => theKhoaHoc(k, duLieu))],
         yDinh: "ho_so_dau_bep",
         slotDaCapNhat: slot,
       };
@@ -532,99 +561,9 @@ export function traLoi(cauHoi: string, duLieu: DuLieuTroLy, slotIn: SlotTriNho):
     };
   }
 
-  // --- 2) Có gì nấu nấy (đa nguyên liệu) ---
-  if (nguyenLieuTimDuoc.length >= 2 || (nguyenLieuTimDuoc.length >= 1 && mauCoGiNauNay)) {
-    slot.nguyenLieuDangCo = nguyenLieuTimDuoc.map((n) => n.ten);
-    slot.nguyenLieuTruyVanGanNhat = nguyenLieuTimDuoc.map((n) => n.khoa);
-    if (slot.giaViDaXacNhan === null) {
-      return {
-        doanVan: [
-          `Bạn đang có: ${slot.nguyenLieuDangCo.join(", ")}. Trước khi gợi ý món, cho Cokba hỏi để tính đúng phần trăm khớp: Nhà bạn có đầy đủ các gia vị cơ bản này không? (chọn những gia vị nhà đang CÓ, rồi bấm xác nhận giúp Cokba nhé)`,
-        ],
-        the: [],
-        canHoiGiaVi: true,
-        danhSachGiaViDeHoi: [...GIA_VI_CO_BAN],
-        yDinh: "co_gi_nau_nay",
-        slotDaCapNhat: slot,
-      };
-    }
-    const ketQua = chamDiemTatCa(duLieu.congThuc, {
-      nguyenLieuNguoiDung: slot.nguyenLieuDangCo,
-      giaViDaXacNhan: slot.giaViDaXacNhan,
-    }).slice(0, 5);
-    if (ketQua.length === 0) {
-      return {
-        doanVan: [
-          `Với ${slot.nguyenLieuDangCo.join(", ")}, Cokba chưa tìm thấy món nào khớp trong dữ liệu hiện có. Bạn thử thêm nguyên liệu khác xem sao nhé.`,
-        ],
-        the: [],
-        khongTraLoiDuoc: true,
-        lyDoKhongTraLoi: `Không món nào khớp với nguyên liệu: ${slot.nguyenLieuDangCo.join(", ")}.`,
-        yDinh: "co_gi_nau_nay",
-        slotDaCapNhat: slot,
-      };
-    }
-    slot.danhSachVuaXem = ketQua.map((k) => k.congThuc.id);
-    slot.monDangBan = ketQua[0].congThuc.id;
-    return {
-      doanVan: [
-        `Với tủ bếp hiện tại, Cokba chấm điểm khớp cho từng món như sau (món khớp nhất xếp trước, còn thiếu gì Cokba ghi ngay trên thẻ):`,
-      ],
-      the: ketQua.map((k) =>
-        theMon(k.congThuc, {
-          diemKhop: k.phanTramKhop,
-          thieu: [...k.thieuChinh, ...k.thieuGiaVi],
-          meta: [
-            `Khớp ${k.phanTramKhop}%`,
-            ...(k.thieuChinh.length ? [`Thiếu chính: ${k.thieuChinh.join(", ")}`] : []),
-            ...(k.thieuGiaVi.length ? [`Thiếu gia vị: ${k.thieuGiaVi.join(", ")}`] : []),
-          ],
-        })
-      ),
-      goiY: ["Còn món khác không?"],
-      yDinh: "co_gi_nau_nay",
-      slotDaCapNhat: slot,
-    };
-  }
-
-  // --- 1) Món theo MỘT nguyên liệu (+ bộ lọc ghép tự do nếu có) ---
-  if (nguyenLieuTimDuoc.length === 1) {
-    const nl = nguyenLieuTimDuoc[0];
-    const ids = monCoNguyenLieu(chiMuc, nl.khoa);
-    const danhSach = ids
-      .map((id) => chiMuc.monTheoId.get(id)!)
-      .filter((m) => apLocMon(m, pt.boLoc));
-    const coBoLoc = pt.boLoc.doKho || pt.boLoc.thoiGianToiDa || pt.boLoc.danhMucMonKhoa;
-    slot.nguyenLieuDangCo = [nl.ten];
-    slot.nguyenLieuTruyVanGanNhat = [nl.khoa];
-    if (danhSach.length === 0) {
-      return {
-        doanVan: [
-          coBoLoc
-            ? `Có món làm bằng ${nl.ten}, nhưng không món nào thỏa thêm điều kiện bạn nêu. Cokba liệt kê tất cả món có ${nl.ten} để bạn xem nhé:`
-            : `Cokba chưa tìm thấy món nào làm bằng ${nl.ten} trong dữ liệu hiện có.`,
-        ],
-        the: coBoLoc ? ids.slice(0, 5).map((id) => theMon(chiMuc.monTheoId.get(id)!)) : [],
-        khongTraLoiDuoc: !coBoLoc,
-        lyDoKhongTraLoi: coBoLoc ? undefined : `Không có món nào dùng nguyên liệu "${nl.ten}".`,
-        yDinh: "mon_theo_nguyen_lieu",
-        slotDaCapNhat: slot,
-      };
-    }
-    const hienThi = danhSach.slice(0, 3);
-    slot.danhSachVuaXem = hienThi.map((m) => m.id);
-    slot.monDangBan = hienThi[0].id;
-    return {
-      doanVan: [
-        `Cokba tìm thấy ${danhSach.length} món làm bằng ${nl.ten}${coBoLoc ? " thỏa điều kiện bạn nêu" : ""}:`,
-      ],
-      the: hienThi.map((m) => theMon(m)),
-      goiY: danhSach.length > 3 ? ["Còn món khác không?"] : undefined,
-      yDinh: "mon_theo_nguyen_lieu",
-      slotDaCapNhat: slot,
-    };
-  }
-
+  // (Vòng rèn luyện 1: khối hỏi đầu bếp/khóa/bài theo nhu cầu được xét
+  // TRƯỚC intent nguyên liệu — trước đây câu "đầu bếp nào dạy làm bánh?"
+  // bị nguyên liệu "bánh tráng" khớp theo 1 từ cướp mất intent.)
   // --- 9) Đầu bếp theo chuyên môn / 7) khóa theo nhu cầu ---
   const hoiDauBep =
     chuaCum(khoa, "dau bep nao") || chuaCum(khoa, "ai day") || chuaCum(khoa, "ai la dau bep");
@@ -739,6 +678,99 @@ export function traLoi(cauHoi: string, duLieu: DuLieuTroLy, slotIn: SlotTriNho):
       lyDoKhongTraLoi: `Không có bài viết khớp chủ đề của câu: "${cauHoi}".`,
       goiY: goiYMacDinh,
       yDinh: "bai_theo_chu_de",
+      slotDaCapNhat: slot,
+    };
+  }
+
+  // --- 2) Có gì nấu nấy (đa nguyên liệu) ---
+  if (nguyenLieuTimDuoc.length >= 2 || (nguyenLieuTimDuoc.length >= 1 && mauCoGiNauNay)) {
+    slot.nguyenLieuDangCo = nguyenLieuTimDuoc.map((n) => n.ten);
+    slot.nguyenLieuTruyVanGanNhat = nguyenLieuTimDuoc.map((n) => n.khoa);
+    if (slot.giaViDaXacNhan === null) {
+      return {
+        doanVan: [
+          `Bạn đang có: ${slot.nguyenLieuDangCo.join(", ")}. Trước khi gợi ý món, cho Cokba hỏi để tính đúng phần trăm khớp: Nhà bạn có đầy đủ các gia vị cơ bản này không? (chọn những gia vị nhà đang CÓ, rồi bấm xác nhận giúp Cokba nhé)`,
+        ],
+        the: [],
+        canHoiGiaVi: true,
+        danhSachGiaViDeHoi: [...GIA_VI_CO_BAN],
+        yDinh: "co_gi_nau_nay",
+        slotDaCapNhat: slot,
+      };
+    }
+    const ketQua = chamDiemTatCa(duLieu.congThuc, {
+      nguyenLieuNguoiDung: slot.nguyenLieuDangCo,
+      giaViDaXacNhan: slot.giaViDaXacNhan,
+    }).slice(0, 5);
+    if (ketQua.length === 0) {
+      return {
+        doanVan: [
+          `Với ${slot.nguyenLieuDangCo.join(", ")}, Cokba chưa tìm thấy món nào khớp trong dữ liệu hiện có. Bạn thử thêm nguyên liệu khác xem sao nhé.`,
+        ],
+        the: [],
+        khongTraLoiDuoc: true,
+        lyDoKhongTraLoi: `Không món nào khớp với nguyên liệu: ${slot.nguyenLieuDangCo.join(", ")}.`,
+        yDinh: "co_gi_nau_nay",
+        slotDaCapNhat: slot,
+      };
+    }
+    slot.danhSachVuaXem = ketQua.map((k) => k.congThuc.id);
+    slot.monDangBan = ketQua[0].congThuc.id;
+    return {
+      doanVan: [
+        `Với tủ bếp hiện tại, Cokba chấm điểm khớp cho từng món như sau (món khớp nhất xếp trước, còn thiếu gì Cokba ghi ngay trên thẻ):`,
+      ],
+      the: ketQua.map((k) =>
+        theMon(k.congThuc, {
+          diemKhop: k.phanTramKhop,
+          thieu: [...k.thieuChinh, ...k.thieuGiaVi],
+          meta: [
+            `Khớp ${k.phanTramKhop}%`,
+            ...(k.thieuChinh.length ? [`Thiếu chính: ${k.thieuChinh.join(", ")}`] : []),
+            ...(k.thieuGiaVi.length ? [`Thiếu gia vị: ${k.thieuGiaVi.join(", ")}`] : []),
+          ],
+        })
+      ),
+      goiY: ["Còn món khác không?"],
+      yDinh: "co_gi_nau_nay",
+      slotDaCapNhat: slot,
+    };
+  }
+
+  // --- 1) Món theo MỘT nguyên liệu (+ bộ lọc ghép tự do nếu có) ---
+  if (nguyenLieuTimDuoc.length === 1) {
+    const nl = nguyenLieuTimDuoc[0];
+    const ids = monCoNguyenLieu(chiMuc, nl.khoa);
+    const danhSach = ids
+      .map((id) => chiMuc.monTheoId.get(id)!)
+      .filter((m) => apLocMon(m, pt.boLoc));
+    const coBoLoc = pt.boLoc.doKho || pt.boLoc.thoiGianToiDa || pt.boLoc.danhMucMonKhoa;
+    slot.nguyenLieuDangCo = [nl.ten];
+    slot.nguyenLieuTruyVanGanNhat = [nl.khoa];
+    if (danhSach.length === 0) {
+      return {
+        doanVan: [
+          coBoLoc
+            ? `Có món làm bằng ${nl.ten}, nhưng không món nào thỏa thêm điều kiện bạn nêu. Cokba liệt kê tất cả món có ${nl.ten} để bạn xem nhé:`
+            : `Cokba chưa tìm thấy món nào làm bằng ${nl.ten} trong dữ liệu hiện có.`,
+        ],
+        the: coBoLoc ? ids.slice(0, 5).map((id) => theMon(chiMuc.monTheoId.get(id)!)) : [],
+        khongTraLoiDuoc: !coBoLoc,
+        lyDoKhongTraLoi: coBoLoc ? undefined : `Không có món nào dùng nguyên liệu "${nl.ten}".`,
+        yDinh: "mon_theo_nguyen_lieu",
+        slotDaCapNhat: slot,
+      };
+    }
+    const hienThi = danhSach.slice(0, 3);
+    slot.danhSachVuaXem = hienThi.map((m) => m.id);
+    slot.monDangBan = hienThi[0].id;
+    return {
+      doanVan: [
+        `Cokba tìm thấy ${danhSach.length} món làm bằng ${nl.ten}${coBoLoc ? " thỏa điều kiện bạn nêu" : ""}:`,
+      ],
+      the: hienThi.map((m) => theMon(m)),
+      goiY: danhSach.length > 3 ? ["Còn món khác không?"] : undefined,
+      yDinh: "mon_theo_nguyen_lieu",
       slotDaCapNhat: slot,
     };
   }

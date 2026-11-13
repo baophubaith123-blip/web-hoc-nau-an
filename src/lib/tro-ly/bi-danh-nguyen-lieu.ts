@@ -38,6 +38,8 @@ export const BI_DANH_NGUYEN_LIEU: Record<string, string> = {
   "chanh chuc": "Lá chanh Thái (chanh chúc)", // chanh chúc = lá chanh Thái
   "ca basa": "Cá lóc", // công thức ghi "Cá lóc (hoặc cá basa/cá hú)"
   "ca hu": "Cá lóc",
+  "dau hu": "Đậu hũ trắng (loại chắc)", // người dùng gõ ngắn "đậu hũ", dữ liệu ghi đầy đủ (vòng rèn luyện 1)
+  "sua tuoi": "Sữa tươi không đường", // tránh bị khớp nhầm sang "Sữa đặc" khi gõ ngắn (vòng rèn luyện 1)
 
   // Dạng sơ chế / mức độ của cùng nguyên liệu
   "hanh la thai nho": "Hành lá",

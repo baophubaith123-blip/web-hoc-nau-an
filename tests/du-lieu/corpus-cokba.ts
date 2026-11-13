@@ -1,4 +1,4 @@
-// Ngân hàng câu hỏi rèn luyện Cokba (Đợt 5A) — 151 mục / 169 lượt hỏi,
+// Ngân hàng câu hỏi rèn luyện Cokba (Đợt 5A) — 151 mục / 168 lượt hỏi,
 // viết trên THỰC THỂ THẬT của DB live (16 công thức xuất bản, 12 khóa,
 // 16 bài viết thật, 6 đầu bếp — số liệu đo ngày 2026-11-14).
 // Mọi số trong chuaChuoi đều được tính tay từ dữ liệu thật (phép tính ghi
@@ -197,7 +197,7 @@ export const CORPUS: MucCorpus[] = [
   { nhom: "ghep_dieu_kien", cauHoi: "Có bài nào về dinh dưỡng không?", kyVong: { loaiThe: "baiViet", chuaTieuDe: "Cách đọc nhãn dinh dưỡng" } },
   { nhom: "ghep_dieu_kien", cauHoi: "Món làm bằng trứng gà, độ khó dễ, dưới 30 phút", kyVong: { loaiThe: "mon", chuaTieuDe: "Cơm chiên dương châu", soTheToiDa: 1 }, ghiChu: "Trứng gà có ở 5 món; chỉ Cơm chiên vừa dễ vừa <30 phút." },
 
-  // ================= chuoi_tri_nho (8 chuỗi, 26 lượt) =================
+  // ================= chuoi_tri_nho (8 chuỗi, 25 lượt) =================
   {
     nhom: "chuoi_tri_nho",
     ghiChu: "Hỏi calo -> trả lời số người -> hỏi nguyên liệu 'món đó'.",
