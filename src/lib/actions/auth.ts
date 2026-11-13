@@ -121,3 +121,22 @@ export async function layVaiTroHienTai(): Promise<KetQua<{ vai_tro: VaiTro }>> {
   if (!p.ok) return p.loi;
   return thanhCong({ vai_tro: p.vaiTro });
 }
+// ===== ĐĂNG NHẬP NHANH ĐỂ DEMO =====
+// Phục vụ khối "Truy cập nhanh để demo" ở trang đăng nhập: bấm 1 nút là vào
+// thẳng giao diện của vai trò tương ứng bằng TÀI KHOẢN MẪU CÔNG KHAI ghi trong
+// README (mật khẩu chung của dữ liệu seed). Chỉ dùng để demo/bảo vệ đồ án và
+// test nhanh 4 giao diện — khi triển khai thật cho người dùng thật thì XÓA
+// action này cùng component DangNhapNhanhDemo.
+const TAI_KHOAN_DEMO: Record<string, string> = {
+  admin: "admin@naungon.vn",
+  hoc_vien: "user1@naungon.vn",
+  dau_bep: "chef@naungon.vn",
+  ho_tro: "support@naungon.vn",
+};
+const MAT_KHAU_DEMO = "Matkhau@123"; // mật khẩu chung của tài khoản mẫu (README)
+
+export async function dangNhapNhanhDemo(khoa: string): Promise<KetQua<{ chuyen_den: string }>> {
+  const email = TAI_KHOAN_DEMO[khoa];
+  if (!email) return thatBai("Tài khoản demo không hợp lệ. Vui lòng đăng nhập thủ công.");
+  return dangNhap({ email, mat_khau: MAT_KHAU_DEMO });
+}

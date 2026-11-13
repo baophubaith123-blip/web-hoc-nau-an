@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { dangNhapSchema, type DangNhapForm } from "@/lib/validations/auth";
 import { dangNhap } from "@/lib/actions/auth";
+import { DangNhapNhanhDemo } from "@/components/auth/dang-nhap-nhanh-demo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -118,6 +119,7 @@ export function FormDangNhap() {
           </p>
         </CardFooter>
       </form>
+      <DangNhapNhanhDemo />
     </Card>
   );
 }
