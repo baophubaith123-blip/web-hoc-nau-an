@@ -66,7 +66,7 @@ export function FormDangKy() {
     return (
       <Card className="w-full max-w-md mx-auto shadow-md text-center p-6 space-y-4">
         <CheckCircle2 className="mx-auto h-12 w-12 text-primary" />
-        <CardTitle className="text-xl font-bold">{vi.auth.dang_ky_thanh_cong}</CardTitle>
+        <CardTitle className="text-xl font-bold">{vi.auth.dang_ky_cho_xac_nhan}</CardTitle>
         <p className="text-sm text-muted-foreground">{vi.auth.email_chua_xac_nhan}</p>
         <Button asChild className="w-full mt-4">
           <Link href="/dang-nhap">{vi.auth.dang_nhap}</Link>
