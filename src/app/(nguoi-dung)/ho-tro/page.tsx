@@ -3,7 +3,6 @@ import { MessageSquare, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { TaoTicketDialog } from "./tao-ticket-dialog";
-import { TuCapNhatDanhSach } from "@/components/realtime/tu-cap-nhat-danh-sach";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 
 const TRANG_THAI_TICKET: Record<string, { nhan: string; class: string }> = {
@@ -27,8 +26,6 @@ export default async function TrangHoTro() {
 
   return (
     <div className="space-y-6">
-      {/* Realtime: trạng thái ticket của mình đổi là danh sách tự cập nhật (RLS chỉ gửi ticket của chính mình) */}
-      <TuCapNhatDanhSach cacBang={["ticket_ho_tro"]} />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Hỗ trợ & Khiếu nại</h1>
