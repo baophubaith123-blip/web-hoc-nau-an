@@ -751,3 +751,12 @@ Sau khi Antigravity viết xong file `003_goi_premium.sql` và `seed.sql`:
 2. **Seed phải idempotent** — chạy lại không nhân đôi dữ liệu
 3. **Nếu Antigravity báo "cần session mới"** — mở chat mới, paste lại prompt, nó sẽ đọc `WORK_LOG.md` để biết đang dừng ở đâu
 4. **Sau khi xong gói Pro** — test kỹ 4 luồng nghiệp vụ trước khi chuyển phần tiếp
+
+---
+
+## 📌 CẬP NHẬT 13/11/2026 — ĐỢT SỬA CHUYÊN SÂU
+
+- Luồng tiền: yêu cầu nâng cấp gắn với giao dịch thất bại/hủy tự chuyển `da_huy` (IPN + return handler); giao dịch `cho_xu_ly` quá 30 phút bị quét hủy lười qua `donYeuCauHetHan()` trong `src/lib/thanh-toan/yeu-cau.ts` (gọi ở trang duyệt nâng cấp, action danh sách và `/goi-cua-toi`). Duyệt Pro bị chặn ở cả UI lẫn server action khi thanh toán chưa `thanh_cong`. Thông báo giao dịch chỉ tạo ở IPN. Giá thanh toán khóa học lấy từ `khoa_hoc.gia` (DB) — không hard-code.
+- Giao diện staff: 3 khu vực dùng topbar riêng (`TopbarVaiTro`), màu nhấn theo vai trò qua `MAU_NHAN_VAI_TRO` (admin đỏ, chef cam, support xanh dương — không dùng tím). Middleware: `/tao-bai-viet` đã nằm trong `KHU_NGUOI_DUNG` và có cổng Pro giống `/tao-cong-thuc` (chuyển hướng `/nang-cap-pro?ly_do=...`).
+- Trang `/dau-bep` đọc hồ sơ đầu bếp bằng admin client (`@/lib/supabase/admin`) vì RLS `profiles` chặn client phiên; chỉ lấy trường công khai. Supabase Auth đã tắt Confirm email — đăng ký vào thẳng, toast dùng khóa `dang_ky_thanh_cong` (chào mừng), nhánh chờ xác nhận dùng `dang_ky_cho_xac_nhan`.
+
