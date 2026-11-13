@@ -767,6 +767,73 @@ export type Database = {
         };
         Relationships: [];
       };
+      cau_hoi_chua_tra_loi: {
+        Row: {
+          id: string;
+          cau_hoi: string;
+          cau_hoi_chuan_hoa: string;
+          so_lan: number;
+          nguoi_dung_id: string | null;
+          lan_hoi_gan_nhat: string;
+          trang_thai: string;
+          tao_luc: string;
+        };
+        Insert: {
+          id?: string;
+          cau_hoi: string;
+          cau_hoi_chuan_hoa: string;
+          so_lan?: number;
+          nguoi_dung_id?: string | null;
+          lan_hoi_gan_nhat?: string;
+          trang_thai?: string;
+          tao_luc?: string;
+        };
+        Update: {
+          id?: string;
+          cau_hoi?: string;
+          cau_hoi_chuan_hoa?: string;
+          so_lan?: number;
+          nguoi_dung_id?: string | null;
+          lan_hoi_gan_nhat?: string;
+          trang_thai?: string;
+          tao_luc?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "cau_hoi_chua_tra_loi_nguoi_dung_id_fkey";
+            columns: ["nguoi_dung_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tro_ly_tri_nho: {
+        Row: {
+          nguoi_dung_id: string;
+          cac_slot: Json;
+          cap_nhat_luc: string;
+        };
+        Insert: {
+          nguoi_dung_id: string;
+          cac_slot?: Json;
+          cap_nhat_luc?: string;
+        };
+        Update: {
+          nguoi_dung_id?: string;
+          cac_slot?: Json;
+          cap_nhat_luc?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tro_ly_tri_nho_nguoi_dung_id_fkey";
+            columns: ["nguoi_dung_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       cau_hinh_he_thong: {
         Row: {
           id: string;
