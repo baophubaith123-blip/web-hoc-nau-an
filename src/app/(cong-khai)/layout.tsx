@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/footer";
 import { taoNguoiDungHeader } from "@/components/layout/nguoi-dung-header";
 import { ThongBaoProvider } from "@/providers/thong-bao-provider";
 import { layPhienHienTai } from "@/lib/supabase/server";
+import { NutNoiCokba } from "@/components/tro-ly/nut-noi-cokba";
 
 export default async function CongKhaiLayout({ children }: { children: React.ReactNode }) {
   const phien = await layPhienHienTai();
@@ -14,6 +15,7 @@ export default async function CongKhaiLayout({ children }: { children: React.Rea
         <main className="flex-1">{children}</main>
         <Footer />
       </div>
+      <NutNoiCokba nguoiDungId={nguoiDung?.id ?? null} />
     </ThongBaoProvider>
   );
 }
