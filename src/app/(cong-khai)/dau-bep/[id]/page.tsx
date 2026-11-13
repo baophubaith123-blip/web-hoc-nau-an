@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { ChefHat, BookOpen, Utensils } from "lucide-react";
+import Link from "next/link";
+import { ChefHat, BookOpen, Utensils, Newspaper } from "lucide-react";
 import { TheCongThuc } from "@/components/cong-thuc/the-cong-thuc";
 import { TheKhoaHoc } from "@/components/khoa-hoc/the-khoa-hoc";
-import { taoSupabaseServer } from "@/lib/supabase/server";
 import { taoSupabaseAdmin } from "@/lib/supabase/admin";
 
 interface Props {
@@ -30,13 +30,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function HoSoDauBep({ params }: Props) {
   const { id } = await params;
-  const supabase = await taoSupabaseServer();
+  // Trang này CÔNG KHAI cho khách chưa đăng nhập (middleware đã bỏ /dau-bep/[id]
+  // khỏi danh sách chi tiết cần đăng nhập). Mọi truy vấn đều qua admin client
+  // và chỉ lấy nội dung ĐÃ XUẤT BẢN, vì RLS chặn khách đọc hồ sơ người khác
+  // cũng như tác giả đi kèm từng nội dung qua client phiên.
+  const supabase = taoSupabaseAdmin();
 
   // 1. Lấy thông tin đầu bếp — RLS profiles chặn đọc hồ sơ người khác qua client
   // phiên (khách mở trang này từng bị 404 oan) → đọc hồ sơ công khai bằng admin client
-  const { data: dauBep } = await taoSupabaseAdmin()
+  const { data: dauBep } = await supabase
     .from("profiles")
-    .select("*")
+    .select("id, ho_ten, avatar_url, bio")
     .eq("id", id)
     .eq("vai_tro", "chef")
     .eq("trang_thai", "hoat_dong")
@@ -46,8 +50,8 @@ export default async function HoSoDauBep({ params }: Props) {
     notFound();
   }
 
-  // 2. Lấy danh sách công thức của đầu bếp
-  const [congThucRes, khoaHocRes] = await Promise.all([
+  // 2. Lấy danh sách công thức, khóa học và bài viết của đầu bếp
+  const [congThucRes, khoaHocRes, baiVietRes] = await Promise.all([
     supabase
       .from("cong_thuc")
       .select("*, tac_gia:profiles(ho_ten, avatar_url)")
@@ -61,10 +65,17 @@ export default async function HoSoDauBep({ params }: Props) {
       .eq("dau_bep_id", dauBep.id)
       .eq("trang_thai", "xuat_ban")
       .order("created_at", { ascending: false }),
+    supabase
+      .from("bai_viet")
+      .select("id, tieu_de, slug, tom_tat, anh_dai_dien, created_at")
+      .eq("tac_gia_id", dauBep.id)
+      .eq("trang_thai", "xuat_ban")
+      .order("created_at", { ascending: false }),
   ]);
 
   const congThucList = congThucRes.data || [];
   const khoaHocList = khoaHocRes.data || [];
+  const baiVietList = baiVietRes.data || [];
 
   return (
     <div className="space-y-12 pb-16">
@@ -106,6 +117,10 @@ export default async function HoSoDauBep({ params }: Props) {
               <BookOpen className="h-4 w-4 text-primary" />
               <span>{khoaHocList.length} khóa học</span>
             </div>
+            <div className="flex items-center gap-1.5 font-medium">
+              <Newspaper className="h-4 w-4 text-primary" />
+              <span>{baiVietList.length} bài viết</span>
+            </div>
           </div>
         </div>
       </div>
@@ -139,6 +154,47 @@ export default async function HoSoDauBep({ params }: Props) {
           </div>
         )}
       </div>
+
+      {/* BÀI VIẾT CỦA ĐẦU BẾP */}
+      {baiVietList.length > 0 && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold tracking-tight">
+            Bài viết chia sẻ ({baiVietList.length})
+          </h2>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {baiVietList.map((bv) => (
+              <Link
+                key={bv.id}
+                href={`/bai-viet/${bv.slug}`}
+                className="group block overflow-hidden rounded-xl border bg-card transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+              >
+                <div className="relative aspect-16/9 w-full bg-muted">
+                  {bv.anh_dai_dien ? (
+                    <Image
+                      src={bv.anh_dai_dien}
+                      alt={bv.tieu_de}
+                      fill
+                      className="object-cover transition-transform group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                      <Newspaper className="h-8 w-8" />
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2 p-4">
+                  <h3 className="line-clamp-2 text-sm font-semibold transition-colors group-hover:text-primary">
+                    {bv.tieu_de}
+                  </h3>
+                  {bv.tom_tat && (
+                    <p className="line-clamp-2 text-xs text-muted-foreground">{bv.tom_tat}</p>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

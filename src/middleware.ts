@@ -3,11 +3,12 @@ import { capNhatPhien } from "@/lib/supabase/middleware";
 import { trangChuTheoVaiTro } from "@/lib/utils/vai-tro";
 import type { VaiTro } from "@/types";
 
-// Trang CHI TIẾT: guest bấm vào sẽ bị chuyển sang /dang-nhap
+// Trang CHI TIẾT: guest bấm vào sẽ bị chuyển sang /dang-nhap.
+// NGOẠI LỆ: chi tiết đầu bếp /dau-bep/[id] là hồ sơ CÔNG KHAI (bio + nội dung
+// đã xuất bản) nên khách chưa đăng nhập mở được — không nằm trong danh sách này.
 const CHI_TIET_CAN_DANG_NHAP = [
   /^\/cong-thuc\/[^/]+/,
   /^\/khoa-hoc\/[^/]+/,
-  /^\/dau-bep\/[^/]+/,
   /^\/bai-viet\/[^/]+/,
 ];
 

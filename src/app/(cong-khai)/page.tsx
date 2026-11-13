@@ -9,6 +9,7 @@ import { HeroTrangChu } from "@/components/trang-chu/hero-trang-chu";
 import { HienDan } from "@/components/trang-chu/hien-dan";
 import { DemSo } from "@/components/trang-chu/dem-so";
 import { taoSupabaseServer } from "@/lib/supabase/server";
+import { taoSupabaseAdmin } from "@/lib/supabase/admin";
 import { vi } from "@/lib/i18n/vi";
 
 export const metadata: Metadata = {
@@ -36,7 +37,10 @@ export default async function TrangChu() {
       .eq("trang_thai", "xuat_ban")
       .order("created_at", { ascending: false })
       .limit(3),
-    supabase
+    // Đầu bếp là thông tin công khai nhưng RLS profiles chỉ cho đọc hồ sơ của
+    // chính mình → client phiên trả 0 dòng và mục "Đầu bếp hàng đầu" không bao
+    // giờ hiện. Đọc bằng admin client, chỉ lấy trường công khai (mẫu /dau-bep).
+    taoSupabaseAdmin()
       .from("profiles")
       .select("id, ho_ten, avatar_url, bio")
       .eq("vai_tro", "chef")
