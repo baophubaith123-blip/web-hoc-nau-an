@@ -3,6 +3,7 @@ import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, ArrowLeft } from "lucide-react";
+import { TuCapNhatDanhSach } from "@/components/realtime/tu-cap-nhat-danh-sach";
 import { dinhDangTuongDoi } from "@/lib/utils/dinh-dang";
 import { nhanCua } from "@/lib/utils/hang-so";
 
@@ -55,6 +56,8 @@ export default async function DanhSachTicketSupportPage({ searchParams }: Props)
 
   return (
     <div className="space-y-6">
+      {/* Realtime: ticket mới / đổi trạng thái là hàng đợi tự cập nhật */}
+      <TuCapNhatDanhSach cacBang={["ticket_ho_tro"]} />
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <Button variant="outline" size="sm" asChild className="mb-2">
