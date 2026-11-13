@@ -13,5 +13,4 @@ export const LIEN_KET_CHINH = [
 
 export const LIEN_KET_PHU = [
   { nhan: vi.menu.tro_giup, href: "/tro-giup" },
-  { nhan: vi.menu.tra_cuu_chung_chi, href: "/tra-cuu-chung-chi" },
 ];

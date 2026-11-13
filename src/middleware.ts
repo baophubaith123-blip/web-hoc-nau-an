@@ -15,7 +15,7 @@ const CHI_TIET_CAN_DANG_NHAP = [
 const KHU_NGUOI_DUNG = [
   "/bang-dieu-khien", "/cong-thuc-cua-toi", "/khoa-hoc-cua-toi", "/hoc-bai",
   "/tao-cong-thuc", "/cong-thuc-da-gui", "/ho-so", "/thong-bao", "/ho-tro", "/thanh-toan",
-  "/nang-cap-pro", "/goi-cua-toi",
+  "/nang-cap-pro", "/goi-cua-toi", "/tao-bai-viet",
 ];
 
 // Khu vực theo vai trò

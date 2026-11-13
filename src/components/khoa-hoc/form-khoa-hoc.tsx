@@ -28,7 +28,7 @@ export function FormKhoaHoc({
   khoaHocId,
   duLieuMacDinh,
   vaiTroNguoiDung = "chef",
-  urlQuayLai = "/bep/quan-ly-khoa-hoc",
+  urlQuayLai = "/bep/khoa-hoc",
 }: FormKhoaHocProps) {
   const router = useRouter();
   const [dangXuLy, setDangXuLy] = useState(false);

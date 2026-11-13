@@ -46,13 +46,13 @@ export default async function ChefDashboard() {
 
         <div className="flex items-center gap-2">
           <Button asChild size="sm" variant="outline" className="gap-1.5">
-            <Link href="/quan-ly-cong-thuc/moi">
+            <Link href="/bep/cong-thuc/moi">
               <Plus className="h-4 w-4" />
               Thêm công thức
             </Link>
           </Button>
           <Button asChild size="sm" className="gap-1.5 shadow-sm">
-            <Link href="/quan-ly-khoa-hoc/moi">
+            <Link href="/bep/khoa-hoc/moi">
               <Plus className="h-4 w-4" />
               Tạo khóa học mới
             </Link>
@@ -93,7 +93,7 @@ export default async function ChefDashboard() {
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold">Khóa học của bạn</h2>
           <Button asChild variant="ghost" size="sm" className="gap-1">
-            <Link href="/quan-ly-khoa-hoc">
+            <Link href="/bep/khoa-hoc">
               Quản lý khóa học
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -119,7 +119,7 @@ export default async function ChefDashboard() {
                       : "Miễn phí"}
                   </span>
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/quan-ly-khoa-hoc/${kh.id}/bai-hoc`}>Quản lý bài học</Link>
+                    <Link href={`/bep/khoa-hoc/${kh.id}/bai-hoc`}>Quản lý bài học</Link>
                   </Button>
                 </div>
               </Card>
