@@ -760,3 +760,12 @@ Sau khi Antigravity viết xong file `003_goi_premium.sql` và `seed.sql`:
 - Giao diện staff: 3 khu vực dùng topbar riêng (`TopbarVaiTro`), màu nhấn theo vai trò qua `MAU_NHAN_VAI_TRO` (admin đỏ, chef cam, support xanh dương — không dùng tím). Middleware: `/tao-bai-viet` đã nằm trong `KHU_NGUOI_DUNG` và có cổng Pro giống `/tao-cong-thuc` (chuyển hướng `/nang-cap-pro?ly_do=...`).
 - Trang `/dau-bep` đọc hồ sơ đầu bếp bằng admin client (`@/lib/supabase/admin`) vì RLS `profiles` chặn client phiên; chỉ lấy trường công khai. Supabase Auth đã tắt Confirm email — đăng ký vào thẳng, toast dùng khóa `dang_ky_thanh_cong` (chào mừng), nhánh chờ xác nhận dùng `dang_ky_cho_xac_nhan`.
 
+
+---
+
+## 📌 CẬP NHẬT TỐI 13/11/2026 — ĐỢT BỔ SUNG (ĐẦU BẾP / CHỨNG CHỈ / ĐĂNG NHẬP DEMO)
+
+- Trang chủ: mục "Đầu bếp hàng đầu" truy vấn `profiles` bằng **admin client** (`taoSupabaseAdmin`), chỉ lấy `id, ho_ten, avatar_url, bio` — dùng client phiên sẽ trả 0 dòng vì RLS `profiles` (đây là gốc rễ việc "không thấy đầu bếp nào" ở giao diện người dùng). `/dau-bep` hiện số liệu thật từng đầu bếp (đếm công thức/khóa học/bài viết đã xuất bản) + khối đầu bếp nổi bật; dữ liệu DB có **6 profiles vai trò chef** (profiles tổng 15) và mọi chef đều được gắn tác giả nội dung.
+- Chi tiết đầu bếp `/dau-bep/[id]` là trang **công khai** (đã gỡ khỏi `CHI_TIET_CAN_DANG_NHAP` trong `src/middleware.ts`) — khác với chi tiết công thức/khóa học/bài viết vẫn cần đăng nhập.
+- Tra cứu chứng chỉ: route công khai `/tra-cuu-chung-chi` (form GET `?ma=`), tra `chung_chi` bằng admin client khớp mã chính xác; footer có link "Tra cứu chứng chỉ" trong `LIEN_KET_PHU` (`src/components/layout/lien-ket.ts`). PDF chứng chỉ vẫn qua `/api/chung-chi/[ma]/pdf`.
+- Đăng nhập nhanh demo: component `src/components/auth/dang-nhap-nhanh-demo.tsx` + server action `dangNhapNhanhDemo` trong `src/lib/actions/auth.ts` — 4 nút dùng tài khoản mẫu công khai (README): admin → `/quan-tri`, user1 (Pro) → `/bang-dieu-khien`, chef → `/bep`, support → `/nhan-vien` (khu hỗ trợ là `/nhan-vien`, còn `/ho-tro` là trang ticket phía học viên). Đây là tính năng demo phục vụ bảo vệ đồ án — xóa cả hai khi triển khai thật.
