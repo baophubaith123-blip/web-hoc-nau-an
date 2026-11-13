@@ -6,7 +6,7 @@ import { defineConfig } from "@playwright/test";
 // Chạy: npx playwright test -c playwright.node.config.ts
 export default defineConfig({
   testDir: "./tests",
-  testMatch: "tro-ly.spec.ts",
+  testMatch: ["tro-ly.spec.ts", "tro-ly-corpus.spec.ts"],
   timeout: 30_000,
   fullyParallel: false,
   workers: 1,
