@@ -91,6 +91,7 @@ export const MENU_QUAN_TRI: MucMenu[] = [
   { nhan: m.thanh_toan, href: "/quan-tri/thanh-toan", icon: "CreditCard" },
   { nhan: m.bao_cao, href: "/quan-tri/bao-cao", icon: "BarChart3" },
   { nhan: m.nhat_ky, href: "/quan-tri/nhat-ky", icon: "ScrollText" },
+  { nhan: m.nhat_ky_cokba, href: "/quan-tri/nhat-ky-cokba", icon: "Bot" },
   { nhan: m.cau_hinh, href: "/quan-tri/cau-hinh", icon: "Settings" },
 ];
 
