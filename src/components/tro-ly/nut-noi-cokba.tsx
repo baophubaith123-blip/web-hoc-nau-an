@@ -1,12 +1,23 @@
 "use client";
 
-// Nút nổi Cokba — chỉ được gắn ở layout khu CÔNG KHAI, góc dưới
-// phải. Trang hiện tại không có phần tử fixed nào khác ở góc này
-// nên không chồng lấn. Trên trang /tro-ly (đã có panel đầy đủ)
-// nút tự ẩn để tránh trùng lặp.
+// Nút TRÒN nổi Cokba — gắn ở layout khu CÔNG KHAI và layout khu
+// NGƯỜI DÙNG (mọi trang người dùng; 3 khu nhân viên quan-tri/bep/
+// nhan-vien có khung riêng nên KHÔNG gắn), cố định góc dưới phải,
+// kiểu nút tròn nổi của Hue Chef (FloatingGameButton).
+//
+// QUAN TRỌNG — vì sao phải render qua portal ra document.body:
+// template gốc (src/app/template.tsx) bọc MỌI nội dung trong div
+// .animate-page-in có `animation: page-in ... both` — keyframe cuối
+// giữ transform: translateY(0) vĩnh viễn (fill-mode both), biến div
+// đó thành containing block cho phần tử fixed: nút/panel đặt bên
+// trong sẽ bị neo theo chiều cao TOÀN TRANG thay vì khung nhìn
+// (trang chủ dài => nút chìm xuống đáy trang, khuất khỏi tầm mắt).
+// Portal đưa nút + panel ra thẳng body nên fixed bám đúng viewport
+// ở mọi trang, không phải đụng tới animation chuyển trang của site.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { ChefHat, X } from "lucide-react";
 import { vi } from "@/lib/i18n/vi";
@@ -26,11 +37,17 @@ const t = vi.tro_ly;
 export function NutNoiCokba({ nguoiDungId = null }: { nguoiDungId?: string | null }) {
   const [mo, setMo] = useState(false);
   const [daMoLanDau, setDaMoLanDau] = useState(false);
+  const [sanSangPortal, setSanSangPortal] = useState(false);
   const duongDan = usePathname();
 
-  if (duongDan === "/tro-ly") return null;
+  // Portal chỉ chạy được phía client sau khi mount.
+  useEffect(() => {
+    setSanSangPortal(true);
+  }, []);
 
-  return (
+  if (duongDan === "/tro-ly" || !sanSangPortal) return null;
+
+  return createPortal(
     <>
       {/* Panel: mobile toàn màn hình, desktop khung cố định bên phải.
           Chỉ mount sau lần mở đầu tiên; từ đó luôn giữ mounted (chỉ ẩn
@@ -50,6 +67,10 @@ export function NutNoiCokba({ nguoiDungId = null }: { nguoiDungId?: string | nul
         </div>
       )}
 
+      {/* Nút tròn nổi cố định 60px: icon ChefHat ở trạng thái đóng,
+          icon X khi panel đang mở (giữ hành vi đóng/mở cũ, không thêm
+          nút thứ hai). Vòng pulse nhẹ kiểu Hue Chef chỉ chạy khi panel
+          đang đóng và tôn trọng prefers-reduced-motion. */}
       <button
         type="button"
         data-testid="nut-noi-cokba"
@@ -58,12 +79,19 @@ export function NutNoiCokba({ nguoiDungId = null }: { nguoiDungId?: string | nul
           setMo((v) => !v);
         }}
         aria-label={mo ? t.dong : t.mo_panel}
+        title={mo ? t.dong : t.mo_panel}
         aria-expanded={mo}
-        className="fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full bg-primary py-3 pl-4 pr-5 text-sm font-bold text-primary-foreground shadow-xl transition hover:scale-[1.03] hover:opacity-95 active:scale-95"
+        className="fixed bottom-5 right-5 z-40 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-primary text-primary-foreground shadow-2xl ring-4 ring-white/70 transition duration-200 hover:-translate-y-0.5 hover:scale-105 active:translate-y-0 active:scale-95"
       >
-        {mo ? <X className="h-5 w-5" /> : <ChefHat className="h-5 w-5" />}
-        <span>{t.tieu_de}</span>
+        {!mo && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-full bg-primary/40 motion-safe:animate-ping"
+          />
+        )}
+        {mo ? <X className="relative h-6 w-6" /> : <ChefHat className="relative h-7 w-7" />}
       </button>
-    </>
+    </>,
+    document.body
   );
 }

@@ -1,4 +1,5 @@
 import { KhungDashboard } from "@/components/layout/khung-dashboard";
+import { NutNoiCokba } from "@/components/tro-ly/nut-noi-cokba";
 import { taoNguoiDungHeader } from "@/components/layout/nguoi-dung-header";
 import { yeuCauVaiTro } from "@/lib/supabase/server";
 import { MENU_NGUOI_DUNG, thongTinKhuVaiTro, type MucMenu } from "@/lib/utils/vai-tro";
@@ -37,8 +38,14 @@ export default async function NguoiDungLayout({ children }: { children: React.Re
     : menuCoKhoa;
 
   return (
-    <KhungDashboard nguoiDung={nguoiDung} menu={menuHienThi} tieuDe={vi.menu.bang_dieu_khien}>
-      {children}
-    </KhungDashboard>
+    <>
+      <KhungDashboard nguoiDung={nguoiDung} menu={menuHienThi} tieuDe={vi.menu.bang_dieu_khien}>
+        {children}
+      </KhungDashboard>
+      {/* Nút tròn nổi Cokba hiện ở MỌI trang khu người dùng (yêu cầu
+          của Bảo 14/11) — cùng component với khu công khai. 3 khu
+          nhân viên không gắn vì có khung riêng. */}
+      <NutNoiCokba nguoiDungId={nguoiDung.id} />
+    </>
   );
 }

@@ -112,7 +112,7 @@ export const en: typeof vi = {
     dang_nghi: "Cokba is thinking...",
     cau_mau: "Sample questions",
     dong: "Close",
-    mo_panel: "Open Cokba kitchen assistant",
+    mo_panel: "Open Cokba — Kitchen assistant",
     du_roi_goi_y: "That's all, suggest dishes for me",
   },
   nau_ranh_tay: {

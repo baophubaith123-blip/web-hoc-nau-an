@@ -321,7 +321,7 @@ export const vi = {
     dang_nghi: "Cokba đang nghĩ...",
     cau_mau: "Câu hỏi mẫu",
     loi_gui: "Cokba đang bận một chút, bạn thử hỏi lại sau ít giây nhé.",
-    mo_panel: "Mở trợ lý bếp Cokba",
+    mo_panel: "Mở Cokba — Trợ lý bếp",
     dong: "Đóng",
     hoi_gia_vi_tieu_de: "Nhà bạn có những gia vị này không?",
     hoi_gia_vi_mo_ta: "Tích là nhà ĐANG CÓ. Gia vị nào nhà không có thì bỏ tích — Cokba tính phần trăm khớp theo đúng những gì nhà bạn có.",
