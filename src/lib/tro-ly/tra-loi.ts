@@ -252,11 +252,13 @@ function traLoiCalo(
   }
   slotMoi.soNguoiAn = soNguoi;
   slotMoi.choSoNguoiAnChoMon = null;
-  const moiNguoi = Math.round(mon.calories / mon.khau_phan);
+  // Nghĩa đã chốt (F.3.1, 15/11): calories = kcal cho MỘT người ăn.
+  // Trước đây code chia cho khau_phan nên trả sai ~4 lần (L-01).
+  const moiNguoi = mon.calories;
   const tong = moiNguoi * soNguoi;
   return {
     doanVan: [
-      `Món ${mon.tieu_de}: công thức gốc cho ${mon.khau_phan} người có tổng ${mon.calories.toLocaleString("vi-VN")} calo, tức khoảng ${moiNguoi.toLocaleString("vi-VN")} calo/người. Nấu cho ${soNguoi} người thì tổng khoảng ${tong.toLocaleString("vi-VN")} calo.`,
+      `Món ${mon.tieu_de}: khoảng ${moiNguoi.toLocaleString("vi-VN")} calo/người. Nấu cho ${soNguoi} người thì tổng khoảng ${tong.toLocaleString("vi-VN")} calo.`,
     ],
     the: [theMon(mon)],
     yDinh: "calo_mon",

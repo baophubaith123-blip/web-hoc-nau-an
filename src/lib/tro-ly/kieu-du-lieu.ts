@@ -33,7 +33,7 @@ export interface CongThucTroLy {
   khau_phan: number; // số người ăn của công thức gốc
   do_kho: DoKhoMon;
   anh_dai_dien: string | null;
-  calories: number | null; // calo cho TOÀN BỘ công thức gốc (khau_phan người)
+  calories: number | null; // kcal cho MỘT người ăn (chốt 15/11 — đợt 2 sửa L-01); tổng cho N người = calories × N
   tac_gia_id: string;
   danh_muc: string[]; // tên danh mục hiển thị, VD ["Món chính", "Món chay"]
   danh_muc_slug: string[];

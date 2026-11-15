@@ -2,9 +2,10 @@
 // viết trên THỰC THỂ THẬT của DB live (16 công thức xuất bản, 12 khóa,
 // 16 bài viết thật, 6 đầu bếp — số liệu đo ngày 2026-11-14).
 // Mọi số trong chuaChuoi đều được tính tay từ dữ liệu thật (phép tính ghi
-// ở ghiChu): calo/người = làm tròn(calories / khau_phan), tổng = calo/người
-// × số người (đúng công thức engine tra-loi.ts dùng); nguyên liệu chia theo
-// chia-khau-phan.ts (g/ml bội 5, đơn vị đếm bội 0,5, "con" tròn lên).
+// ở ghiChu): calories = kcal cho MỘT người ăn (nghĩa đã chốt 15/11, đợt 2
+// sửa L-01), tổng cho N người = calories × N (đúng công thức engine
+// tra-loi.ts dùng); nguyên liệu chia theo chia-khau-phan.ts (g/ml bội 5,
+// đơn vị đếm bội 0,5, "con" tròn lên).
 
 import type { SlotTriNho } from "../../src/lib/tro-ly/kieu-du-lieu";
 
@@ -110,10 +111,10 @@ export const CORPUS: MucCorpus[] = [
   { nhom: "viet_tay", cauHoi: "Có bài nào về gia vị không?", kyVong: { loaiThe: "baiViet", chuaTieuDe: "Tủ gia vị Việt" } },
   // intent 12: calo
   { nhom: "viet_tay", cauHoi: "Phở bò Hà Nội bao nhiêu calo?", kyVong: { coCo: "choSoNguoiAn" }, ghiChu: "Chưa biết số người -> phải hỏi lại (luật calo)." },
-  { nhom: "viet_tay", cauHoi: "Đậu hũ sốt cà chua bao nhiêu calo cho 6 người?", kyVong: { loaiThe: "mon", chuaChuoi: "480" }, ghiChu: "240 calo / 3 người = 80/người; 80 x 6 = 480." },
-  { nhom: "viet_tay", cauHoi: "Cơm chiên dương châu bao nhiêu calo cho 4 người?", kyVong: { loaiThe: "mon", chuaChuoi: "1.120" }, ghiChu: "560 / 2 = 280/người; 280 x 4 = 1120 (định dạng vi-VN: 1.120)." },
-  { nhom: "viet_tay", cauHoi: "Bò lúc lắc bao nhiêu calo cho 2 người?", kyVong: { loaiThe: "mon", chuaChuoi: "320" }, ghiChu: "480 / 3 = 160/người; 160 x 2 = 320." },
-  { nhom: "viet_tay", cauHoi: "Canh chua cá lóc bao nhiêu calo cho 2 người?", kyVong: { loaiThe: "mon", chuaChuoi: "106" }, ghiChu: "210 / 4 = 52,5 -> làm tròn 53/người; 53 x 2 = 106." },
+  { nhom: "viet_tay", cauHoi: "Đậu hũ sốt cà chua bao nhiêu calo cho 6 người?", kyVong: { loaiThe: "mon", chuaChuoi: "1.440" }, ghiChu: "Đợt 2 (L-01): calories = 240 kcal/người; 240 x 6 = 1.440. (Kỳ vọng cũ 480 theo công thức chia khẩu phần đã bỏ.)" },
+  { nhom: "viet_tay", cauHoi: "Cơm chiên dương châu bao nhiêu calo cho 4 người?", kyVong: { loaiThe: "mon", chuaChuoi: "2.240" }, ghiChu: "Đợt 2 (L-01): 560 kcal/người x 4 = 2.240 (định dạng vi-VN). (Kỳ vọng cũ 1.120 theo công thức chia khẩu phần đã bỏ.)" },
+  { nhom: "viet_tay", cauHoi: "Bò lúc lắc bao nhiêu calo cho 2 người?", kyVong: { loaiThe: "mon", chuaChuoi: "960" }, ghiChu: "Đợt 2 (L-01): 480 kcal/người x 2 = 960. (Kỳ vọng cũ 320 theo công thức chia khẩu phần đã bỏ.)" },
+  { nhom: "viet_tay", cauHoi: "Canh chua cá lóc bao nhiêu calo cho 2 người?", kyVong: { loaiThe: "mon", chuaChuoi: "420" }, ghiChu: "Đợt 2 (L-01): 210 kcal/người x 2 = 420. (Kỳ vọng cũ 106 theo công thức chia khẩu phần đã bỏ.)" },
 
   // ================= dien_dat_lai (40) =================
   { nhom: "dien_dat_lai", cauHoi: "Cokba ơi, món gì nấu với cà chua được nhỉ?", kyVong: { loaiThe: "mon", chuaTieuDe: "Canh chua cá lóc" } },
@@ -139,7 +140,7 @@ export const CORPUS: MucCorpus[] = [
   { nhom: "dien_dat_lai", cauHoi: "Viết về nước dùng thì có bài gì?", kyVong: { loaiThe: "baiViet", chuaTieuDe: "Bí quyết nấu nước dùng" } },
   { nhom: "dien_dat_lai", cauHoi: "Mẹo bảo quản rau củ có bài nào không?", kyVong: { loaiThe: "baiViet", chuaTieuDe: "Bảo quản rau củ" } },
   { nhom: "dien_dat_lai", cauHoi: "Súp cua chứa bao nhiêu năng lượng?", kyVong: { coCo: "choSoNguoiAn" }, ghiChu: "'Năng lượng' = calo, diễn đạt đồng nghĩa; chưa biết số người nên phải hỏi lại." },
-  { nhom: "dien_dat_lai", cauHoi: "Cho 3 người thì phở bò tổng cộng mấy calo?", kyVong: { loaiThe: "mon", chuaChuoi: "339" }, ghiChu: "450 / 4 = 112,5 -> 113/người; 113 x 3 = 339. Gọi tắt 'phở bò' thay cho tên đầy đủ." },
+  { nhom: "dien_dat_lai", cauHoi: "Cho 3 người thì phở bò tổng cộng mấy calo?", kyVong: { loaiThe: "mon", chuaChuoi: "1.350" }, ghiChu: "Đợt 2 (L-01): 450 kcal/người x 3 = 1.350. Gọi tắt 'phở bò' thay cho tên đầy đủ. (Kỳ vọng cũ 339 theo công thức chia khẩu phần đã bỏ.)" },
   { nhom: "dien_dat_lai", cauHoi: "Đổi khẩu phần đậu hũ sốt cà chua sang 6 người giúp mình", kyVong: { loaiThe: "mon", chuaChuoi: "8 bìa" }, ghiChu: "Đậu hũ 4 bìa (gốc 3 người) x 6/3 = 8 bìa." },
   { nhom: "dien_dat_lai", cauHoi: "Nguyên liệu làm gỏi cuốn cho 4 người gồm gì?", kyVong: { loaiThe: "mon", chuaChuoi: "300 g" }, ghiChu: "Gọi tắt 'gỏi cuốn'; gốc 4 người: bún tươi 300 g giữ nguyên." },
   { nhom: "dien_dat_lai", cauHoi: "Nhà có sẵn đậu hũ với cà chua, gợi ý món đi Cokba", kyVong: { coCo: "canHoiGiaVi" } },
@@ -171,7 +172,7 @@ export const CORPUS: MucCorpus[] = [
   { nhom: "khong_dau", cauHoi: "mon chay nao de lam bang ca chua duoi 30 phut", kyVong: { loaiThe: "mon", chuaTieuDe: "Đậu hũ sốt cà chua" } },
   { nhom: "khong_dau", cauHoi: "canh chua ca loc can nguyen lieu gi cho 2 nguoi", kyVong: { loaiThe: "mon", chuaChuoi: "300 g" } },
   { nhom: "khong_dau", cauHoi: "khoa nau an cho nguoi moi bat dau gom may bai", kyVong: { loaiThe: "khoaHoc", chuaChuoi: "3 bài" } },
-  { nhom: "khong_dau", cauHoi: "com chien duong chau bao nhieu calo cho 4 nguoi", kyVong: { loaiThe: "mon", chuaChuoi: "1.120" }, ghiChu: "560 / 2 = 280/người; 280 x 4 = 1120." },
+  { nhom: "khong_dau", cauHoi: "com chien duong chau bao nhieu calo cho 4 nguoi", kyVong: { loaiThe: "mon", chuaChuoi: "2.240" }, ghiChu: "Đợt 2 (L-01): 560 kcal/người x 4 = 2.240. (Kỳ vọng cũ 1.120 theo công thức chia khẩu phần đã bỏ.)" },
   { nhom: "khong_dau", cauHoi: "mon nao lam bang ca loc", kyVong: { loaiThe: "mon", chuaTieuDe: "Cá kho tộ" } },
   { nhom: "khong_dau", cauHoi: "dau bep tran van minh co mon nao", kyVong: { loaiThe: "dauBep", chuaTieuDe: "Trần Văn Minh" } },
   { nhom: "khong_dau", cauHoi: "khoa hoc nang cao co nhung khoa nao", kyVong: { loaiThe: "khoaHoc", chuaTieuDe: "Kỹ thuật bếp chuyên nghiệp" } },
@@ -200,10 +201,10 @@ export const CORPUS: MucCorpus[] = [
   // ================= chuoi_tri_nho (8 chuỗi, 25 lượt) =================
   {
     nhom: "chuoi_tri_nho",
-    ghiChu: "Hỏi calo -> trả lời số người -> hỏi nguyên liệu 'món đó'.",
+    ghiChu: "Hỏi calo -> trả lời số người -> hỏi nguyên liệu 'món đó'. (Lượt calo cập nhật đợt 2 theo L-01: 450 x 4 = 1.800; kỳ vọng cũ 452.)",
     luot: [
       { cauHoi: "Phở bò Hà Nội bao nhiêu calo?", kyVong: { coCo: "choSoNguoiAn" } },
-      { cauHoi: "4 người", kyVong: { chuaChuoi: "452" } },
+      { cauHoi: "4 người", kyVong: { chuaChuoi: "1.800" } },
       { cauHoi: "Món đó cần nguyên liệu gì?", kyVong: { loaiThe: "mon", chuaChuoi: "1 kg" } },
     ],
   },
@@ -214,7 +215,7 @@ export const CORPUS: MucCorpus[] = [
       { cauHoi: "Món nào làm bằng cà chua?", kyVong: { loaiThe: "mon", chuaTieuDe: "Canh chua cá lóc" } },
       { cauHoi: "Còn món khác không?", kyVong: { chuaChuoi: "liệt kê hết" } },
       { cauHoi: "Đậu hũ sốt cà chua bao nhiêu calo?", kyVong: { coCo: "choSoNguoiAn" } },
-      { cauHoi: "6", kyVong: { chuaChuoi: "480" } },
+      { cauHoi: "6", kyVong: { chuaChuoi: "1.440" } },
     ],
   },
   {
@@ -237,20 +238,20 @@ export const CORPUS: MucCorpus[] = [
   },
   {
     nhom: "chuoi_tri_nho",
-    ghiChu: "Nguyên liệu 2 người -> 'đổi sang 4 người' -> calo 'món đó' phải dùng luôn số người đã biết (280 x 4 = 1120).",
+    ghiChu: "Nguyên liệu 2 người -> 'đổi sang 4 người' -> calo 'món đó' phải dùng luôn số người đã biết (đợt 2, L-01: 560 x 4 = 2.240; kỳ vọng cũ 1.120).",
     luot: [
       { cauHoi: "Nguyên liệu món Cơm chiên dương châu cho 2 người", kyVong: { chuaChuoi: "3 quả" } },
       { cauHoi: "Đổi sang 4 người", kyVong: { chuaChuoi: "6 quả" } },
-      { cauHoi: "Món đó bao nhiêu calo?", kyVong: { chuaChuoi: "1.120" } },
+      { cauHoi: "Món đó bao nhiêu calo?", kyVong: { chuaChuoi: "2.240" } },
     ],
   },
   {
     nhom: "chuoi_tri_nho",
-    ghiChu: "Cách làm -> nguyên liệu 'món đó' cho 8 người (bột gạo 300 g x 2 = 600 g) -> calo 'món đó' (95/người x 8 = 760).",
+    ghiChu: "Cách làm -> nguyên liệu 'món đó' cho 8 người (bột gạo 300 g x 2 = 600 g) -> calo 'món đó' (đợt 2, L-01: 380/người x 8 = 3.040; kỳ vọng cũ 760).",
     luot: [
       { cauHoi: "Cách làm bánh xèo miền Tây thế nào?", kyVong: { chuaChuoi: "7 bước" } },
       { cauHoi: "Món đó cần nguyên liệu gì cho 8 người?", kyVong: { chuaChuoi: "600 g" } },
-      { cauHoi: "Món đó bao nhiêu calo?", kyVong: { chuaChuoi: "760" } },
+      { cauHoi: "Món đó bao nhiêu calo?", kyVong: { chuaChuoi: "3.040" } },
     ],
   },
   {

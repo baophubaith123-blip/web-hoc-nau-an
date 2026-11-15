@@ -26,16 +26,18 @@ test.beforeAll(async () => {
 
 test("nap du lieu that: dung so luong 4 mien", () => {
   const chiMuc = dungChiMuc(duLieu);
-  // Đo trên DB live 2026-11-14: cong_thuc có 17 dòng nhưng 1 dòng đang
-  // "cho_duyet" (Mì Ý sốt bò bằm) nên bộ lọc xuat_ban của tai-du-lieu.ts
-  // cho 16; bai_viet 20 dòng gồm 4 bài TEST_ bị loại ở chỉ mục còn 16.
+  // Đo trên DB live: cong_thuc có 17 dòng nhưng 1 dòng đang "cho_duyet"
+  // (Mì Ý sốt bò bằm) nên bộ lọc xuat_ban cho 16. Bài viết: DB có 20 dòng
+  // nhưng 4 bài TEST_PW đã được duyệt chuyển về NHÁP ngày 14/11/2026 nên
+  // bộ nạp (chỉ lấy xuat_ban) trả 16 bài thật và chỉ mục cũng 16 — kỳ
+  // vọng cũ 20 đã lệch sau thay đổi dữ liệu đó (L-06, sửa ở đợt 2).
   console.log(
     `[corpus] du lieu that: congThuc=${duLieu.congThuc.length} khoaHoc=${duLieu.khoaHoc.length} ` +
       `baiViet=${duLieu.baiViet.length} (chi muc ${chiMuc.baiVietTheoId.size}) dauBep=${duLieu.dauBep.length}`
   );
   expect(duLieu.congThuc.length).toBe(16);
   expect(duLieu.khoaHoc.length).toBe(12);
-  expect(duLieu.baiViet.length).toBe(20);
+  expect(duLieu.baiViet.length).toBe(16);
   expect(chiMuc.baiVietTheoId.size).toBe(16);
   expect(duLieu.dauBep.length).toBe(6);
 });
