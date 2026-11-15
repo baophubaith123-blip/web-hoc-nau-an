@@ -5,6 +5,7 @@ import { ChefHat, Utensils, BookOpen, Newspaper, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { taoSupabaseAdmin } from "@/lib/supabase/admin";
+import { voiLocXoa } from "@/lib/thung-rac";
 
 export const metadata: Metadata = {
   title: "Đội ngũ đầu bếp",
@@ -43,16 +44,22 @@ export default async function DanhSachDauBep() {
         .in("tac_gia_id", ids)
         .eq("trang_thai", "xuat_ban")
         .is("deleted_at", null),
-      supabase
-        .from("khoa_hoc")
-        .select("dau_bep_id")
-        .in("dau_bep_id", ids)
-        .eq("trang_thai", "xuat_ban"),
-      supabase
-        .from("bai_viet")
-        .select("tac_gia_id")
-        .in("tac_gia_id", ids)
-        .eq("trang_thai", "xuat_ban"),
+      voiLocXoa((loc) => {
+        const q = supabase
+          .from("khoa_hoc")
+          .select("dau_bep_id")
+          .in("dau_bep_id", ids)
+          .eq("trang_thai", "xuat_ban");
+        return loc ? q.is("deleted_at", null) : q;
+      }),
+      voiLocXoa((loc) => {
+        const q = supabase
+          .from("bai_viet")
+          .select("tac_gia_id")
+          .in("tac_gia_id", ids)
+          .eq("trang_thai", "xuat_ban");
+        return loc ? q.is("deleted_at", null) : q;
+      }),
     ]);
     (ctRes.data || []).forEach((r) => {
       const s = soLieu.get(r.tac_gia_id);

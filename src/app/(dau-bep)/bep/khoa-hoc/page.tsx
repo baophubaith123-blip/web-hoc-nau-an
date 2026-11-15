@@ -6,16 +6,20 @@ import { Plus, Edit3, BookOpen, Clock, Award, Eye } from "lucide-react";
 import Image from "next/image";
 import { HienThiGia } from "@/components/thanh-toan/hien-thi-gia";
 import type { Bang } from "@/types";
+import { NutXoaVaoThungRac } from "@/components/thung-rac/nut-xoa-vao-thung-rac";
 
 export default async function QuanLyKhoaHocDauBepPage() {
   const phien = await yeuCauVaiTro(["chef", "admin"]);
   const supabase = await taoSupabaseServer();
 
-  const { data: danhSachKhoaHoc } = await supabase
+  const { data: danhSachKhoaHocTho } = await supabase
     .from("khoa_hoc")
     .select("*")
     .eq("dau_bep_id", phien.user.id)
     .order("created_at", { ascending: false });
+
+  // Ẩn khóa học đang nằm trong thùng rác (deleted_at có từ migration 009)
+  const danhSachKhoaHoc = (danhSachKhoaHocTho || []).filter((kh) => !kh.deleted_at);
 
   const nhanTrangThai: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
     xuat_ban: { label: "Đã xuất bản", variant: "default" },
@@ -130,6 +134,7 @@ export default async function QuanLyKhoaHocDauBepPage() {
                         <Edit3 className="w-4 h-4 mr-1" /> Sửa
                       </Link>
                     </Button>
+                    <NutXoaVaoThungRac loai="khoa_hoc" id={kh.id} tieuDe={kh.tieu_de} />
                   </div>
                 </div>
               </div>

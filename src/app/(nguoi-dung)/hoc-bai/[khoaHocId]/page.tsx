@@ -14,11 +14,12 @@ export default async function ChuyenHuongHocBai({ params }: Props) {
   // Kiểm tra quyền học
   const { data: kh } = await supabase
     .from("khoa_hoc")
-    .select("id, mien_phi")
+    .select("*")
     .eq("id", khoaHocId)
     .single();
 
-  if (!kh) notFound();
+  // Khóa học trong thùng rác (deleted_at có từ migration 009) → học viên không vào học được
+  if (!kh || kh.deleted_at) notFound();
 
   // Kiểm tra đăng ký
   const { data: dk } = await supabase

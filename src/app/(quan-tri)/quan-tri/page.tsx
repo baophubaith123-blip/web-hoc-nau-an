@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { dinhDangTuongDoi } from "@/lib/utils/dinh-dang";
 import { dinhDangTien } from "@/lib/utils/dinh-dang";
+import { voiLocXoa } from "@/lib/thung-rac";
 
 export default async function QuanTriDashboardPage() {
   await yeuCauVaiTro(["admin"]);
@@ -31,7 +32,10 @@ export default async function QuanTriDashboardPage() {
     supabase.from("profiles").select("*", { count: "exact", head: true }).eq("vai_tro", "chef"),
     supabase.from("cong_thuc").select("*", { count: "exact", head: true }).is("deleted_at", null),
     supabase.from("cong_thuc").select("*", { count: "exact", head: true }).eq("trang_thai", "cho_duyet").is("deleted_at", null),
-    supabase.from("khoa_hoc").select("*", { count: "exact", head: true }),
+    voiLocXoa((loc) => {
+      const q = supabase.from("khoa_hoc").select("*", { count: "exact", head: true });
+      return loc ? q.is("deleted_at", null) : q;
+    }),
     supabase.from("dang_ky_khoa_hoc").select("khoa_hoc:khoa_hoc(gia)").eq("da_thanh_toan", true),
     supabase
       .from("cong_thuc")

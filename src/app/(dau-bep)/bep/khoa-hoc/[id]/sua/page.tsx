@@ -17,7 +17,7 @@ export default async function SuaKhoaHocDauBepPage({ params }: Props) {
     .eq("id", id)
     .maybeSingle();
 
-  if (!khoaHoc || (khoaHoc.dau_bep_id !== phien.user.id && phien.profile.vai_tro !== "admin")) {
+  if (!khoaHoc || khoaHoc.deleted_at || (khoaHoc.dau_bep_id !== phien.user.id && phien.profile.vai_tro !== "admin")) {
     notFound();
   }
 

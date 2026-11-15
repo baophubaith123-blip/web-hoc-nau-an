@@ -28,7 +28,8 @@ export default async function ChiTietKhoaHoc({ params }: Props) {
     .eq("trang_thai", "xuat_ban")
     .maybeSingle();
 
-  if (error || !kh) {
+  // Khóa học trong thùng rác (deleted_at có từ migration 009) → 404 như khóa nháp
+  if (error || !kh || kh.deleted_at) {
     notFound();
   }
 

@@ -21,7 +21,8 @@ export default async function ChiTietBaiViet({ params }: Props) {
     .eq("trang_thai", "xuat_ban")
     .maybeSingle();
 
-  if (!bv) {
+  // Bài viết trong thùng rác (deleted_at có từ migration 009) → 404 như bài nháp
+  if (!bv || bv.deleted_at) {
     notFound();
   }
 

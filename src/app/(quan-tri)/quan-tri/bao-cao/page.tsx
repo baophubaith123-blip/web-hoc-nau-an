@@ -2,6 +2,7 @@ import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
 import { TheThongKe } from "@/components/quan-tri/the-thong-ke";
 import { BarChart3, BookOpen, Eye, TrendingUp, Users, Award } from "lucide-react";
 import { dinhDangTien } from "@/lib/utils/dinh-dang";
+import { voiLocXoa } from "@/lib/thung-rac";
 
 export default async function BaoCaoThongKePage() {
   await yeuCauVaiTro(["admin"]);
@@ -17,7 +18,10 @@ export default async function BaoCaoThongKePage() {
     supabase.from("dang_ky_khoa_hoc").select("*", { count: "exact", head: true }),
     supabase.from("chung_chi").select("*", { count: "exact", head: true }),
     supabase.from("cong_thuc").select("tieu_de, luot_xem, slug").is("deleted_at", null).order("luot_xem", { ascending: false }).limit(5),
-    supabase.from("khoa_hoc").select("tieu_de, gia, mien_phi, slug").order("created_at", { ascending: false }).limit(5),
+    voiLocXoa((loc) => {
+      const q = supabase.from("khoa_hoc").select("tieu_de, gia, mien_phi, slug").order("created_at", { ascending: false }).limit(5);
+      return loc ? q.is("deleted_at", null) : q;
+    }),
     supabase.from("thanh_toan").select("so_tien").eq("trang_thai", "thanh_cong"),
   ]);
 

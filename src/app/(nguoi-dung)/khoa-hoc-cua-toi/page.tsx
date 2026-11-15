@@ -58,7 +58,8 @@ export default async function KhoaHocCuaToi() {
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {dangKyList.map((dk) => {
             const kh = dk.khoa_hoc;
-            if (!kh) return null;
+            // Ẩn khóa học đang nằm trong thùng rác (deleted_at có từ migration 009)
+            if (!kh || kh.deleted_at) return null;
             const maChungChi = mapChungChi.get(kh.id);
             const daXong = dk.phan_tram_tien_do >= 100;
 

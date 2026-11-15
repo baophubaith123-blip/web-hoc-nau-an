@@ -17,7 +17,7 @@ export default async function SuaKhoaHocAdminPage({ params }: Props) {
     .eq("id", id)
     .maybeSingle();
 
-  if (!khoaHoc) {
+  if (!khoaHoc || khoaHoc.deleted_at) {
     notFound();
   }
 

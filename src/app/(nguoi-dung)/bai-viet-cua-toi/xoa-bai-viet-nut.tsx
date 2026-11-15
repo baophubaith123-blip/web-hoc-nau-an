@@ -30,7 +30,7 @@ export function XoaBaiVietCuaToiNut({ baiVietId, tieuDe }: { baiVietId: string; 
         toast.error(res.loi);
         return;
       }
-      toast.success("Đã xóa bài viết");
+      toast.success("Đã chuyển bài viết vào thùng rác");
       setMo(false);
       router.refresh();
     } catch {
@@ -52,8 +52,9 @@ export function XoaBaiVietCuaToiNut({ baiVietId, tieuDe }: { baiVietId: string; 
         <DialogHeader>
           <DialogTitle>Xóa bài viết này?</DialogTitle>
           <DialogDescription>
-            Bài viết <span className="font-semibold text-foreground">{tieuDe}</span> sẽ bị xóa vĩnh
-            viễn và không khôi phục được.
+            Bài viết <span className="font-semibold text-foreground">{tieuDe}</span> sẽ được chuyển
+            vào Thùng rác. Bạn có thể khôi phục trong vòng 30 ngày; sau 30 ngày bài viết sẽ bị
+            xóa vĩnh viễn.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

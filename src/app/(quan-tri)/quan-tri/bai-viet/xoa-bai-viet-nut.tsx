@@ -12,12 +12,12 @@ export function XoaBaiVietNut({ baiVietId }: { baiVietId: string }) {
   const [dangXuLy, setDangXuLy] = useState(false);
 
   const xuLyXoa = async () => {
-    if (!confirm("Bạn có chắc chắn muốn xóa bài viết này?")) return;
+    if (!confirm("Bài viết này sẽ được chuyển vào Thùng rác — bạn có thể khôi phục trong vòng 30 ngày. Tiếp tục xóa?")) return;
     setDangXuLy(true);
     try {
       const res = await xoaBaiViet(baiVietId);
       if (res.thanh_cong) {
-        toast.success("Đã xóa bài viết thành công!");
+        toast.success("Đã chuyển bài viết vào thùng rác!");
         router.refresh();
       } else {
         toast.error(res.loi);

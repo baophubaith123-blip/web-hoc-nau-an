@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { taoSupabaseAdmin } from "@/lib/supabase/admin";
+import { voiLocXoa } from "@/lib/thung-rac";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -32,16 +33,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           .eq("trang_thai", "xuat_ban")
           .is("deleted_at", null)
           .limit(100),
-        admin
-          .from("khoa_hoc")
-          .select("slug, updated_at")
-          .eq("trang_thai", "xuat_ban")
-          .limit(100),
-        admin
-          .from("bai_viet")
-          .select("slug, updated_at")
-          .eq("trang_thai", "xuat_ban")
-          .limit(100),
+        voiLocXoa((loc) => {
+          const q = admin
+            .from("khoa_hoc")
+            .select("slug, updated_at")
+            .eq("trang_thai", "xuat_ban")
+            .limit(100);
+          return loc ? q.is("deleted_at", null) : q;
+        }),
+        voiLocXoa((loc) => {
+          const q = admin
+            .from("bai_viet")
+            .select("slug, updated_at")
+            .eq("trang_thai", "xuat_ban")
+            .limit(100);
+          return loc ? q.is("deleted_at", null) : q;
+        }),
       ]);
 
     const routesCongThuc: MetadataRoute.Sitemap = (congThucList || []).map((ct) => ({

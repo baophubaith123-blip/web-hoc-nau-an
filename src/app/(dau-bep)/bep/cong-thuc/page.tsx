@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Edit3, Eye, Clock, Users } from "lucide-react";
 import Image from "next/image";
 import type { Bang } from "@/types";
+import { NutXoaVaoThungRac } from "@/components/thung-rac/nut-xoa-vao-thung-rac";
 
 export default async function QuanLyCongThucDauBepPage() {
   const phien = await yeuCauVaiTro(["chef", "admin"]);
@@ -117,6 +118,7 @@ export default async function QuanLyCongThucDauBepPage() {
                       <Edit3 className="w-4 h-4 mr-1" /> Sửa
                     </Link>
                   </Button>
+                  <NutXoaVaoThungRac loai="cong_thuc" id={ct.id} tieuDe={ct.tieu_de} />
                 </div>
               </div>
             );

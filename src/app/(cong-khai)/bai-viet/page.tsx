@@ -17,11 +17,15 @@ export const metadata: Metadata = {
 export default async function DanhSachBaiViet() {
   const supabase = await taoSupabaseServer();
 
-  const { data: danhSach } = await supabase
+  const { data: danhSachTho } = await supabase
     .from("bai_viet")
     .select("*, tac_gia:profiles(ho_ten, avatar_url)")
     .eq("trang_thai", "xuat_ban")
     .order("created_at", { ascending: false });
+
+  // Ẩn bài viết đang nằm trong thùng rác (cột deleted_at có từ migration 009;
+  // trước đó trường này không tồn tại nên bộ lọc không loại bài nào)
+  const danhSach = (danhSachTho || []).filter((bv) => !bv.deleted_at);
 
   return (
     <div className="space-y-8 pb-16">

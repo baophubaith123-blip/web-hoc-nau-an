@@ -22,11 +22,14 @@ export default async function BaiVietCuaToi() {
   const quyenCao = phien.profile.vai_tro === "chef" || phien.profile.vai_tro === "admin";
   const duocVietBai = quyenCao || laProConHan(phien.profile);
 
-  const { data: danhSach } = await supabase
+  const { data: danhSachTho } = await supabase
     .from("bai_viet")
     .select("*")
     .eq("tac_gia_id", phien.user.id)
     .order("created_at", { ascending: false });
+
+  // Ẩn bài viết đang nằm trong thùng rác (deleted_at có từ migration 009)
+  const danhSach = (danhSachTho || []).filter((bv) => !bv.deleted_at);
 
   return (
     <div className="space-y-6">

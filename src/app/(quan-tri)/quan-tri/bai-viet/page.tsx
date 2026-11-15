@@ -12,10 +12,13 @@ export default async function QuanLyBaiVietPage() {
   await yeuCauVaiTro(["admin"]);
   const supabase = await taoSupabaseServer();
 
-  const { data: danhSachBaiViet } = await supabase
+  const { data: danhSachBaiVietTho } = await supabase
     .from("bai_viet")
     .select("*, tac_gia:profiles!bai_viet_tac_gia_id_fkey(ho_ten)")
     .order("created_at", { ascending: false });
+
+  // Ẩn bài viết đang nằm trong thùng rác (deleted_at có từ migration 009)
+  const danhSachBaiViet = (danhSachBaiVietTho || []).filter((bv) => !bv.deleted_at);
 
   const mauTrangThai: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
     xuat_ban: { label: "Xuất bản", variant: "default" },

@@ -6,6 +6,7 @@ import { ChefHat, BookOpen, Utensils, Newspaper } from "lucide-react";
 import { TheCongThuc } from "@/components/cong-thuc/the-cong-thuc";
 import { TheKhoaHoc } from "@/components/khoa-hoc/the-khoa-hoc";
 import { taoSupabaseAdmin } from "@/lib/supabase/admin";
+import { voiLocXoa } from "@/lib/thung-rac";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -65,16 +66,20 @@ export default async function HoSoDauBep({ params }: Props) {
       .eq("dau_bep_id", dauBep.id)
       .eq("trang_thai", "xuat_ban")
       .order("created_at", { ascending: false }),
-    supabase
-      .from("bai_viet")
-      .select("id, tieu_de, slug, tom_tat, anh_dai_dien, created_at")
-      .eq("tac_gia_id", dauBep.id)
-      .eq("trang_thai", "xuat_ban")
-      .order("created_at", { ascending: false }),
+    voiLocXoa((loc) => {
+      const q = supabase
+        .from("bai_viet")
+        .select("id, tieu_de, slug, tom_tat, anh_dai_dien, created_at")
+        .eq("tac_gia_id", dauBep.id)
+        .eq("trang_thai", "xuat_ban")
+        .order("created_at", { ascending: false });
+      return loc ? q.is("deleted_at", null) : q;
+    }),
   ]);
 
   const congThucList = congThucRes.data || [];
-  const khoaHocList = khoaHocRes.data || [];
+  // Ẩn khóa học đang nằm trong thùng rác (deleted_at có từ migration 009)
+  const khoaHocList = (khoaHocRes.data || []).filter((kh) => !kh.deleted_at);
   const baiVietList = baiVietRes.data || [];
 
   return (

@@ -16,7 +16,7 @@ export default async function QuanLyBaiHocPage({ params }: Props) {
     supabase.from("bai_hoc").select("*").eq("khoa_hoc_id", id).order("thu_tu", { ascending: true }),
   ]);
 
-  if (!khoaHoc || (khoaHoc.dau_bep_id !== phien.user.id && phien.profile.vai_tro !== "admin")) {
+  if (!khoaHoc || khoaHoc.deleted_at || (khoaHoc.dau_bep_id !== phien.user.id && phien.profile.vai_tro !== "admin")) {
     notFound();
   }
 

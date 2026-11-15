@@ -98,12 +98,12 @@ export function ThaoTacDuyetCongThuc({
   };
 
   const xuLyXoa = async () => {
-    if (!confirm("Bạn có chắc chắn muốn xóa công thức này khỏi hệ thống?")) return;
+    if (!confirm("Công thức này sẽ được chuyển vào Thùng rác — bạn có thể khôi phục trong vòng 30 ngày. Tiếp tục xóa?")) return;
     setDangXuLy(true);
     try {
       const res = await xoaCongThuc(congThucId);
       if (res.thanh_cong) {
-        toast.success("Đã gỡ công thức thành công!");
+        toast.success("Đã chuyển công thức vào thùng rác!");
         router.refresh();
       } else {
         toast.error(res.loi);

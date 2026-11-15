@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Eye, BookOpen, Clock, Edit3 } from "lucide-react";
 import Image from "next/image";
 import { HienThiGia } from "@/components/thanh-toan/hien-thi-gia";
+import { NutXoaVaoThungRac } from "@/components/thung-rac/nut-xoa-vao-thung-rac";
 
 interface Props {
   searchParams: Promise<{ trang_thai?: string }>;
@@ -26,7 +27,10 @@ export default async function QuanLyKhoaHocAdminPage({ searchParams }: Props) {
     truyVan = truyVan.eq("trang_thai", params.trang_thai as Bang<"khoa_hoc">["trang_thai"]);
   }
 
-  const { data: danhSachKhoaHoc } = await truyVan;
+  const { data: danhSachKhoaHocTho } = await truyVan;
+
+  // Ẩn khóa học đang nằm trong thùng rác (deleted_at có từ migration 009)
+  const danhSachKhoaHoc = (danhSachKhoaHocTho || []).filter((kh) => !kh.deleted_at);
 
   const mauTrangThai: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
     xuat_ban: { label: "Đã xuất bản", variant: "default" },
@@ -155,10 +159,13 @@ export default async function QuanLyKhoaHocAdminPage({ searchParams }: Props) {
                     </Button>
                   </div>
 
-                  <ThaoTacDuyetKhoaHoc
-                    khoaHocId={kh.id}
-                    trangThai={kh.trang_thai}
-                  />
+                  <div className="flex items-center gap-1">
+                    <NutXoaVaoThungRac loai="khoa_hoc" id={kh.id} tieuDe={kh.tieu_de} />
+                    <ThaoTacDuyetKhoaHoc
+                      khoaHocId={kh.id}
+                      trangThai={kh.trang_thai}
+                    />
+                  </div>
                 </div>
               </div>
             );

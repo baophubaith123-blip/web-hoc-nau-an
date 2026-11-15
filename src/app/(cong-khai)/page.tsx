@@ -10,6 +10,7 @@ import { HienDan } from "@/components/trang-chu/hien-dan";
 import { DemSo } from "@/components/trang-chu/dem-so";
 import { taoSupabaseServer } from "@/lib/supabase/server";
 import { taoSupabaseAdmin } from "@/lib/supabase/admin";
+import { voiLocXoa } from "@/lib/thung-rac";
 import { vi } from "@/lib/i18n/vi";
 
 export const metadata: Metadata = {
@@ -35,14 +36,17 @@ export default async function TrangChu() {
       .order("noi_bat", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(6),
-    supabase
-      .from("khoa_hoc")
-      .select(
-        "id, slug, tieu_de, mo_ta, anh_dai_dien, cap_do, co_chung_chi, so_bai_hoc, tong_thoi_gian, mien_phi, gia, dau_bep:profiles(ho_ten, avatar_url)"
-      )
-      .eq("trang_thai", "xuat_ban")
-      .order("created_at", { ascending: false })
-      .limit(3),
+    voiLocXoa((loc) => {
+      const q = supabase
+        .from("khoa_hoc")
+        .select(
+          "id, slug, tieu_de, mo_ta, anh_dai_dien, cap_do, co_chung_chi, so_bai_hoc, tong_thoi_gian, mien_phi, gia, dau_bep:profiles(ho_ten, avatar_url)"
+        )
+        .eq("trang_thai", "xuat_ban")
+        .order("created_at", { ascending: false })
+        .limit(3);
+      return loc ? q.is("deleted_at", null) : q;
+    }),
     // Đầu bếp là thông tin công khai nhưng RLS profiles chỉ cho đọc hồ sơ của
     // chính mình → client phiên trả 0 dòng và mục "Đầu bếp hàng đầu" không bao
     // giờ hiện. Đọc bằng admin client, chỉ lấy trường công khai (mẫu /dau-bep).
@@ -52,25 +56,34 @@ export default async function TrangChu() {
       .eq("vai_tro", "chef")
       .eq("trang_thai", "hoat_dong")
       .limit(4),
-    supabase
-      .from("bai_viet")
-      .select("id, tieu_de, slug, tom_tat, anh_dai_dien, created_at")
-      .eq("trang_thai", "xuat_ban")
-      .order("created_at", { ascending: false })
-      .limit(3),
+    voiLocXoa((loc) => {
+      const q = supabase
+        .from("bai_viet")
+        .select("id, tieu_de, slug, tom_tat, anh_dai_dien, created_at")
+        .eq("trang_thai", "xuat_ban")
+        .order("created_at", { ascending: false })
+        .limit(3);
+      return loc ? q.is("deleted_at", null) : q;
+    }),
     supabase
       .from("cong_thuc")
       .select("id", { count: "exact", head: true })
       .eq("trang_thai", "xuat_ban")
       .is("deleted_at", null),
-    supabase
-      .from("khoa_hoc")
-      .select("id", { count: "exact", head: true })
-      .eq("trang_thai", "xuat_ban"),
-    supabase
-      .from("khoa_hoc")
-      .select("so_bai_hoc, tong_thoi_gian")
-      .eq("trang_thai", "xuat_ban"),
+    voiLocXoa((loc) => {
+      const q = supabase
+        .from("khoa_hoc")
+        .select("id", { count: "exact", head: true })
+        .eq("trang_thai", "xuat_ban");
+      return loc ? q.is("deleted_at", null) : q;
+    }),
+    voiLocXoa((loc) => {
+      const q = supabase
+        .from("khoa_hoc")
+        .select("so_bai_hoc, tong_thoi_gian")
+        .eq("trang_thai", "xuat_ban");
+      return loc ? q.is("deleted_at", null) : q;
+    }),
   ]);
 
   const congThucNoiBat = congThucRes.data || [];

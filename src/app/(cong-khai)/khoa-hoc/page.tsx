@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { TheKhoaHoc } from "@/components/khoa-hoc/the-khoa-hoc";
 import { taoSupabaseServer } from "@/lib/supabase/server";
+import { voiLocXoa } from "@/lib/thung-rac";
 import { GraduationCap, SearchX } from "lucide-react";
 import { TieuDeTrang } from "@/components/layout/tieu-de-trang";
 import { TrangThaiTrong } from "@/components/layout/trang-thai-trong";
@@ -25,25 +26,30 @@ export default async function DanhSachKhoaHoc({ searchParams }: Props) {
   const supabase = await taoSupabaseServer();
 
   // Đợt 6: chỉ select các trường thẻ hiển thị thay vì select *.
-  let query = supabase
-    .from("khoa_hoc")
-    .select(
-      "id, slug, tieu_de, mo_ta, anh_dai_dien, cap_do, co_chung_chi, so_bai_hoc, tong_thoi_gian, mien_phi, gia, dau_bep:profiles(ho_ten, avatar_url)"
-    )
-    .eq("trang_thai", "xuat_ban")
-    .order("created_at", { ascending: false });
+  const chayTruyVan = (locXoa: boolean) => {
+    let query = supabase
+      .from("khoa_hoc")
+      .select(
+        "id, slug, tieu_de, mo_ta, anh_dai_dien, cap_do, co_chung_chi, so_bai_hoc, tong_thoi_gian, mien_phi, gia, dau_bep:profiles(ho_ten, avatar_url)"
+      )
+      .eq("trang_thai", "xuat_ban")
+      .order("created_at", { ascending: false });
 
-  if (capDo && capDo !== "tat_ca") {
-    query = query.eq("cap_do", capDo as "co_ban" | "trung_cap" | "nang_cao");
-  }
+    if (capDo && capDo !== "tat_ca") {
+      query = query.eq("cap_do", capDo as "co_ban" | "trung_cap" | "nang_cao");
+    }
 
-  if (loaiGia === "mien_phi") {
-    query = query.eq("mien_phi", true);
-  } else if (loaiGia === "tra_phi") {
-    query = query.eq("mien_phi", false);
-  }
+    if (loaiGia === "mien_phi") {
+      query = query.eq("mien_phi", true);
+    } else if (loaiGia === "tra_phi") {
+      query = query.eq("mien_phi", false);
+    }
 
-  const { data: danhSach } = await query;
+    // Lọc nội dung trong thùng rác (migration 009); voiLocXoa tự bỏ lọc khi DB chưa có cột
+    return locXoa ? query.is("deleted_at", null) : query;
+  };
+
+  const { data: danhSach } = await voiLocXoa(chayTruyVan);
 
   return (
     <div className="space-y-8 pb-16">

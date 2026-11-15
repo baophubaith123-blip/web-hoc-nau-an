@@ -27,7 +27,8 @@ export default async function TrangHocBai({ params }: Props) {
     .eq("id", khoaHocId)
     .single();
 
-  if (!kh) notFound();
+  // Khóa học trong thùng rác (deleted_at có từ migration 009) → học viên không vào học được
+  if (!kh || kh.deleted_at) notFound();
 
   // 2. Lấy thông tin bài học hiện tại
   const { data: bhHienTai } = await supabase

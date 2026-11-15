@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Plus, Edit3, Eye, AlertCircle } from "lucide-react";
+import { Plus, Edit3, Eye, AlertCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
+import { NutXoaVaoThungRac } from "@/components/thung-rac/nut-xoa-vao-thung-rac";
 
 const TRANG_THAI_MAP: Record<string, { nhan: string; class: string }> = {
   nhap: { nhan: "Bản nháp", class: "bg-slate-500/10 text-slate-600 dark:text-slate-400" },
@@ -33,12 +34,20 @@ export default async function CongThucDaGui() {
             Theo dõi trạng thái kiểm duyệt và chỉnh sửa các công thức do bạn tạo
           </p>
         </div>
-        <Button asChild size="sm" className="gap-1.5">
-          <Link href="/tao-cong-thuc">
-            <Plus className="h-4 w-4" />
-            Tạo công thức mới
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline" size="sm" className="gap-1.5">
+            <Link href="/thung-rac">
+              <Trash2 className="h-4 w-4" />
+              Thùng rác
+            </Link>
+          </Button>
+          <Button asChild size="sm" className="gap-1.5">
+            <Link href="/tao-cong-thuc">
+              <Plus className="h-4 w-4" />
+              Tạo công thức mới
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {(!danhSach || danhSach.length === 0) ? (
@@ -99,6 +108,8 @@ export default async function CongThucDaGui() {
                         Chỉnh sửa
                       </Link>
                     </Button>
+
+                    <NutXoaVaoThungRac loai="cong_thuc" id={ct.id} tieuDe={ct.tieu_de} />
                   </div>
                 </CardContent>
               </Card>
