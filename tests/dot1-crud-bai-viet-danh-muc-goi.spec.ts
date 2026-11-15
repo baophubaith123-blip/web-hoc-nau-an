@@ -2,7 +2,9 @@ import { test, expect, type Page } from "@playwright/test";
 
 // ĐỢT 1 (15/11/2026) — CRUD bài viết (Pro + admin), danh mục, gói Pro.
 // Bài viết/danh mục/gói TEST_DOT1_ được tự dọn ngay trong spec bằng chính
-// thao tác xóa trên giao diện (bài viết + gói: xóa cứng/ngừng bán; danh mục: xóa cứng).
+// thao tác xóa trên giao diện (bài viết: vào thùng rác rồi xóa vĩnh viễn
+// trong thùng rác — cơ chế đợt 3; gói: xóa cứng khi chưa có người mua;
+// danh mục: xóa cứng).
 const MAT_KHAU = process.env.TEST_PASSWORD ?? "Matkhau@123";
 const DAU = Date.now();
 
@@ -70,15 +72,26 @@ test.describe("Đợt 1 — CRUD bài viết", () => {
     await expect(khach.getByText(tieuDeMoi).first()).toBeVisible();
     await ctxKhach.close();
 
-    // 5) Admin xóa cứng -> biến mất khỏi danh sách quản trị và trang công khai
+    // 5) Admin xóa -> bài vào thùng rác (đợt 3), biến mất khỏi danh sách
+    // quản trị và trang công khai
     admin.once("dialog", (d) => d.accept());
     // Nút xóa là nút icon thùng rác trong thẻ bài (khi bài không còn chờ duyệt)
     await theAdmin.locator("button").last().click();
     await expect(admin.getByText(tieuDeMoi)).toHaveCount(0, { timeout: 20_000 });
+
+    // 6) Dọn hẳn: admin xóa vĩnh viễn trong thùng rác quản trị để DB về baseline
+    await admin.goto("/quan-tri/thung-rac");
+    const dongRac = admin.locator("div.divide-y > div").filter({ hasText: tieuDeMoi }).first();
+    await expect(dongRac).toBeVisible();
+    await dongRac.getByRole("button", { name: "Xóa vĩnh viễn" }).click();
+    const hopThoaiRac = admin.getByRole("dialog");
+    await hopThoaiRac.getByRole("button", { name: "Tôi hiểu, tiếp tục" }).click();
+    await hopThoaiRac.getByRole("button", { name: "Xóa vĩnh viễn" }).click();
+    await expect(hopThoaiRac).toBeHidden({ timeout: 20_000 });
     await ctxAdmin.close();
   });
 
-  test("Pro: tạo nháp rồi tự xóa nháp (xóa cứng phía người dùng)", async ({ page }) => {
+  test("Pro: tạo nháp rồi tự xóa nháp (vào thùng rác rồi xóa vĩnh viễn)", async ({ page }) => {
     const tieuDe = `TEST_DOT1_ Bài nháp tự xóa ${DAU}`;
     await dangNhap(page, "user1@naungon.vn");
     await page.goto("/tao-bai-viet");
@@ -87,11 +100,26 @@ test.describe("Đợt 1 — CRUD bài viết", () => {
     await expect(page).toHaveURL(/\/bai-viet-cua-toi/);
     await expect(page.getByText(tieuDe)).toBeVisible();
 
-    // Mở hộp thoại xóa từ thẻ bài viết của chính bài đó và xác nhận
+    // Mở hộp thoại xóa từ thẻ bài viết của chính bài đó và xác nhận chuyển
+    // vào thùng rác (đợt 3: nhãn nút xác nhận là "Chuyển vào thùng rác",
+    // chờ hộp thoại đóng = action đã ghi xong rồi mới đi tiếp)
     const vungBai = page.locator("div.overflow-hidden.shadow-xs").filter({ hasText: tieuDe }).first();
     await vungBai.getByRole("button", { name: "Xóa", exact: true }).click();
-    await page.getByRole("button", { name: "Xóa bài viết" }).click();
+    const hopThoai = page.getByRole("dialog");
+    await hopThoai.getByRole("button", { name: "Chuyển vào thùng rác" }).click();
+    await expect(hopThoai).toBeHidden({ timeout: 20_000 });
     await expect(page.getByText(tieuDe)).toHaveCount(0, { timeout: 20_000 });
+
+    // Dọn hẳn: xóa vĩnh viễn trong thùng rác của tôi để DB về baseline
+    await page.goto("/thung-rac");
+    const dong = page.locator("div.divide-y > div").filter({ hasText: tieuDe }).first();
+    await expect(dong).toBeVisible();
+    await dong.getByRole("button", { name: "Xóa vĩnh viễn" }).click();
+    const hopThoai2 = page.getByRole("dialog");
+    await hopThoai2.getByRole("button", { name: "Tôi hiểu, tiếp tục" }).click();
+    await hopThoai2.getByRole("button", { name: "Xóa vĩnh viễn" }).click();
+    await expect(hopThoai2).toBeHidden({ timeout: 20_000 });
+    await expect(page.locator("div.divide-y").getByText(tieuDe)).toHaveCount(0, { timeout: 20_000 });
   });
 });
 
@@ -174,14 +202,13 @@ test.describe("Đợt 1 — CRUD gói Pro (admin)", () => {
     await expect(page.locator("tr").filter({ hasText: "pro_nam" }).getByText("Pro Năm")).toBeVisible();
   });
 
-  // LỖI ĐÃ XÁC NHẬN (L-02): DB còn CHECK ma_goi IN ('pro_thang','pro_nam')
-  // từ migration 003 nên admin KHÔNG THỂ tạo gói với mã mới — server trả
-  // lỗi 23514. Đợt 2 đã bảo đảm lỗi server hiển thị rõ trong form gói
-  // (khối alert cố định + thông điệp 23514 riêng), nhưng việc nới CHECK
-  // nằm ở migration 009 của đợt 3 nên ca này GIỮ test.fail() chờ
-  // migration; khi 009 đã chạy phải bỏ test.fail và bổ sung sửa/xóa gói mới.
-  test.fail("Admin tạo gói với mã gói mới phải thành công", async ({ page }) => {
+  // L-02 ĐÃ ĐÓNG: migration 009 (đợt 3, Bảo đã dán 16/11/2026) bỏ CHECK
+  // ma_goi IN ('pro_thang','pro_nam') và nới ràng buộc thoi_han_ngay > 0
+  // nên admin tạo được gói với mã mới. Ca này nay chạy THẬT trọn vòng:
+  // tạo -> sửa tên -> xóa (chưa có người mua nên xóa cứng) -> hết dấu vết.
+  test("Admin tạo gói với mã gói mới phải thành công", async ({ page }) => {
     const maGoi = `test_dot1_${DAU}`;
+    const tenSua = `TEST_DOT1_ Gói đã sửa ${DAU}`;
     await dangNhap(page, "admin@naungon.vn");
     await page.goto("/quan-tri/quan-ly-goi/moi");
     await page.locator("#ma_goi").fill(maGoi);
@@ -193,5 +220,19 @@ test.describe("Đợt 1 — CRUD gói Pro (admin)", () => {
     await page.getByRole("button", { name: "Tạo gói mới" }).click();
     await expect(page).toHaveURL(/\/quan-tri\/quan-ly-goi$/, { timeout: 20_000 });
     await expect(page.locator("tr").filter({ hasText: maGoi })).toHaveCount(1);
+
+    // Sửa tên gói mới
+    const dong = page.locator("tr").filter({ hasText: maGoi }).first();
+    await dong.getByRole("link", { name: "Sửa" }).click();
+    await expect(page).toHaveURL(/\/quan-tri\/quan-ly-goi\/[0-9a-f-]{36}\/sua/);
+    await page.locator("#ten").fill(tenSua);
+    await page.getByRole("button", { name: "Lưu thay đổi" }).click();
+    await expect(page).toHaveURL(/\/quan-tri\/quan-ly-goi$/);
+    await expect(page.locator("tr").filter({ hasText: maGoi }).getByText(tenSua)).toBeVisible();
+
+    // Dọn: xóa gói mới (confirm của trình duyệt)
+    page.once("dialog", (d) => d.accept());
+    await page.locator("tr").filter({ hasText: maGoi }).getByRole("button", { name: "Xóa" }).click();
+    await expect(page.locator("tr").filter({ hasText: maGoi })).toHaveCount(0, { timeout: 20_000 });
   });
 });
