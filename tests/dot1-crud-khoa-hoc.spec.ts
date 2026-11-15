@@ -90,8 +90,8 @@ test.describe("Đợt 1 — CRUD khóa học (đầu bếp + admin)", () => {
     await page.getByRole("button", { name: "Thêm bài học mới" }).click();
     await expect(page.getByText("Thêm bài học mới", { exact: true }).last()).toBeVisible();
     await page.locator("#tieu_de_bh").fill(tieuDeBai);
-    // Phải điền cả mô tả: để trống mô tả là lỗi đã biết D1-P1-02 (client gửi
-    // undefined, baiHocSchema yêu cầu chuỗi) — đợt 2 sửa xong sẽ bỏ ghi chú này.
+    // Ca này vẫn điền mô tả như một bài học đầy đủ; trường hợp để trống mô
+    // tả (lỗi L-03 ở đợt 1) có ca riêng ở dưới sau khi đã sửa ở đợt 2.
     await page.locator("#mo_ta_bh").fill("Bài học kiểm thử đợt 1 kèm câu hỏi trắc nghiệm.");
     await page.locator("#video_url_bh").fill("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
     // Thêm 1 câu hỏi trắc nghiệm (chỉ hiện khi khóa bật bài tập)
@@ -117,6 +117,32 @@ test.describe("Đợt 1 — CRUD khóa học (đầu bếp + admin)", () => {
     const dongMoi = page.locator("div.border.rounded-xl").filter({ hasText: tieuDeBaiMoi }).first();
     await dongMoi.locator("button").last().click();
     await expect(page.getByText(tieuDeBaiMoi)).toHaveCount(0, { timeout: 20_000 });
+  });
+
+  test("Đợt 2 — L-03: thêm bài học để trống mô tả tóm tắt phải lưu thành công", async ({ page }) => {
+    const tieuDeKhoa = `TEST_DOT1_ Khóa L-03 ${DAU}`;
+    const tieuDeBai = `TEST_DOT1_ Bài học không mô tả ${DAU}`;
+
+    await dangNhap(page, "chef@naungon.vn");
+    await page.goto("/bep/khoa-hoc/moi");
+    await dienFormKhoaHoc(page, tieuDeKhoa, "Khóa học kiểm thử đợt 2 cho ca L-03: bài học để trống mô tả.");
+    await page.getByRole("button", { name: "Lưu nháp" }).click();
+    await expect(page).toHaveURL(/\/bep\/khoa-hoc$/);
+
+    await theKhoaHoc(page, tieuDeKhoa).getByRole("link", { name: /Bài học/ }).click();
+    await expect(page).toHaveURL(/\/bep\/khoa-hoc\/[0-9a-f-]{36}\/bai-hoc/);
+    await page.getByRole("button", { name: "Thêm bài học mới" }).click();
+    await page.locator("#tieu_de_bh").fill(tieuDeBai);
+    // CỐ Ý để trống "Mô tả tóm tắt" và link video — L-03 ở đợt 1 khiến thao
+    // tác này thất bại (client gửi undefined, schema yêu cầu chuỗi).
+    await page.getByRole("button", { name: "Thêm bài học", exact: true }).click();
+    const dongBai = page.locator("div.border.rounded-xl").filter({ hasText: tieuDeBai }).first();
+    await expect(dongBai).toBeVisible({ timeout: 20_000 });
+
+    // Dọn bài học vừa tạo (khóa TEST_DOT1_ được dọn ở bước đối chiếu DB cuối đợt như lệ đợt 1)
+    page.once("dialog", (d) => d.accept());
+    await dongBai.locator("button").last().click();
+    await expect(page.getByText(tieuDeBai)).toHaveCount(0, { timeout: 20_000 });
   });
 
   test("Admin: tạo khóa học -> xuất bản ngay -> hiện công khai, admin sửa được", async ({ page }) => {

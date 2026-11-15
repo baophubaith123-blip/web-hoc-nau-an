@@ -128,13 +128,13 @@ test.describe("Đợt 1 — CRUD danh mục (admin)", () => {
   });
 });
 
-test.describe("Đợt 1 — CRUD danh mục: lỗi đã biết", () => {
-  // LỖI ĐÃ XÁC NHẬN (báo cáo đợt 1, mã D1-P1-02): tạo danh mục mà để trống
-  // "Mô tả"/"Ảnh đại diện" (hai trường giao diện không bắt buộc) thì lưu thất
-  // bại — client gửi undefined, danhMucSchema yêu cầu chuỗi nên parse lỗi.
-  // test.fail(): kỳ vọng hành vi ĐÚNG; khi lỗi được sửa ở đợt 2, ca này sẽ
-  // chuyển thành "passed ngoài mong đợi" để nhắc cập nhật spec.
-  test.fail("Admin tạo danh mục chỉ với tên + slug (để trống mô tả/ảnh) phải thành công", async ({ page }) => {
+test.describe("Đợt 2 — L-03: trường tùy chọn để trống", () => {
+  // L-03 đã sửa ở đợt 2: helper tùy chọn trong validations/chung.ts chấp
+  // nhận undefined/null/chuỗi rỗng nhất quán, nên tạo danh mục chỉ với tên
+  // (để trống Mô tả/Ảnh — hai trường giao diện không bắt buộc) phải thành
+  // công. Ca này ở đợt 1 là test.fail() ghi nhận lỗi; nay là ca xanh thật
+  // và tự dọn danh mục vừa tạo ngay trong ca.
+  test("Admin tạo danh mục chỉ với tên + slug (để trống mô tả/ảnh) phải thành công", async ({ page }) => {
     const ten = `TEST_DOT1 Danh mục tối thiểu ${DAU}`;
     await dangNhap(page, "admin@naungon.vn");
     await page.goto("/quan-tri/danh-muc");
@@ -142,6 +142,12 @@ test.describe("Đợt 1 — CRUD danh mục: lỗi đã biết", () => {
     await page.locator("#ten_dm").fill(ten);
     await page.getByRole("button", { name: "Tạo danh mục" }).click();
     await expect(page.getByText(ten)).toBeVisible({ timeout: 20_000 });
+
+    // Dọn: xóa danh mục vừa tạo (confirm của trình duyệt)
+    page.once("dialog", (d) => d.accept());
+    const dong = page.locator("div.p-4").filter({ hasText: ten }).first();
+    await dong.locator("button").last().click();
+    await expect(page.getByText(ten)).toHaveCount(0, { timeout: 20_000 });
   });
 });
 
@@ -168,11 +174,12 @@ test.describe("Đợt 1 — CRUD gói Pro (admin)", () => {
     await expect(page.locator("tr").filter({ hasText: "pro_nam" }).getByText("Pro Năm")).toBeVisible();
   });
 
-  // LỖI ĐÃ XÁC NHẬN (báo cáo đợt 1, mã D1-P1-01): DB còn CHECK
-  // ma_goi IN ('pro_thang','pro_nam') từ migration 003 nên admin KHÔNG THỂ
-  // tạo gói với mã mới — server trả lỗi 23514, giao diện chỉ hiện toast lỗi
-  // chung. test.fail(): kỳ vọng hành vi ĐÚNG (tạo được gói mã mới); đợt 2
-  // sửa constraint xong phải bỏ test.fail và bổ sung bước sửa/xóa gói mới.
+  // LỖI ĐÃ XÁC NHẬN (L-02): DB còn CHECK ma_goi IN ('pro_thang','pro_nam')
+  // từ migration 003 nên admin KHÔNG THỂ tạo gói với mã mới — server trả
+  // lỗi 23514. Đợt 2 đã bảo đảm lỗi server hiển thị rõ trong form gói
+  // (khối alert cố định + thông điệp 23514 riêng), nhưng việc nới CHECK
+  // nằm ở migration 009 của đợt 3 nên ca này GIỮ test.fail() chờ
+  // migration; khi 009 đã chạy phải bỏ test.fail và bổ sung sửa/xóa gói mới.
   test.fail("Admin tạo gói với mã gói mới phải thành công", async ({ page }) => {
     const maGoi = `test_dot1_${DAU}`;
     await dangNhap(page, "admin@naungon.vn");

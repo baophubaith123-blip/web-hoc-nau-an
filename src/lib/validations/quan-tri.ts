@@ -7,7 +7,11 @@ export const danhMucSchema = z.object({
   slug: z.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, t("kiem_tra.slug")).max(80),
   mo_ta: vanBanTuyChon(300),
   anh_dai_dien: urlTuyChon,
-  danh_muc_cha_id: idUuid.nullable(),
+  // undefined (khóa bị loại khi qua Server Action) cũng được hiểu là null — cùng gốc L-03
+  danh_muc_cha_id: idUuid
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
   thu_tu: soNguyen(0, 9999),
   trang_thai: z.enum(["hoat_dong", "an"]),
 });

@@ -15,11 +15,19 @@ export const vanBan = (toiThieu = 1, toiDa = 255) =>
         .max(toiDa, t("kiem_tra.toi_da", { so: toiDa }))
     );
 
-// Chuỗi tùy chọn (cho phép rỗng)
+// Chuỗi tùy chọn (cho phép rỗng).
+// Sửa L-03 (đợt 2): các form tự viết gửi `undefined` cho trường để trống
+// (VD mo_ta: ... || undefined) và khóa undefined bị loại khi qua Server
+// Action, trong khi schema cũ yêu cầu khóa phải là chuỗi -> parse lỗi dù
+// trường không bắt buộc. Nay MỌI helper "tùy chọn" ở tầng dùng chung này
+// đều chấp nhận nhất quán cả 3 dạng "trống": thiếu khóa/undefined, null
+// và chuỗi rỗng — tất cả được chuẩn hóa về "" trước khi kiểm tra tiếp.
 export const vanBanTuyChon = (toiDa = 1000) =>
   z
     .string()
-    .transform(lamSachVanBan)
+    .nullable()
+    .optional()
+    .transform((v) => lamSachVanBan(v ?? ""))
     .pipe(z.string().max(toiDa, t("kiem_tra.toi_da", { so: toiDa })));
 
 // z.guid() (không phải z.uuid()) vì id trong seed.sql không theo đúng chuẩn phiên bản UUID
@@ -27,12 +35,19 @@ export const idUuid = z.guid(t("kiem_tra.bat_buoc"));
 
 const laUrl = (v: string) => /^https?:\/\/\S+$/i.test(v);
 export const urlBatBuoc = z.string().trim().refine(laUrl, t("kiem_tra.url"));
-export const urlTuyChon = z.string().trim().refine((v) => v === "" || laUrl(v), t("kiem_tra.url"));
+export const urlTuyChon = z
+  .string()
+  .nullable()
+  .optional()
+  .transform((v) => (v ?? "").trim())
+  .pipe(z.string().refine((v) => v === "" || laUrl(v), t("kiem_tra.url")));
 
 export const linkYoutubeTuyChon = z
   .string()
-  .trim()
-  .refine((v) => v === "" || !!layIdYoutube(v), t("kiem_tra.youtube"));
+  .nullable()
+  .optional()
+  .transform((v) => (v ?? "").trim())
+  .pipe(z.string().refine((v) => v === "" || !!layIdYoutube(v), t("kiem_tra.youtube")));
 
 // Số nguyên trong khoảng (form dùng valueAsNumber)
 export const soNguyen = (min: number, max: number, thongDiep?: string) =>
