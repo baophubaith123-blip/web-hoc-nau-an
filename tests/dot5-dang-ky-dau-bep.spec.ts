@@ -55,10 +55,27 @@ async function guiFormUngTuyen(page: Page, monTu: string) {
       "TEST_DOT5 — Muốn đăng công thức và mở khóa học món Việt cơ bản cho người mới bắt đầu nấu ăn."
     );
   await page.getByRole("button", { name: "Gửi đơn ứng tuyển" }).click();
-  // Gửi thành công -> trang refresh hiện thẻ trạng thái đang chờ duyệt
-  await expect(page.getByText(/đang chờ duyệt/).first()).toBeVisible({
-    timeout: 30_000,
-  });
+  // Gửi thành công -> trang refresh hiện THẺ trạng thái chờ duyệt.
+  // Phải khớp đúng câu riêng của thẻ ("Đơn ứng tuyển của bạn đang chờ
+  // duyệt") — câu mô tả tĩnh của form cũng chứa "đang chờ duyệt", khớp
+  // lỏng sẽ qua ngay cả khi action chưa chạy xong và điều hướng kế tiếp
+  // hủy mất request (race đã gặp ở đợt 3).
+  await expect(
+    page.getByText("Đơn ứng tuyển của bạn đang chờ duyệt")
+  ).toBeVisible({ timeout: 30_000 });
+}
+
+// Thẻ đơn chờ duyệt của đúng ứng viên trên trang Admin: div trong cùng
+// chứa cả tên ứng viên lẫn nút Duyệt (tránh chọn nhầm div tiêu đề thẻ
+// chỉ chứa tên + huy hiệu kinh nghiệm mà không chứa nút thao tác).
+function theDonChoDuyet(page: Page, tenUngVien: string) {
+  return page
+    .locator("div")
+    .filter({ hasText: tenUngVien })
+    .filter({
+      has: page.getByRole("button", { name: "Duyệt thành đầu bếp" }),
+    })
+    .last();
 }
 
 test.describe("Đợt 5 — Đăng ký đầu bếp: bề mặt luôn chạy", () => {
@@ -178,11 +195,7 @@ test.describe("Đợt 5 — Luồng thật (cần migration 010)", () => {
     const admin = await ctxAdmin.newPage();
     await dangNhap(admin, "admin@naungon.vn");
     await admin.goto("/quan-tri/duyet-dau-bep");
-    const theDon = admin
-      .locator("div")
-      .filter({ hasText: tenUngVien })
-      .filter({ hasText: "năm kinh nghiệm" })
-      .last();
+    const theDon = theDonChoDuyet(admin, tenUngVien);
     await expect(theDon.getByText(tenUngVien)).toBeVisible({ timeout: 30_000 });
     await theDon.getByRole("button", { name: "Duyệt thành đầu bếp" }).click();
     await expect(admin.getByText(/chính thức trở thành đầu bếp/)).toBeVisible({
@@ -225,11 +238,7 @@ test.describe("Đợt 5 — Luồng thật (cần migration 010)", () => {
     const admin = await ctxAdmin.newPage();
     await dangNhap(admin, "admin@naungon.vn");
     await admin.goto("/quan-tri/duyet-dau-bep");
-    const theDon = admin
-      .locator("div")
-      .filter({ hasText: tenUngVien })
-      .filter({ hasText: "năm kinh nghiệm" })
-      .last();
+    const theDon = theDonChoDuyet(admin, tenUngVien);
     await expect(theDon.getByText(tenUngVien)).toBeVisible({ timeout: 30_000 });
     await theDon.getByRole("button", { name: "Từ chối", exact: true }).click();
     const hopThoai = admin.getByRole("dialog");
@@ -242,7 +251,8 @@ test.describe("Đợt 5 — Luồng thật (cần migration 010)", () => {
     // Ứng viên mở lại trang: thấy lý do + mốc gửi lại sau 7 ngày, không có form
     await uv.goto("/tro-thanh-dau-bep");
     await expect(uv.getByText(/chưa được duyệt/).first()).toBeVisible();
-    await expect(uv.getByText(lyDo)).toBeVisible();
+    // Lý do hiện ở 2 chỗ hợp lệ: thẻ trạng thái + dòng lịch sử đơn
+    await expect(uv.getByText(lyDo).first()).toBeVisible();
     await expect(uv.getByText(/gửi lại từ ngày/)).toBeVisible();
     await expect(
       uv.getByRole("button", { name: "Gửi đơn ứng tuyển" })
