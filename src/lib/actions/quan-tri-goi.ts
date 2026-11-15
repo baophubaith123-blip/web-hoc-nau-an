@@ -293,6 +293,21 @@ export async function duyetYeuCauNangCapAction(dauVao: unknown): Promise<KetQua>
       .eq("id", yc.nguoi_dung_id);
     if (errProf) throw errProf;
 
+    // 3b. Hủy mọi yêu cầu chờ duyệt KHÁC của cùng người dùng (gia cố đợt 2):
+    // gói vừa được kích hoạt bởi yêu cầu này, các yêu cầu còn lại không
+    // được phép kích hoạt thêm lần nữa (chống cộng hạn 2 lần khi một
+    // người có nhiều yêu cầu chờ duyệt cùng lúc — quan sát đợt 1).
+    await p.supabase
+      .from("yeu_cau_nang_cap")
+      .update({
+        trang_thai: "da_huy",
+        ly_do_tu_choi: `Đã kích hoạt Pro bởi yêu cầu ${yc.ma_yeu_cau} — yêu cầu này bị hủy để tránh kích hoạt trùng`,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("nguoi_dung_id", yc.nguoi_dung_id)
+      .eq("trang_thai", "cho_duyet")
+      .neq("id", yc.id);
+
     // 4. Gửi thông báo hệ thống
     const ngayDinhDang = hetHan.toLocaleDateString("vi-VN");
     await guiThongBaoNhieuNguoi(p.supabase, [yc.nguoi_dung_id], {

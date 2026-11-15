@@ -42,21 +42,55 @@ export async function POST(request: NextRequest) {
       }
 
       // Chống trùng yêu cầu Pro (quan sát đợt 1, gia cố đợt 2): dọn các yêu
-      // cầu đã hết hiệu lực (giao dịch thất bại / treo quá 30 phút) trước,
-      // rồi nếu người dùng ĐÃ có một yêu cầu đang chờ duyệt thì KHÔNG tạo
-      // thêm — tránh admin duyệt 2 lần cộng hạn 2 lần cho cùng một người.
+      // cầu đã hết hiệu lực (giao dịch thất bại / treo quá 30 phút) trước.
+      // Sau đó xét các yêu cầu còn chờ duyệt của chính người dùng:
+      //  - Yêu cầu ĐÃ THANH TOÁN cho CHÍNH gói này, đang chờ duyệt ->
+      //    CHẶN tạo thêm (409, trùng thật). Gói khác: giữ nguyên — khi
+      //    admin duyệt một yêu cầu, action duyệt tự hủy các yêu cầu chờ
+      //    còn lại của người dùng, nên không thể cộng hạn 2 lần.
+      //  - Yêu cầu chưa trả tiền (giao dịch còn chờ xử lý/bỏ dở) hoặc yêu
+      //    cầu "ma" không gắn giao dịch (dữ liệu cũ) -> TỰ HỦY để yêu cầu
+      //    mới thay thế, tránh người dùng bị kẹt vĩnh viễn không mua được.
       await donYeuCauHetHan(supabaseAdmin);
-      const { data: ycDangCho } = await supabaseAdmin
+      const { data: cacYcCho } = await supabaseAdmin
         .from("yeu_cau_nang_cap")
-        .select("id, ma_yeu_cau, goi_id")
+        .select("id, ma_yeu_cau, thanh_toan_id, goi_id")
         .eq("nguoi_dung_id", phien.user.id)
-        .eq("trang_thai", "cho_duyet")
-        .limit(1)
-        .maybeSingle();
-      if (ycDangCho) {
+        .eq("trang_thai", "cho_duyet");
+      let ycTrungGoi: { ma_yeu_cau: string } | null = null;
+      for (const yc of cacYcCho ?? []) {
+        let daTraTien = false;
+        if (yc.thanh_toan_id) {
+          const { data: tt } = await supabaseAdmin
+            .from("thanh_toan")
+            .select("trang_thai")
+            .eq("id", yc.thanh_toan_id)
+            .maybeSingle();
+          daTraTien = tt?.trang_thai === "thanh_cong";
+        }
+        if (daTraTien) {
+          // Đã trả tiền cho CHÍNH gói này và đang chờ duyệt -> trùng thật,
+          // chặn rõ ràng. Gói khác thì giữ nguyên (admin xử lý từng yêu
+          // cầu; khi duyệt một yêu cầu, các yêu cầu chờ khác của cùng
+          // người dùng tự bị hủy ở action duyệt — không cộng hạn 2 lần).
+          if (yc.goi_id === goi.id) ycTrungGoi = yc;
+          continue;
+        }
+        await supabaseAdmin
+          .from("yeu_cau_nang_cap")
+          .update({
+            trang_thai: "da_huy",
+            ly_do_tu_choi:
+              "Được thay thế bởi yêu cầu nâng cấp mới (yêu cầu cũ chưa hoàn tất thanh toán)",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", yc.id)
+          .eq("trang_thai", "cho_duyet");
+      }
+      if (ycTrungGoi) {
         return NextResponse.json(
           {
-            loi: `Bạn đã có yêu cầu nâng cấp (${ycDangCho.ma_yeu_cau}) đang chờ duyệt. Vui lòng chờ quản trị viên xử lý hoặc hủy yêu cầu đó ở trang "Gói của tôi" trước khi tạo yêu cầu mới.`,
+            loi: `Bạn đã có yêu cầu nâng cấp (${ycTrungGoi.ma_yeu_cau}) cho gói này, đã thanh toán và đang chờ duyệt. Vui lòng chờ quản trị viên xử lý hoặc hủy yêu cầu đó ở trang \"Gói của tôi\" trước khi tạo yêu cầu mới.`,
           },
           { status: 409 }
         );
