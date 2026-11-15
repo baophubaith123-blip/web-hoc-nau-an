@@ -63,7 +63,7 @@ export function XoaBaiVietCuaToiNut({ baiVietId, tieuDe }: { baiVietId: string; 
           </Button>
           <Button variant="destructive" onClick={xuLyXoa} disabled={dangXoa} className="gap-2">
             {dangXoa && <Loader2 className="h-4 w-4 animate-spin" />}
-            Xóa bài viết
+            Chuyển vào thùng rác
           </Button>
         </DialogFooter>
       </DialogContent>
