@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import {
   BarChart3, Bell, BookOpen, Bookmark, ChefHat, CreditCard, FolderTree, GraduationCap, Inbox,
   LayoutDashboard, LifeBuoy, Megaphone, MessageSquare, Newspaper, PenLine, PlusCircle, ScrollText,
-  Send, Settings, Star, User, Users, Crown, ShieldCheck, Bot, Lock, Trash2, type LucideIcon,
+  Send, Settings, Star, User, Users, Crown, ShieldCheck, Bot, Lock, Trash2, UserCheck, type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { MucMenu } from "@/lib/utils/vai-tro";
@@ -18,7 +18,7 @@ import { HopThoaiNangCapPro } from "./nut-khoa-pro";
 const ICON: Record<string, LucideIcon> = {
   BarChart3, Bell, BookOpen, Bookmark, ChefHat, CreditCard, FolderTree, GraduationCap, Inbox,
   LayoutDashboard, LifeBuoy, Megaphone, MessageSquare, Newspaper, PenLine, PlusCircle, ScrollText,
-  Send, Settings, Star, User, Users, Crown, ShieldCheck, Bot, Trash2,
+  Send, Settings, Star, User, Users, Crown, ShieldCheck, Bot, Trash2, UserCheck,
 };
 
 export function DanhSachMenu({

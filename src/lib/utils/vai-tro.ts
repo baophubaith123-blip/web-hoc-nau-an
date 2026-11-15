@@ -79,6 +79,7 @@ export const MENU_DAU_BEP: MucMenu[] = [
 export const MENU_QUAN_TRI: MucMenu[] = [
   { nhan: m.tong_quan, href: "/quan-tri", icon: "LayoutDashboard" },
   { nhan: "Duyệt nâng cấp Pro", href: "/quan-tri/duyet-nang-cap", icon: "ShieldCheck" },
+  { nhan: "Duyệt đầu bếp", href: "/quan-tri/duyet-dau-bep", icon: "UserCheck" },
   { nhan: "Quản lý gói Pro", href: "/quan-tri/quan-ly-goi", icon: "Crown" },
   { nhan: m.nguoi_dung, href: "/quan-tri/nguoi-dung", icon: "Users" },
   { nhan: m.quan_ly_dau_bep, href: "/quan-tri/dau-bep", icon: "ChefHat" },

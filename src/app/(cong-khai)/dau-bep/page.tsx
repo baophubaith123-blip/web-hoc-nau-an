@@ -201,6 +201,28 @@ export default async function DanhSachDauBep() {
           </Card>
         ))}
       </div>
+
+      {/* MỜI ỨNG TUYỂN ĐẦU BẾP (đợt 5) */}
+      <section className="overflow-hidden rounded-3xl border border-orange-200 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100 p-6 shadow-xs dark:border-orange-900/40 dark:from-orange-950/30 dark:via-amber-950/20 dark:to-orange-950/30 sm:p-8">
+        <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-orange-600 text-white shadow-sm">
+            <ChefHat className="h-8 w-8" />
+          </span>
+          <div className="flex-1 space-y-2">
+            <h2 className="text-xl font-extrabold tracking-tight">
+              Bạn nấu ăn ngon? Hãy trở thành đầu bếp trên Học Nấu Ăn
+            </h2>
+            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              Chia sẻ công thức, mở khóa học của riêng bạn và đồng hành cùng cộng
+              đồng yêu bếp. Chỉ cần gửi một đơn ứng tuyển — quản trị viên sẽ xem
+              hồ sơ và phản hồi ngay trong mục thông báo của bạn.
+            </p>
+          </div>
+          <Button asChild size="lg" className="shrink-0 font-bold">
+            <Link href="/tro-thanh-dau-bep">Ứng tuyển làm đầu bếp</Link>
+          </Button>
+        </div>
+      </section>
     </div>
   );
 }

@@ -48,6 +48,21 @@ export default async function TrangHoSo() {
     supabase.from("bai_viet").select("id", { count: "exact", head: true }).eq("tac_gia_id", phien.user.id),
   ]);
 
+  // Đợt 5: đơn ứng tuyển đầu bếp mới nhất của học viên (bảng chưa tồn
+  // tại — migration 010 chưa chạy — thì bỏ qua êm, không hiện khối).
+  const donUngTuyenRes =
+    profile.vai_tro === "user"
+      ? await supabase
+          .from("don_ung_tuyen_dau_bep")
+          .select("trang_thai, ly_do_tu_choi, created_at, duyet_luc")
+          .eq("nguoi_dung_id", phien.user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : null;
+  const donMoiNhat =
+    donUngTuyenRes && !donUngTuyenRes.error ? donUngTuyenRes.data : null;
+
   const goi = goiRes.data;
   const congThucCuaToi = congThucRes.data || [];
   const soCongThucChoDuyet = congThucCuaToi.filter((c) => c.trang_thai === "cho_duyet").length;
@@ -265,6 +280,31 @@ export default async function TrangHoSo() {
           </Button>
         </div>
       </div>
+
+      {/* ĐỢT 5: TRẠNG THÁI ỨNG TUYỂN ĐẦU BẾP */}
+      {profile.vai_tro === "user" && (
+        <Link
+          href="/tro-thanh-dau-bep"
+          className="group flex items-center gap-4 rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"
+        >
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
+            <ChefHat className="h-6 w-6" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-bold">Trở thành đầu bếp</span>
+            <span className="block text-sm text-muted-foreground">
+              {!donMoiNhat
+                ? "Ứng tuyển để đăng công thức và mở khóa học của riêng bạn"
+                : donMoiNhat.trang_thai === "cho_duyet"
+                  ? "Đơn ứng tuyển của bạn đang chờ quản trị viên duyệt"
+                  : donMoiNhat.trang_thai === "da_duyet"
+                    ? "Đơn đã được duyệt — chúc mừng đầu bếp mới!"
+                    : `Đơn gần nhất chưa được duyệt${donMoiNhat.ly_do_tu_choi ? `: ${donMoiNhat.ly_do_tu_choi}` : ""} — bấm để xem chi tiết và gửi lại`}
+            </span>
+          </span>
+          <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
+        </Link>
+      )}
 
       {/* FORM THÔNG TIN + ĐỔI MẬT KHẨU */}
       <FormHoSoClient profile={profile} />
