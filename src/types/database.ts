@@ -849,6 +849,72 @@ export type Database = {
           },
         ];
       };
+      don_ung_tuyen_dau_bep: {
+        Row: {
+          id: string;
+          nguoi_dung_id: string;
+          chuyen_mon: string;
+          so_nam_kinh_nghiem: number;
+          mon_tu: string | null;
+          tieu_su: string;
+          ly_do: string;
+          lien_ket_mang_xa_hoi: string | null;
+          trang_thai: string;
+          ly_do_tu_choi: string | null;
+          nguoi_duyet_id: string | null;
+          duyet_luc: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          nguoi_dung_id: string;
+          chuyen_mon: string;
+          so_nam_kinh_nghiem: number;
+          mon_tu?: string | null;
+          tieu_su: string;
+          ly_do: string;
+          lien_ket_mang_xa_hoi?: string | null;
+          trang_thai?: string;
+          ly_do_tu_choi?: string | null;
+          nguoi_duyet_id?: string | null;
+          duyet_luc?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          nguoi_dung_id?: string;
+          chuyen_mon?: string;
+          so_nam_kinh_nghiem?: number;
+          mon_tu?: string | null;
+          tieu_su?: string;
+          ly_do?: string;
+          lien_ket_mang_xa_hoi?: string | null;
+          trang_thai?: string;
+          ly_do_tu_choi?: string | null;
+          nguoi_duyet_id?: string | null;
+          duyet_luc?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "don_ung_tuyen_dau_bep_nguoi_dung_id_fkey";
+            columns: ["nguoi_dung_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "don_ung_tuyen_dau_bep_nguoi_duyet_id_fkey";
+            columns: ["nguoi_duyet_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       cau_hinh_he_thong: {
         Row: {
           id: string;
