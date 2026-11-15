@@ -59,11 +59,12 @@ test.describe("Cokba Đợt 3", () => {
   test("d) calo: chưa biết số người thì hỏi lại, gõ 3 người ra tổng + lẻ", async ({ page }) => {
     await page.goto("/");
     await moPanel(page);
-    // Phở bò Hà Nội: dữ liệu thật 450 calo cho 4 người -> 113/người, 3 người = 339
+    // Phở bò Hà Nội: calories = 450 kcal cho MỘT người ăn (đính chính đợt 2,
+    // xem báo cáo Cokba) -> 3 người: tổng 1.350, vẫn 450/người.
     await hoi(page, "Món phở bò Hà Nội bao nhiêu calo?");
     await expect(page.getByText(/mấy người/i).first()).toBeVisible({ timeout: 30_000 });
     await hoi(page, "3 người");
-    await expect(page.getByText(/339/).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(/1\.350/).first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText(/calo\/người/).first()).toBeVisible();
   });
 
