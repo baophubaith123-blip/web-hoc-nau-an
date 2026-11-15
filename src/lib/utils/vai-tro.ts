@@ -63,6 +63,7 @@ export const MENU_NGUOI_DUNG: MucMenu[] = [
   { nhan: m.cong_thuc_da_gui, href: "/cong-thuc-da-gui", icon: "Send" },
   { nhan: "Viết bài viết", href: "/tao-bai-viet", icon: "PenLine" },
   { nhan: "Bài viết của tôi", href: "/bai-viet-cua-toi", icon: "Newspaper" },
+  { nhan: "Thùng rác", href: "/thung-rac", icon: "Trash2" },
   { nhan: m.thong_bao, href: "/thong-bao", icon: "Bell" },
   { nhan: m.ho_tro, href: "/ho-tro", icon: "LifeBuoy" },
   { nhan: m.ho_so, href: "/ho-so", icon: "User" },
@@ -72,6 +73,7 @@ export const MENU_DAU_BEP: MucMenu[] = [
   { nhan: m.tong_quan, href: "/bep", icon: "LayoutDashboard" },
   { nhan: m.quan_ly_cong_thuc, href: "/bep/cong-thuc", icon: "ChefHat" },
   { nhan: m.quan_ly_khoa_hoc, href: "/bep/khoa-hoc", icon: "GraduationCap" },
+  { nhan: "Thùng rác", href: "/bep/thung-rac", icon: "Trash2" },
 ];
 
 export const MENU_QUAN_TRI: MucMenu[] = [
@@ -82,6 +84,7 @@ export const MENU_QUAN_TRI: MucMenu[] = [
   { nhan: m.quan_ly_dau_bep, href: "/quan-tri/dau-bep", icon: "ChefHat" },
   { nhan: m.quan_ly_cong_thuc, href: "/quan-tri/cong-thuc", icon: "BookOpen" },
   { nhan: m.quan_ly_khoa_hoc, href: "/quan-tri/khoa-hoc", icon: "GraduationCap" },
+  { nhan: "Thùng rác", href: "/quan-tri/thung-rac", icon: "Trash2" },
   { nhan: m.danh_muc, href: "/quan-tri/danh-muc", icon: "FolderTree" },
   { nhan: m.binh_luan, href: "/quan-tri/binh-luan", icon: "MessageSquare" },
   { nhan: m.danh_gia, href: "/quan-tri/danh-gia", icon: "Star" },

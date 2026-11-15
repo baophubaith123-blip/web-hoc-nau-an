@@ -8,12 +8,15 @@ import { idUuid } from "@/lib/validations/chung";
 import { chuanHoaLoi, thanhCong, thatBai, type KetQua } from "@/lib/utils/phan-hoi-loi";
 import { taoSlugDuyNhat } from "@/lib/utils/slug";
 import { t } from "@/lib/i18n/config";
+import { docDongThungRac, ghiKhoiPhuc, ghiXoaMem } from "@/lib/thung-rac";
 import type { z } from "zod";
 
 const lamMoi = () => {
   revalidatePath("/bai-viet");
   revalidatePath("/quan-tri/bai-viet");
   revalidatePath("/bai-viet-cua-toi");
+  revalidatePath("/thung-rac");
+  revalidatePath("/quan-tri/thung-rac");
   revalidatePath("/ho-so");
   revalidatePath("/");
 };
@@ -63,15 +66,28 @@ export async function xoaBaiViet(id: unknown): Promise<KetQua> {
   try {
     const p = await canPhien(["admin"]);
     if (!p.ok) return p.loi;
-    const { error } = await p.supabase.from("bai_viet").delete().eq("id", idUuid.parse(id));
-    if (error) throw error;
-    await ghiNhatKy(p.supabase, p.user.id, "xoa_bai_viet", "bai_viet", String(id));
+    const idBv = idUuid.parse(id);
+
+    const admin = taoSupabaseAdmin();
+    const { dong, thieuCot } = await docDongThungRac(admin, "bai_viet", idBv, "tac_gia_id");
+    if (!dong || dong.deleted_at) return thatBai(t("loi.khong_tim_thay"));
+
+    if (thieuCot) {
+      // Chưa có migration 009 → fallback hành vi cũ: XÓA CỨNG.
+      const { error } = await p.supabase.from("bai_viet").delete().eq("id", idBv);
+      if (error) throw error;
+    } else {
+      // Xóa mềm vào thùng rác (đợt 3): set deleted_at + lưu trạng thái cũ.
+      await ghiXoaMem(admin, "bai_viet", idBv, dong.trang_thai);
+    }
+    await ghiNhatKy(p.supabase, p.user.id, "xoa_bai_viet", "bai_viet", idBv, { vao_thung_rac: !thieuCot });
     lamMoi();
     return thanhCong();
   } catch (e) {
     return chuanHoaLoi(e);
   }
 }
+
 // ================= PHÍA NGƯỜI DÙNG (thành viên Pro gửi bài chờ duyệt) =================
 
 type MucDichBaiViet = "nhap" | "gui"; // nhap = lưu bản nháp, gui = gửi duyệt
@@ -144,6 +160,8 @@ export async function capNhatBaiVietCuaToi(
       .maybeSingle();
     if (!cu) return thatBai(t("loi.khong_tim_thay"));
     if (cu.tac_gia_id !== p.user.id) return thatBai(t("loi.khong_co_quyen"));
+    const { dong: dongRacSua } = await docDongThungRac(taoSupabaseAdmin(), "bai_viet", idBv, "tac_gia_id");
+    if (dongRacSua?.deleted_at) return thatBai(t("loi.khong_tim_thay"));
     // Chỉ sửa được khi bài đang là bản nháp hoặc bị từ chối
     if (cu.trang_thai !== "nhap" && cu.trang_thai !== "tu_choi") {
       return thatBai("Bài viết đang chờ duyệt hoặc đã xuất bản nên không sửa được.");
@@ -186,9 +204,69 @@ export async function xoaBaiVietCuaToi(id: unknown): Promise<KetQua> {
     if (cu.trang_thai !== "nhap" && cu.trang_thai !== "tu_choi") {
       return thatBai("Chỉ xóa được bài viết đang là bản nháp hoặc bị từ chối.");
     }
-    const { error } = await p.supabase.from("bai_viet").delete().eq("id", idBv);
+
+    const admin = taoSupabaseAdmin();
+    const { dong, thieuCot } = await docDongThungRac(admin, "bai_viet", idBv, "tac_gia_id");
+    if (dong?.deleted_at) return thatBai(t("loi.khong_tim_thay"));
+
+    if (thieuCot) {
+      // Chưa có migration 009 → fallback hành vi cũ: XÓA CỨNG.
+      const { error } = await p.supabase.from("bai_viet").delete().eq("id", idBv);
+      if (error) throw error;
+    } else {
+      // Xóa mềm vào thùng rác. Ghi bằng admin client sau khi đã kiểm tra
+      // chủ sở hữu tường minh: WITH CHECK của bai_viet_sua không cho giữ
+      // trạng thái 'tu_choi' khi ghi bằng client phiên.
+      await ghiXoaMem(admin, "bai_viet", idBv, cu.trang_thai);
+    }
+    await ghiNhatKy(p.supabase, p.user.id, "xoa_bai_viet", "bai_viet", idBv, { vao_thung_rac: !thieuCot });
+    lamMoi();
+    return thanhCong();
+  } catch (e) {
+    return chuanHoaLoi(e);
+  }
+}
+
+// Khôi phục bài viết từ thùng rác (chủ sở hữu / admin) — về đúng trạng
+// thái trước khi xóa.
+export async function khoiPhucBaiViet(id: unknown): Promise<KetQua> {
+  try {
+    const p = await canPhien();
+    if (!p.ok) return p.loi;
+    const idBv = idUuid.parse(id);
+
+    const admin = taoSupabaseAdmin();
+    const { dong, thieuCot } = await docDongThungRac(admin, "bai_viet", idBv, "tac_gia_id");
+    if (thieuCot) return thatBai("Thùng rác cho bài viết sẽ kích hoạt sau khi cập nhật cơ sở dữ liệu (migration 009).");
+    if (!dong || !dong.deleted_at) return thatBai("Bài viết không nằm trong thùng rác.");
+    if (dong.chu_id !== p.user.id && p.vaiTro !== "admin") return thatBai(t("loi.khong_co_quyen"));
+
+    await ghiKhoiPhuc(admin, "bai_viet", idBv, dong);
+    await ghiNhatKy(p.supabase, p.user.id, "khoi_phuc_bai_viet", "bai_viet", idBv, { trang_thai: dong.trang_thai_truoc_xoa ?? dong.trang_thai });
+    lamMoi();
+    return thanhCong();
+  } catch (e) {
+    return chuanHoaLoi(e);
+  }
+}
+
+// Xóa VĨNH VIỄN bài viết đang nằm trong thùng rác (chủ sở hữu / admin).
+export async function xoaVinhVienBaiViet(id: unknown): Promise<KetQua> {
+  try {
+    const p = await canPhien();
+    if (!p.ok) return p.loi;
+    const idBv = idUuid.parse(id);
+
+    const admin = taoSupabaseAdmin();
+    const { dong, thieuCot } = await docDongThungRac(admin, "bai_viet", idBv, "tac_gia_id");
+    if (thieuCot) return thatBai("Thùng rác cho bài viết sẽ kích hoạt sau khi cập nhật cơ sở dữ liệu (migration 009).");
+    if (!dong || !dong.deleted_at) return thatBai("Bài viết không nằm trong thùng rác nên chưa xóa vĩnh viễn được.");
+    if (dong.chu_id !== p.user.id && p.vaiTro !== "admin") return thatBai(t("loi.khong_co_quyen"));
+
+    const { error } = await admin.from("bai_viet").delete().eq("id", idBv);
     if (error) throw error;
-    await ghiNhatKy(p.supabase, p.user.id, "xoa_bai_viet", "bai_viet", idBv);
+
+    await ghiNhatKy(p.supabase, p.user.id, "xoa_vinh_vien_bai_viet", "bai_viet", idBv);
     lamMoi();
     return thanhCong();
   } catch (e) {

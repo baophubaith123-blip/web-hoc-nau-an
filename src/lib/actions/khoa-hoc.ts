@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { canPhien, ghiNhatKy, rongThanhNull } from "@/lib/actions/chung";
+import { taoSupabaseAdmin } from "@/lib/supabase/admin";
+import { docDongThungRac, ghiKhoiPhuc, ghiXoaMem } from "@/lib/thung-rac";
 import { khoaHocSchema, type KhoaHocForm } from "@/lib/validations/khoa-hoc";
 import { idUuid } from "@/lib/validations/chung";
 import { chuanHoaLoi, thanhCong, thatBai, type KetQua } from "@/lib/utils/phan-hoi-loi";
@@ -11,7 +13,7 @@ import { t } from "@/lib/i18n/config";
 type MucDich = "luu" | "gui"; // gui = gửi duyệt (admin: xuất bản luôn)
 
 const lamMoi = () => {
-  ["/khoa-hoc", "/khoa-hoc-cua-toi", "/bep/khoa-hoc", "/quan-tri/khoa-hoc"].forEach((p) => revalidatePath(p));
+  ["/khoa-hoc", "/khoa-hoc-cua-toi", "/bep/khoa-hoc", "/quan-tri/khoa-hoc", "/bep/thung-rac", "/quan-tri/thung-rac"].forEach((p) => revalidatePath(p));
 };
 
 function duLieuKhoaHoc(d: KhoaHocForm) {
@@ -122,6 +124,96 @@ export async function dangKyMienPhi(khoaHocId: unknown): Promise<KetQua> {
     await ghiNhatKy(p.supabase, p.user.id, "dang_ky_khoa_hoc", "khoa_hoc", String(khoaHocId));
     revalidatePath("/khoa-hoc-cua-toi");
     revalidatePath("/bang-dieu-khien");
+    return thanhCong();
+  } catch (e) {
+    return chuanHoaLoi(e);
+  }
+}
+// ================= THÙNG RÁC KHÓA HỌC (đợt 3) =================
+// Xóa mềm khóa học vào thùng rác: set deleted_at + lưu trạng thái trước
+// xóa, GIỮ NGUYÊN trang_thai — PHÂN BIỆT với luuTruKhoaHoc ở trên (lưu trữ
+// là tạm ẩn có chủ đích, không phải xóa). Quyền: chef chủ sở hữu / admin.
+// Ghi bằng admin client sau khi kiểm tra chủ sở hữu tường minh (bảng chưa
+// có policy DELETE cho chủ sở hữu — xem ghi chú migration 009).
+// Chưa có migration 009 (chưa có cột deleted_at): fallback về hành vi
+// HIỆN TẠI — xóa = lưu trữ (trang_thai = 'luu_tru'), không lỗi.
+export async function xoaKhoaHoc(id: unknown): Promise<KetQua> {
+  try {
+    const p = await canPhien(["chef", "admin"]);
+    if (!p.ok) return p.loi;
+    const idKh = idUuid.parse(id);
+    const { data: cu } = await p.supabase.from("khoa_hoc").select("dau_bep_id, trang_thai").eq("id", idKh).maybeSingle();
+    if (!cu) return thatBai(t("loi.khong_tim_thay"));
+    if (cu.dau_bep_id !== p.user.id && p.vaiTro !== "admin") return thatBai(t("loi.khong_co_quyen"));
+
+    const admin = taoSupabaseAdmin();
+    const { dong: dongRac } = await docDongThungRac(admin, "khoa_hoc", idKh, "dau_bep_id");
+    if (dongRac?.deleted_at) return thatBai(t("loi.khong_tim_thay"));
+
+    const kq = await ghiXoaMem(admin, "khoa_hoc", idKh, cu.trang_thai);
+    if (kq.cheDo === "chua_co_cot") {
+      const { error } = await p.supabase.from("khoa_hoc").update({ trang_thai: "luu_tru" }).eq("id", idKh);
+      if (error) throw error;
+      await ghiNhatKy(p.supabase, p.user.id, "luu_tru_khoa_hoc", "khoa_hoc", idKh, { fallback_xoa_khi_chua_co_009: true });
+      lamMoi();
+      return thanhCong();
+    }
+
+    await ghiNhatKy(p.supabase, p.user.id, "xoa_khoa_hoc", "khoa_hoc", idKh, { vao_thung_rac: true, trang_thai_truoc_xoa: cu.trang_thai });
+    lamMoi();
+    return thanhCong();
+  } catch (e) {
+    return chuanHoaLoi(e);
+  }
+}
+
+// Khôi phục khóa học từ thùng rác (chủ sở hữu / admin): bài học, ghi danh,
+// tiến độ, chứng chỉ KHÔNG bị đụng trong thời gian khóa nằm ở thùng rác —
+// khôi phục xong học viên học tiếp được ngay.
+export async function khoiPhucKhoaHoc(id: unknown): Promise<KetQua> {
+  try {
+    const p = await canPhien(["chef", "admin"]);
+    if (!p.ok) return p.loi;
+    const idKh = idUuid.parse(id);
+
+    const admin = taoSupabaseAdmin();
+    const { dong, thieuCot } = await docDongThungRac(admin, "khoa_hoc", idKh, "dau_bep_id");
+    if (thieuCot) return thatBai("Thùng rác cho khóa học sẽ kích hoạt sau khi cập nhật cơ sở dữ liệu (migration 009).");
+    if (!dong || !dong.deleted_at) return thatBai("Khóa học không nằm trong thùng rác.");
+    if (dong.chu_id !== p.user.id && p.vaiTro !== "admin") return thatBai(t("loi.khong_co_quyen"));
+
+    await ghiKhoiPhuc(admin, "khoa_hoc", idKh, dong);
+    await ghiNhatKy(p.supabase, p.user.id, "khoi_phuc_khoa_hoc", "khoa_hoc", idKh, { trang_thai: dong.trang_thai_truoc_xoa ?? dong.trang_thai });
+    lamMoi();
+    return thanhCong();
+  } catch (e) {
+    return chuanHoaLoi(e);
+  }
+}
+
+// Xóa VĨNH VIỄN khóa học trong thùng rác — CHỈ ADMIN (chốt F.3): chef bị
+// từ chối TƯỜNG MINH ngay trong action kể cả khi gọi thẳng, dù là chủ sở
+// hữu. Xóa dòng thật, cascade theo FK hiện có (bài học, ghi danh, tiến độ,
+// chứng chỉ liên quan bị xóa theo).
+export async function xoaVinhVienKhoaHoc(id: unknown): Promise<KetQua> {
+  try {
+    const p = await canPhien();
+    if (!p.ok) return p.loi;
+    if (p.vaiTro !== "admin") {
+      return thatBai("Chỉ Admin mới được xóa vĩnh viễn khóa học. Đầu bếp vui lòng khôi phục khóa học hoặc để trong thùng rác chờ Admin xử lý.");
+    }
+    const idKh = idUuid.parse(id);
+
+    const admin = taoSupabaseAdmin();
+    const { dong, thieuCot } = await docDongThungRac(admin, "khoa_hoc", idKh, "dau_bep_id");
+    if (thieuCot) return thatBai("Thùng rác cho khóa học sẽ kích hoạt sau khi cập nhật cơ sở dữ liệu (migration 009).");
+    if (!dong || !dong.deleted_at) return thatBai("Khóa học không nằm trong thùng rác nên chưa xóa vĩnh viễn được.");
+
+    const { error } = await admin.from("khoa_hoc").delete().eq("id", idKh);
+    if (error) throw error;
+
+    await ghiNhatKy(p.supabase, p.user.id, "xoa_vinh_vien_khoa_hoc", "khoa_hoc", idKh);
+    lamMoi();
     return thanhCong();
   } catch (e) {
     return chuanHoaLoi(e);

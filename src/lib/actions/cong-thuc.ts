@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { canPhien, ghiNhatKy, laDauBepHoacAdmin, laProConHan, rongThanhNull, type Db } from "@/lib/actions/chung";
+import { taoSupabaseAdmin } from "@/lib/supabase/admin";
+import { docDongThungRac, ghiKhoiPhuc, ghiXoaMem } from "@/lib/thung-rac";
 import { congThucSchema, type CongThucForm } from "@/lib/validations/cong-thuc";
 import { idUuid, vanBan } from "@/lib/validations/chung";
 import { chuanHoaLoi, thanhCong, thatBai, type KetQua } from "@/lib/utils/phan-hoi-loi";
@@ -12,7 +14,7 @@ import type { Json } from "@/types/database";
 type MucDich = "nhap" | "gui"; // nhap = lưu bản nháp, gui = gửi duyệt (chef/admin: xuất bản luôn)
 
 const lamMoi = () => {
-  ["/cong-thuc", "/cong-thuc-da-gui", "/cong-thuc-cua-toi", "/bep/cong-thuc", "/quan-tri/cong-thuc"].forEach((p) =>
+  ["/cong-thuc", "/cong-thuc-da-gui", "/cong-thuc-cua-toi", "/bep/cong-thuc", "/quan-tri/cong-thuc", "/thung-rac", "/bep/thung-rac", "/quan-tri/thung-rac"].forEach((p) =>
     revalidatePath(p)
   );
 };
@@ -125,22 +127,77 @@ export async function capNhatCongThuc(id: unknown, dauVao: unknown, mucDich: Muc
   }
 }
 
-// Xóa mềm. Đặt trang_thai = 'nhap' để qua được WITH CHECK của RLS với user thường
+// Xóa mềm vào THÙNG RÁC (đợt 3): set deleted_at + LƯU trạng thái trước khi
+// xóa vào trang_thai_truoc_xoa (migration 009), GIỮ NGUYÊN trang_thai để
+// khôi phục về đúng trạng thái cũ.
+// Vì sao ghi bằng admin client (sau khi đã kiểm tra chủ sở hữu tường minh ở
+// trên): WITH CHECK của policy cong_thuc_sua chỉ cho user thường đưa
+// trang_thai về 'nhap'/'cho_duyet' — đó là lý do bản cũ phải ép 'nhap' khi
+// xóa, làm mất trạng thái xuất bản. Ghi qua admin client giữ nguyên trạng
+// thái; quyền đã được chốt ở tầng action nên không cần nới RLS.
+// Chưa có migration 009: ghiXoaMem tự fallback chỉ set deleted_at (cột đã
+// có từ migration 001) — hành vi hiển thị giữ nguyên như trước đợt 3.
 export async function xoaCongThuc(id: unknown): Promise<KetQua> {
   try {
     const p = await canPhien();
     if (!p.ok) return p.loi;
     const idCt = idUuid.parse(id);
 
-    const { data: cu } = await p.supabase.from("cong_thuc").select("tac_gia_id, deleted_at").eq("id", idCt).maybeSingle();
+    const { data: cu } = await p.supabase.from("cong_thuc").select("tac_gia_id, trang_thai, deleted_at").eq("id", idCt).maybeSingle();
     if (!cu || cu.deleted_at) return thatBai(t("loi.khong_tim_thay"));
     if (cu.tac_gia_id !== p.user.id && p.vaiTro !== "admin") return thatBai(t("loi.khong_co_quyen"));
 
-    const { error } = await p.supabase
-      .from("cong_thuc").update({ deleted_at: new Date().toISOString(), trang_thai: "nhap" }).eq("id", idCt);
+    const admin = taoSupabaseAdmin();
+    await ghiXoaMem(admin, "cong_thuc", idCt, cu.trang_thai);
+
+    await ghiNhatKy(p.supabase, p.user.id, "xoa_cong_thuc", "cong_thuc", idCt, { vao_thung_rac: true, trang_thai_truoc_xoa: cu.trang_thai });
+    lamMoi();
+    return thanhCong();
+  } catch (e) {
+    return chuanHoaLoi(e);
+  }
+}
+
+// Khôi phục công thức từ thùng rác: xóa deleted_at, trả trang_thai về
+// trạng thái đã lưu lúc xóa (trang_thai_truoc_xoa). Quyền: chủ sở hữu/admin.
+export async function khoiPhucCongThuc(id: unknown): Promise<KetQua> {
+  try {
+    const p = await canPhien();
+    if (!p.ok) return p.loi;
+    const idCt = idUuid.parse(id);
+
+    const admin = taoSupabaseAdmin();
+    const { dong } = await docDongThungRac(admin, "cong_thuc", idCt, "tac_gia_id");
+    if (!dong || !dong.deleted_at) return thatBai("Công thức không nằm trong thùng rác.");
+    if (dong.chu_id !== p.user.id && p.vaiTro !== "admin") return thatBai(t("loi.khong_co_quyen"));
+
+    await ghiKhoiPhuc(admin, "cong_thuc", idCt, dong);
+    await ghiNhatKy(p.supabase, p.user.id, "khoi_phuc_cong_thuc", "cong_thuc", idCt, { trang_thai: dong.trang_thai_truoc_xoa ?? dong.trang_thai });
+    lamMoi();
+    return thanhCong();
+  } catch (e) {
+    return chuanHoaLoi(e);
+  }
+}
+
+// Xóa VĨNH VIỄN công thức đang nằm trong thùng rác (xóa hẳn dòng).
+// Quyền: chủ sở hữu hoặc admin. Ghi bằng admin client vì bảng chưa có
+// policy DELETE cho chủ sở hữu (quyền đã kiểm tra tường minh ở trên).
+export async function xoaVinhVienCongThuc(id: unknown): Promise<KetQua> {
+  try {
+    const p = await canPhien();
+    if (!p.ok) return p.loi;
+    const idCt = idUuid.parse(id);
+
+    const admin = taoSupabaseAdmin();
+    const { dong } = await docDongThungRac(admin, "cong_thuc", idCt, "tac_gia_id");
+    if (!dong || !dong.deleted_at) return thatBai("Công thức không nằm trong thùng rác nên chưa xóa vĩnh viễn được.");
+    if (dong.chu_id !== p.user.id && p.vaiTro !== "admin") return thatBai(t("loi.khong_co_quyen"));
+
+    const { error } = await admin.from("cong_thuc").delete().eq("id", idCt);
     if (error) throw error;
 
-    await ghiNhatKy(p.supabase, p.user.id, "xoa_cong_thuc", "cong_thuc", idCt);
+    await ghiNhatKy(p.supabase, p.user.id, "xoa_vinh_vien_cong_thuc", "cong_thuc", idCt);
     lamMoi();
     return thanhCong();
   } catch (e) {

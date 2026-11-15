@@ -3,8 +3,10 @@
 // công khai của web. Các module còn lại nhận DuLieuTroLy qua tham số.
 //
 // Quy ước lấy dữ liệu (khớp các trang công khai hiện tại của dự án):
-//   - cong_thuc / khoa_hoc / bai_viet: chỉ trạng thái "xuat_ban";
-//     cong_thuc thêm điều kiện deleted_at IS NULL.
+//   - cong_thuc / khoa_hoc / bai_viet: chỉ trạng thái "xuat_ban" và
+//     deleted_at IS NULL (nội dung trong thùng rác không được gợi ý).
+//     khoa_hoc/bai_viet có cột deleted_at từ migration 009 — voiLocXoa
+//     tự chạy lại không lọc khi DB chưa có cột, Cokba không sập.
 //   - Chỉ lấy các trường Cokba cần, không lấy dữ liệu nhạy cảm.
 //   - Đầu bếp: profiles vai trò "chef" — trang /dau-bep của dự án đã phải
 //     dùng admin client vì RLS của profiles chỉ cho đọc hồ sơ của chính
@@ -14,6 +16,7 @@
 import "server-only";
 
 import { taoSupabaseAdmin } from "@/lib/supabase/admin";
+import { voiLocXoa } from "@/lib/thung-rac";
 import { taoSupabaseServer } from "@/lib/supabase/server";
 import type {
   BaiHocTroLy,
@@ -64,20 +67,26 @@ export async function taiDuLieuTroLy(): Promise<DuLieuTroLy> {
     supabase
       .from("cong_thuc_danh_muc")
       .select("cong_thuc_id, danh_muc:danh_muc(ten, slug)"),
-    supabase
-      .from("khoa_hoc")
-      .select(
-        "id, tieu_de, slug, mo_ta, mo_ta_chi_tiet, anh_dai_dien, cap_do, gia, mien_phi, dau_bep_id, tong_thoi_gian, so_bai_hoc"
-      )
-      .eq("trang_thai", "xuat_ban"),
+    voiLocXoa((loc) => {
+      const q = supabase
+        .from("khoa_hoc")
+        .select(
+          "id, tieu_de, slug, mo_ta, mo_ta_chi_tiet, anh_dai_dien, cap_do, gia, mien_phi, dau_bep_id, tong_thoi_gian, so_bai_hoc"
+        )
+        .eq("trang_thai", "xuat_ban");
+      return loc ? q.is("deleted_at", null) : q;
+    }),
     supabase
       .from("bai_hoc")
       .select("id, khoa_hoc_id, tieu_de, mo_ta, thoi_gian_phut, thu_tu, xem_truoc")
       .order("thu_tu", { ascending: true }),
-    supabase
-      .from("bai_viet")
-      .select("id, tieu_de, slug, tom_tat, noi_dung, anh_dai_dien, tac_gia_id, danh_muc")
-      .eq("trang_thai", "xuat_ban"),
+    voiLocXoa((loc) => {
+      const q = supabase
+        .from("bai_viet")
+        .select("id, tieu_de, slug, tom_tat, noi_dung, anh_dai_dien, tac_gia_id, danh_muc")
+        .eq("trang_thai", "xuat_ban");
+      return loc ? q.is("deleted_at", null) : q;
+    }),
   ]);
 
   // Danh mục theo từng công thức
