@@ -11,6 +11,7 @@ import { DemSo } from "@/components/trang-chu/dem-so";
 import { taoSupabaseServer } from "@/lib/supabase/server";
 import { taoSupabaseAdmin } from "@/lib/supabase/admin";
 import { voiLocXoa } from "@/lib/thung-rac";
+import { ganTacGia, ganDauBep } from "@/lib/hien-thi/tac-gia-cong-khai";
 import { vi } from "@/lib/i18n/vi";
 
 export const metadata: Metadata = {
@@ -29,7 +30,7 @@ export default async function TrangChu() {
     supabase
       .from("cong_thuc")
       .select(
-        "id, slug, tieu_de, mo_ta, anh_dai_dien, thoi_gian_chuan_bi, thoi_gian_nau, do_kho, calories, luot_xem, noi_bat, tac_gia_la_pro, tac_gia:profiles(ho_ten, avatar_url)"
+        "id, slug, tieu_de, mo_ta, anh_dai_dien, thoi_gian_chuan_bi, thoi_gian_nau, do_kho, calories, luot_xem, noi_bat, tac_gia_la_pro, tac_gia_id"
       )
       .eq("trang_thai", "xuat_ban")
       .is("deleted_at", null)
@@ -40,7 +41,7 @@ export default async function TrangChu() {
       const q = supabase
         .from("khoa_hoc")
         .select(
-          "id, slug, tieu_de, mo_ta, anh_dai_dien, cap_do, co_chung_chi, so_bai_hoc, tong_thoi_gian, mien_phi, gia, dau_bep:profiles(ho_ten, avatar_url)"
+          "id, slug, tieu_de, mo_ta, anh_dai_dien, cap_do, co_chung_chi, so_bai_hoc, tong_thoi_gian, mien_phi, gia, dau_bep_id"
         )
         .eq("trang_thai", "xuat_ban")
         .order("created_at", { ascending: false })
@@ -86,8 +87,10 @@ export default async function TrangChu() {
     }),
   ]);
 
-  const congThucNoiBat = congThucRes.data || [];
-  const khoaHocMoi = khoaHocRes.data || [];
+  // Đợt 4: ghép tên tác giả/đầu bếp thật theo id (join profiles bằng
+  // client phiên trả null vì RLS — xem lib/hien-thi/tac-gia-cong-khai).
+  const congThucNoiBat = await ganTacGia(congThucRes.data || []);
+  const khoaHocMoi = await ganDauBep(khoaHocRes.data || []);
   const dauBepList = dauBepRes.data || [];
   const baiVietList = baiVietRes.data || [];
 

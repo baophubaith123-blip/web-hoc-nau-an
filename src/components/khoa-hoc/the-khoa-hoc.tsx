@@ -96,7 +96,7 @@ export function TheKhoaHoc({ khoaHoc }: { khoaHoc: KhoaHocItem }) {
 
           <div className="flex items-center justify-between pt-1">
             <div className="text-xs text-muted-foreground truncate">
-              {khoaHoc.dau_bep?.ho_ten ? `Chef ${khoaHoc.dau_bep.ho_ten}` : "Master Chef"}
+              {khoaHoc.dau_bep?.ho_ten ? `Chef ${khoaHoc.dau_bep.ho_ten}` : "Đầu bếp Học Nấu Ăn"}
             </div>
 
             <div className="text-right">

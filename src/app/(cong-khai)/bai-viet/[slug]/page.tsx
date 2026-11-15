@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { taoSupabaseServer } from "@/lib/supabase/server";
+import { docHoSoCongKhai } from "@/lib/hien-thi/tac-gia-cong-khai";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -16,7 +17,7 @@ export default async function ChiTietBaiViet({ params }: Props) {
 
   const { data: bv } = await supabase
     .from("bai_viet")
-    .select("*, tac_gia:profiles(id, ho_ten, avatar_url, bio)")
+    .select("*")
     .eq("slug", slug)
     .eq("trang_thai", "xuat_ban")
     .maybeSingle();
@@ -25,6 +26,10 @@ export default async function ChiTietBaiViet({ params }: Props) {
   if (!bv || bv.deleted_at) {
     notFound();
   }
+
+  // Đợt 4: đọc riêng hồ sơ công khai của tác giả (RLS chặn join profiles
+  // với người khác) để hiện đúng tên người viết thay vì "Ban biên tập".
+  const tacGia = (await docHoSoCongKhai([bv.tac_gia_id])).get(bv.tac_gia_id) ?? null;
 
   // Tăng lượt xem bài viết
   await supabase
@@ -55,12 +60,12 @@ export default async function ChiTietBaiViet({ params }: Props) {
         <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9">
-              <AvatarImage src={bv.tac_gia?.avatar_url || undefined} />
-              <AvatarFallback>{(bv.tac_gia?.ho_ten || "U").charAt(0)}</AvatarFallback>
+              <AvatarImage src={tacGia?.avatar_url || undefined} />
+              <AvatarFallback>{(tacGia?.ho_ten || "U").charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
               <p className="font-semibold text-foreground text-sm">
-                {bv.tac_gia?.ho_ten || "Ban biên tập"}
+                {tacGia?.ho_ten || "Ban biên tập"}
               </p>
               <div className="flex items-center gap-2 mt-0.5">
                 <Calendar className="h-3 w-3" />

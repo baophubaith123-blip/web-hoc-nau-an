@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { TheKhoaHoc } from "@/components/khoa-hoc/the-khoa-hoc";
 import { taoSupabaseServer } from "@/lib/supabase/server";
 import { voiLocXoa } from "@/lib/thung-rac";
+import { ganDauBep } from "@/lib/hien-thi/tac-gia-cong-khai";
 import { GraduationCap, SearchX } from "lucide-react";
 import { TieuDeTrang } from "@/components/layout/tieu-de-trang";
 import { TrangThaiTrong } from "@/components/layout/trang-thai-trong";
@@ -30,7 +31,7 @@ export default async function DanhSachKhoaHoc({ searchParams }: Props) {
     let query = supabase
       .from("khoa_hoc")
       .select(
-        "id, slug, tieu_de, mo_ta, anh_dai_dien, cap_do, co_chung_chi, so_bai_hoc, tong_thoi_gian, mien_phi, gia, dau_bep:profiles(ho_ten, avatar_url)"
+        "id, slug, tieu_de, mo_ta, anh_dai_dien, cap_do, co_chung_chi, so_bai_hoc, tong_thoi_gian, mien_phi, gia, dau_bep_id"
       )
       .eq("trang_thai", "xuat_ban")
       .order("created_at", { ascending: false });
@@ -49,7 +50,10 @@ export default async function DanhSachKhoaHoc({ searchParams }: Props) {
     return locXoa ? query.is("deleted_at", null) : query;
   };
 
-  const { data: danhSach } = await voiLocXoa(chayTruyVan);
+  const { data: danhSachTho } = await voiLocXoa(chayTruyVan);
+  // Đợt 4: ghép tên đầu bếp thật theo dau_bep_id (join profiles bằng
+  // client phiên trả null vì RLS — xem lib/hien-thi/tac-gia-cong-khai).
+  const danhSach = await ganDauBep(danhSachTho ?? []);
 
   return (
     <div className="space-y-8 pb-16">

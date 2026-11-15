@@ -10,6 +10,7 @@ import { TrinhPhatYouTube } from "@/components/khoa-hoc/trinh-phat-youtube";
 import { DanhGiaSao } from "@/components/binh-luan/danh-gia-sao";
 import { KhuBinhLuan, type BinhLuanItem } from "@/components/binh-luan/khu-binh-luan";
 import { layPhienHienTai, taoSupabaseServer } from "@/lib/supabase/server";
+import { docHoSoCongKhai } from "@/lib/hien-thi/tac-gia-cong-khai";
 import type { BuocNau, NguyenLieu } from "@/types";
 
 interface Props {
@@ -26,7 +27,7 @@ export default async function ChiTietCongThuc({ params }: Props) {
   // 1. Lấy chi tiết công thức
   const { data: ct, error } = await supabase
     .from("cong_thuc")
-    .select("*, tac_gia:profiles(id, ho_ten, avatar_url, bio)")
+    .select("*")
     .eq("slug", slug)
     .eq("trang_thai", "xuat_ban")
     .is("deleted_at", null)
@@ -35,6 +36,10 @@ export default async function ChiTietCongThuc({ params }: Props) {
   if (error || !ct) {
     notFound();
   }
+
+  // Đợt 4: join profiles bằng client phiên trả null với tác giả là
+  // người khác (RLS) → đọc riêng hồ sơ công khai để hiện đúng tên tác giả.
+  const tacGia = (await docHoSoCongKhai([ct.tac_gia_id])).get(ct.tac_gia_id) ?? null;
 
   // Đợt 6 — tối ưu tốc độ: sau khi có ct, bốn nhóm truy vấn dưới đây độc
   // lập nhau (tăng lượt xem · đã lưu/đánh giá của tôi · toàn bộ đánh giá
@@ -64,7 +69,7 @@ export default async function ChiTietCongThuc({ params }: Props) {
     // 4. Lấy bình luận kèm phân cấp con
     supabase
       .from("binh_luan")
-      .select("*, nguoi_dung:profiles(id, ho_ten, avatar_url)")
+      .select("*")
       .eq("cong_thuc_id", ct.id)
       .is("deleted_at", null)
       .order("created_at", { ascending: false }),
@@ -79,7 +84,14 @@ export default async function ChiTietCongThuc({ params }: Props) {
   }
 
   const tatCaDanhGia = tatCaDanhGiaRes.data;
-  const binhLuanRaw = binhLuanRes.data;
+  // Đợt 4: tên người bình luận cũng đọc qua hồ sơ công khai (RLS chặn
+  // join profiles với người khác) để hiện đúng tên thật của từng người.
+  const binhLuanTho = binhLuanRes.data;
+  const banDoNguoiBinhLuan = await docHoSoCongKhai((binhLuanTho || []).map((bl) => bl.nguoi_dung_id));
+  const binhLuanRaw = (binhLuanTho || []).map((bl) => ({
+    ...bl,
+    nguoi_dung: banDoNguoiBinhLuan.get(bl.nguoi_dung_id) ?? null,
+  }));
 
   const soDanhGia = tatCaDanhGia?.length || 0;
   const diemTrungBinh =
@@ -136,12 +148,12 @@ export default async function ChiTietCongThuc({ params }: Props) {
         <div className="flex flex-wrap items-center justify-between gap-4 border-y py-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={ct.tac_gia?.avatar_url || undefined} />
-              <AvatarFallback>{(ct.tac_gia?.ho_ten || "U").charAt(0)}</AvatarFallback>
+              <AvatarImage src={tacGia?.avatar_url || undefined} />
+              <AvatarFallback>{(tacGia?.ho_ten || "U").charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
               <p className="font-semibold text-sm text-foreground">
-                {ct.tac_gia?.ho_ten || "Đầu bếp"}
+                {tacGia?.ho_ten || "Đầu bếp"}
               </p>
               <div className="flex items-center gap-2 mt-0.5">
                 <Calendar className="h-3 w-3" />

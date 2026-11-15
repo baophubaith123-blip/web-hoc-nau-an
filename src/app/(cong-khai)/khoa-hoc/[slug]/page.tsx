@@ -8,6 +8,7 @@ import { TrinhPhatYouTube } from "@/components/khoa-hoc/trinh-phat-youtube";
 import { DanhSachBaiHoc } from "@/components/khoa-hoc/danh-sach-bai-hoc";
 import { NutMuaKhoaHoc } from "@/components/thanh-toan/nut-mua-khoa-hoc";
 import { layPhienHienTai, taoSupabaseServer } from "@/lib/supabase/server";
+import { docHoSoCongKhai } from "@/lib/hien-thi/tac-gia-cong-khai";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -23,7 +24,7 @@ export default async function ChiTietKhoaHoc({ params }: Props) {
   // 1. Chi tiết khóa học
   const { data: kh, error } = await supabase
     .from("khoa_hoc")
-    .select("*, dau_bep:profiles(id, ho_ten, avatar_url, bio)")
+    .select("*")
     .eq("slug", slug)
     .eq("trang_thai", "xuat_ban")
     .maybeSingle();
@@ -32,6 +33,10 @@ export default async function ChiTietKhoaHoc({ params }: Props) {
   if (error || !kh || kh.deleted_at) {
     notFound();
   }
+
+  // Đợt 4: đọc riêng hồ sơ công khai của đầu bếp (RLS chặn join profiles
+  // với người khác) để khối "Giảng viên phụ trách" hiện đúng tên thật.
+  const dauBep = (await docHoSoCongKhai([kh.dau_bep_id])).get(kh.dau_bep_id) ?? null;
 
   // 2. Danh sách bài học
   const { data: baiHocList } = await supabase
@@ -95,13 +100,13 @@ export default async function ChiTietKhoaHoc({ params }: Props) {
           )}
 
           {/* Đầu bếp giảng dạy */}
-          {kh.dau_bep && (
+          {dauBep && (
             <div className="flex items-center gap-3 pt-2">
               <div className="relative h-12 w-12 overflow-hidden rounded-full border bg-muted">
-                {kh.dau_bep.avatar_url ? (
+                {dauBep.avatar_url ? (
                   <Image
-                    src={kh.dau_bep.avatar_url}
-                    alt={kh.dau_bep.ho_ten || "Đầu bếp"}
+                    src={dauBep.avatar_url}
+                    alt={dauBep.ho_ten || "Đầu bếp"}
                     fill
                     className="object-cover"
                   />
@@ -112,10 +117,10 @@ export default async function ChiTietKhoaHoc({ params }: Props) {
               <div>
                 <p className="text-xs text-muted-foreground">Giảng viên phụ trách</p>
                 <Link
-                  href={`/dau-bep/${kh.dau_bep.id}`}
+                  href={`/dau-bep/${dauBep.id}`}
                   className="font-semibold text-foreground hover:text-primary transition-colors"
                 >
-                  Chef {kh.dau_bep.ho_ten}
+                  Chef {dauBep.ho_ten}
                 </Link>
               </div>
             </div>

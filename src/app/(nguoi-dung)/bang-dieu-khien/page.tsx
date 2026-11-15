@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { TheCongThuc } from "@/components/cong-thuc/the-cong-thuc";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
+import { docHoSoCongKhai, ganTacGia } from "@/lib/hien-thi/tac-gia-cong-khai";
 
 export default async function BangDieuKhienNguoiDung() {
   const phien = await yeuCauVaiTro();
@@ -17,13 +18,13 @@ export default async function BangDieuKhienNguoiDung() {
   const [khoaHocRes, congThucLuuRes, congThucGuiRes, chungChiRes] = await Promise.all([
     supabase
       .from("dang_ky_khoa_hoc")
-      .select("*, khoa_hoc(*, dau_bep:profiles(ho_ten, avatar_url))")
+      .select("*, khoa_hoc(*)")
       .eq("nguoi_dung_id", userId)
       .order("ngay_dang_ky", { ascending: false })
       .limit(4),
     supabase
       .from("cong_thuc_da_luu")
-      .select("*, cong_thuc(*, tac_gia:profiles(ho_ten, avatar_url))")
+      .select("*, cong_thuc(*)")
       .eq("nguoi_dung_id", userId)
       .order("ngay_luu", { ascending: false })
       .limit(4),
@@ -38,8 +39,18 @@ export default async function BangDieuKhienNguoiDung() {
       .eq("nguoi_dung_id", userId),
   ]);
 
-  const dangKyList = khoaHocRes.data || [];
-  const daLuuList = (congThucLuuRes.data || []).map((x) => x.cong_thuc).filter(Boolean);
+  // Đợt 4: ghép tên đầu bếp/tác giả thật theo id (RLS chặn join profiles
+  // với người khác — xem lib/hien-thi/tac-gia-cong-khai).
+  const dangKyTho = khoaHocRes.data || [];
+  const banDoDauBep = await docHoSoCongKhai(dangKyTho.map((dk) => dk.khoa_hoc?.dau_bep_id));
+  const dangKyList = dangKyTho.map((dk) => ({
+    ...dk,
+    khoa_hoc: dk.khoa_hoc
+      ? { ...dk.khoa_hoc, dau_bep: banDoDauBep.get(dk.khoa_hoc.dau_bep_id) ?? null }
+      : null,
+  }));
+  const daLuuTho = (congThucLuuRes.data || []).map((x) => x.cong_thuc).filter(Boolean);
+  const daLuuList = await ganTacGia(daLuuTho as NonNullable<(typeof daLuuTho)[number]>[]);
   const soCongThucGui = congThucGuiRes.count || 0;
   const soChungChi = chungChiRes.count || 0;
   const laProHopLe =
@@ -148,7 +159,7 @@ export default async function BangDieuKhienNguoiDung() {
                   <Progress value={dk.phan_tram_tien_do} className="h-2" />
                   <div className="flex items-center justify-between pt-2">
                     <span className="text-xs text-muted-foreground">
-                      Chef {kh.dau_bep?.ho_ten || "Master Chef"}
+                      Chef {kh.dau_bep?.ho_ten || "Đầu bếp Học Nấu Ăn"}
                     </span>
                     <Button asChild size="sm">
                       <Link href={`/hoc-bai/${kh.id}`}>Tiếp tục học</Link>

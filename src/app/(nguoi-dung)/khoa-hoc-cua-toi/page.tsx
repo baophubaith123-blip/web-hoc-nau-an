@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { yeuCauVaiTro, taoSupabaseServer } from "@/lib/supabase/server";
+import { docHoSoCongKhai } from "@/lib/hien-thi/tac-gia-cong-khai";
 
 export default async function KhoaHocCuaToi() {
   const phien = await yeuCauVaiTro();
@@ -15,7 +16,7 @@ export default async function KhoaHocCuaToi() {
   const [dangKyRes, chungChiRes] = await Promise.all([
     supabase
       .from("dang_ky_khoa_hoc")
-      .select("*, khoa_hoc(*, dau_bep:profiles(ho_ten, avatar_url))")
+      .select("*, khoa_hoc(*)")
       .eq("nguoi_dung_id", userId)
       .order("ngay_dang_ky", { ascending: false }),
     supabase
@@ -25,6 +26,15 @@ export default async function KhoaHocCuaToi() {
   ]);
 
   const dangKyList = dangKyRes.data || [];
+  // Đợt 4: ghép tên đầu bếp thật cho từng khóa đã đăng ký (RLS chặn join
+  // profiles với người khác — xem lib/hien-thi/tac-gia-cong-khai).
+  const banDoDauBep = await docHoSoCongKhai(dangKyList.map((dk) => dk.khoa_hoc?.dau_bep_id));
+  const dangKyDayDu = dangKyList.map((dk) => ({
+    ...dk,
+    khoa_hoc: dk.khoa_hoc
+      ? { ...dk.khoa_hoc, dau_bep: banDoDauBep.get(dk.khoa_hoc.dau_bep_id) ?? null }
+      : null,
+  }));
   const mapChungChi = new Map<string, string>();
   (chungChiRes.data || []).forEach((c) => {
     mapChungChi.set(c.khoa_hoc_id, c.ma_chung_chi);
@@ -56,7 +66,7 @@ export default async function KhoaHocCuaToi() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {dangKyList.map((dk) => {
+          {dangKyDayDu.map((dk) => {
             const kh = dk.khoa_hoc;
             // Ẩn khóa học đang nằm trong thùng rác (deleted_at có từ migration 009)
             if (!kh || kh.deleted_at) return null;
@@ -96,7 +106,7 @@ export default async function KhoaHocCuaToi() {
                   </div>
 
                   <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t">
-                    <span className="truncate">Chef {kh.dau_bep?.ho_ten || "Master Chef"}</span>
+                    <span className="truncate">Chef {kh.dau_bep?.ho_ten || "Đầu bếp Học Nấu Ăn"}</span>
                     <span>{kh.so_bai_hoc || 0} bài học</span>
                   </div>
 

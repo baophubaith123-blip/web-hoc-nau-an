@@ -1,0 +1,18 @@
+feat(hien-thi): hiện tên người đăng thật trên thẻ và trang chi tiết (đợt 4)
+
+Gốc rễ: RLS của profiles chỉ cho đọc hồ sơ của chính mình nên mọi
+truy vấn join tac_gia/dau_bep bằng client phiên trả null với tác giả
+là người khác — thẻ khóa học rơi về nhãn chung "Master Chef" trên
+toàn bộ trang danh sách/trang chủ, thẻ công thức mất tên tác giả,
+trang chi tiết khóa học ẩn mất khối giảng viên, chi tiết công thức/
+bài viết hiện tên thay thế chung chung, bình luận hiện sai tên.
+
+Thêm helper server src/lib/hien-thi/tac-gia-cong-khai.ts: đọc riêng
+các trường công khai (id, ho_ten, avatar_url) bằng admin client —
+cùng mẫu trang /dau-bep — rồi ghép theo tac_gia_id/dau_bep_id.
+Áp dụng: trang chủ, /khoa-hoc, /cong-thuc, chi tiết công thức (tác
+giả + người bình luận), chi tiết khóa học, chi tiết bài viết,
+/khoa-hoc-cua-toi, /bang-dieu-khien (khóa đã đăng ký + công thức đã
+lưu). Nhãn dự phòng "Master Chef" đổi thành "Đầu bếp Học Nấu Ăn"
+(không còn gán tên người giả; dữ liệu thật luôn có người đăng).
+Không thay đổi dữ liệu tác giả — chỉ sửa cách đọc hiển thị.

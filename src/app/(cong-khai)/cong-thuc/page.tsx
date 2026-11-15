@@ -4,6 +4,7 @@ import { TheCongThuc } from "@/components/cong-thuc/the-cong-thuc";
 import { BoLocCongThuc } from "@/components/cong-thuc/bo-loc-cong-thuc";
 import { Button } from "@/components/ui/button";
 import { taoSupabaseServer } from "@/lib/supabase/server";
+import { ganTacGia } from "@/lib/hien-thi/tac-gia-cong-khai";
 import { ChevronLeft, ChevronRight, Utensils, SearchX } from "lucide-react";
 import { TieuDeTrang } from "@/components/layout/tieu-de-trang";
 import { TrangThaiTrong } from "@/components/layout/trang-thai-trong";
@@ -44,7 +45,7 @@ export default async function DanhSachCongThuc({ searchParams }: Props) {
   let query = supabase
     .from("cong_thuc")
     .select(
-      "id, slug, tieu_de, mo_ta, anh_dai_dien, thoi_gian_chuan_bi, thoi_gian_nau, do_kho, calories, luot_xem, noi_bat, tac_gia_la_pro, tac_gia:profiles(ho_ten, avatar_url)",
+      "id, slug, tieu_de, mo_ta, anh_dai_dien, thoi_gian_chuan_bi, thoi_gian_nau, do_kho, calories, luot_xem, noi_bat, tac_gia_la_pro, tac_gia_id",
       { count: "exact" }
     )
     .eq("trang_thai", "xuat_ban")
@@ -72,10 +73,14 @@ export default async function DanhSachCongThuc({ searchParams }: Props) {
   const to = from + SO_LUONG_MOI_TRANG - 1;
   query = query.range(from, to);
 
-  const [{ data: danhMucList }, { data: danhSach, count }] = await Promise.all([
+  const [{ data: danhMucList }, { data: danhSachTho, count }] = await Promise.all([
     truyVanDanhMuc,
     query,
   ]);
+
+  // Đợt 4: ghép tên tác giả thật theo tac_gia_id (join profiles bằng
+  // client phiên trả null vì RLS — xem lib/hien-thi/tac-gia-cong-khai).
+  const danhSach = await ganTacGia(danhSachTho ?? []);
 
   const tongSo = count || 0;
   const tongTrang = Math.ceil(tongSo / SO_LUONG_MOI_TRANG) || 1;
