@@ -13,6 +13,10 @@ import {
   tenChuanNguyenLieu,
 } from "../src/lib/tro-ly/chuan-hoa";
 import { docThoiLuong } from "../src/lib/tro-ly/doc-thoi-luong";
+import {
+  phanLoaiBuoc,
+  tachBuocChuanBi,
+} from "../src/lib/tro-ly/phan-loai-buoc";
 import { khopMotMon } from "../src/lib/tro-ly/khop-nguyen-lieu";
 import { taoSlotTrong, type DuLieuTroLy } from "../src/lib/tro-ly/kieu-du-lieu";
 import { traLoi } from "../src/lib/tro-ly/tra-loi";
@@ -291,6 +295,57 @@ test("doc-thoi-luong: mốc đơn, nửa giờ, khoảng, không có giờ", () 
 });
 
 // ---------------------------------------------------------------------------
+// 4b) Phân loại bước chuẩn bị / nấu chính (đợt 2 — F.3.5)
+// ---------------------------------------------------------------------------
+
+test("phan-loai-buoc: tiêu đề chuẩn bị (sơ chế / ướp / pha bột) -> chuan_bi", () => {
+  expect(phanLoaiBuoc("Sơ chế gà: rửa sạch, thấm khô bằng khăn.")).toBe("chuan_bi");
+  expect(phanLoaiBuoc("Ướp gà: xoa đều nước ướp, ướp tối thiểu 2 giờ trong ngăn mát.")).toBe("chuan_bi");
+  expect(phanLoaiBuoc("Pha bột: trộn bột gạo với nước cốt dừa, để bột nghỉ 30 phút.")).toBe("chuan_bi");
+  expect(phanLoaiBuoc("Chuẩn bị nguyên liệu: luộc ức gà, xé sợi nhỏ, xào sơ thịt cua cho thơm.")).toBe("chuan_bi");
+});
+
+test("phan-loai-buoc: động từ nấu chính -> nau_chinh; lẫn chuẩn bị vẫn là nấu chính", () => {
+  expect(phanLoaiBuoc("Nướng gà ở 200°C trong 25 phút đến khi da vàng.")).toBe("nau_chinh");
+  expect(phanLoaiBuoc("Xào thịt bò lửa lớn 2 phút rồi trút ra đĩa.")).toBe("nau_chinh");
+  expect(phanLoaiBuoc("Xào nhanh thịt rồi ướp thêm 10 phút cho thấm vị.")).toBe("nau_chinh");
+  expect(phanLoaiBuoc("Nấu nước dùng: ninh xương 45 phút, hớt bọt.")).toBe("nau_chinh");
+});
+
+test("phan-loai-buoc: không rõ ràng -> mặc định an toàn nau_chinh", () => {
+  expect(phanLoaiBuoc("Bày món ra đĩa, rắc tiêu và thưởng thức.")).toBe("nau_chinh");
+  expect(phanLoaiBuoc("Kiểm tra độ chín rồi để thịt nghỉ 10 phút trước khi chặt.")).toBe("nau_chinh");
+});
+
+test("tach-buoc: chỉ đoạn chuẩn bị liền nhau ở đầu mới tách; chuẩn bị giữa chừng ở lại luồng chính", () => {
+  const buoc = (noi_dung: string, thu_tu: number) => ({ thu_tu, noi_dung });
+  const gaNuong = tachBuocChuanBi([
+    buoc("Sơ chế gà: rửa sạch, để ráo.", 1),
+    buoc("Ướp gà: ướp 2 giờ trong ngăn mát.", 2),
+    buoc("Nướng gà 25 phút ở 200°C.", 3),
+    buoc("Thưởng thức: chặt gà bày ra đĩa.", 4),
+  ]);
+  expect(gaNuong.chiSoChuanBi).toEqual([0, 1]);
+  expect(gaNuong.chiSoNauChinh).toEqual([2, 3]);
+
+  const giuaChung = tachBuocChuanBi([
+    buoc("Nấu nước dùng: ninh xương 45 phút.", 1),
+    buoc("Chuẩn bị thịt tái: thái mỏng, ướp nhẹ 10 phút.", 2),
+    buoc("Trụng bánh phở 20 giây rồi chan nước dùng.", 3),
+  ]);
+  expect(giuaChung.chiSoChuanBi).toEqual([]);
+  expect(giuaChung.chiSoNauChinh).toEqual([0, 1, 2]);
+
+  const toanChuanBi = tachBuocChuanBi([
+    buoc("Sơ chế: rửa sạch rau.", 1),
+    buoc("Ướp: ướp 10 phút.", 2),
+  ]);
+  // Toàn bộ là chuẩn bị -> không tách (trả hết về nấu chính cho an toàn)
+  expect(toanChuanBi.chiSoChuanBi).toEqual([]);
+  expect(toanChuanBi.chiSoNauChinh).toEqual([0, 1]);
+});
+
+// ---------------------------------------------------------------------------
 // 5) tra-loi — 12 intent với dữ liệu mồi
 // ---------------------------------------------------------------------------
 
@@ -428,8 +483,10 @@ test("intent 12: calo — chưa biết số người thì hỏi lại đúng 1 �
   // Lượt sau: người dùng chỉ trả lời con số -> tính cho món đang chờ.
   const tinh = traLoi("3 người", DU_LIEU_MOI, hoi.slotDaCapNhat);
   expect(tinh.choSoNguoiAn).toBeFalsy();
-  expect(vanBan(tinh)).toContain("480"); // 320/2 * 3
-  expect(vanBan(tinh)).toContain("160"); // calo/người
+  // Đợt 2 (L-01): calories = kcal cho MỘT người ăn -> 320/người, 3 người = 960.
+  // (Kỳ vọng cũ 480/160 theo công thức chia khẩu phần đã bỏ.)
+  expect(vanBan(tinh)).toContain("960"); // 320 * 3
+  expect(vanBan(tinh)).toContain("320"); // calo/người
   expect(tinh.slotDaCapNhat.soNguoiAn).toBe(3);
 });
 
@@ -439,7 +496,7 @@ test("intent 12: đã biết số người trong phiên + 'món đó' -> tính t
   slot.soNguoiAn = 3;
   const kq = traLoi("món đó bao nhiêu calo?", DU_LIEU_MOI, slot);
   expect(kq.choSoNguoiAn).toBeFalsy();
-  expect(vanBan(kq)).toContain("480");
+  expect(vanBan(kq)).toContain("960"); // đợt 2 (L-01): 320 kcal/người x 3
 });
 
 test("intent 12: món chưa có dữ liệu calo -> nói thật, không bịa", () => {

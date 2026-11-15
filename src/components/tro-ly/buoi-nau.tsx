@@ -1,10 +1,17 @@
 "use client";
 
-// Buổi nấu rảnh tay (Đợt 4 — Cokba) gồm 3 màn:
-//   A. Chuẩn bị: ảnh/meta món, nguyên liệu đã chia theo số người ăn
+// Buổi nấu rảnh tay (Đợt 4 — Cokba; giai đoạn Chuẩn bị bổ sung ở đợt 2
+// theo quyết định F.3.5) gồm 4 màn:
+//   A. Giới thiệu: ảnh/meta món, nguyên liệu đã chia theo số người ăn
 //      (chia-khau-phan.ts), 2 công tắc giọng nói / giữ màn hình sáng.
-//   B. Từng bước: chữ to, ảnh bước, KHU ĐỒNG HỒ — mỗi mốc giờ mà
-//      docThoiLuong() đọc được từ nội dung bước là một đồng hồ riêng.
+//   A2. GIAI ĐOẠN CHUẨN BỊ: nguyên liệu cần sẵn sàng + các bước chuẩn bị
+//      tách bằng phan-loai-buoc.ts (đoạn chuẩn bị liền nhau ở đầu công
+//      thức) + đồng hồ cho các khoảng chờ dài (ngâm/ướp…) đọc được từ
+//      các bước đó. Nút "Chuẩn bị xong" mới vào bước nấu chính đầu tiên;
+//      đang nấu vẫn quay lại xem chuẩn bị được.
+//   B. Từng bước (chỉ các bước NẤU CHÍNH): chữ to, ảnh bước, KHU ĐỒNG HỒ
+//      — mỗi mốc giờ mà docThoiLuong() đọc được từ nội dung bước là một
+//      đồng hồ riêng.
 //   C. Hoàn thành: tổng thời gian + lối tắt + gợi ý món cùng danh mục.
 //
 // Đồng hồ tính theo TIMESTAMP ĐÍCH (Date.now) nên chuyển tab quay lại
@@ -45,6 +52,10 @@ import {
 import { ghiTriNhoCokba } from "@/lib/actions/tro-ly";
 import { chiaKhauPhan } from "@/lib/tro-ly/chia-khau-phan";
 import { docThoiLuong } from "@/lib/tro-ly/doc-thoi-luong";
+import {
+  CHO_DAI_TOI_THIEU_GIAY,
+  tachBuocChuanBi,
+} from "@/lib/tro-ly/phan-loai-buoc";
 import {
   taoSlotTrong,
   type BuocNauMon,
@@ -398,9 +409,10 @@ export function BuoiNau({
   const tongBuoc = mon.cac_buoc.length;
   const khauPhanGoc = mon.khau_phan > 0 ? mon.khau_phan : 1;
 
-  const [giaiDoan, setGiaiDoan] = useState<"chuan-bi" | "dang-nau" | "hoan-thanh">(
-    "chuan-bi"
-  );
+  const [giaiDoan, setGiaiDoan] = useState<
+    "gioi-thieu" | "chuan-bi" | "dang-nau" | "hoan-thanh"
+  >("gioi-thieu");
+  const [daVaoNau, setDaVaoNau] = useState(false);
   const [soNguoi, setSoNguoi] = useState(khauPhanGoc);
   const [docGiongNoi, setDocGiongNoi] = useState(false);
   const [giuSang, setGiuSang] = useState(false);
@@ -442,6 +454,21 @@ export function BuoiNau({
   const nguyenLieuDaChia = useMemo(
     () => chiaKhauPhan(mon.nguyen_lieu, khauPhanGoc, soNguoi),
     [mon.nguyen_lieu, khauPhanGoc, soNguoi]
+  );
+  // Tách bước chuẩn bị / nấu chính (đợt 2 — F.3.5). buocIdx luôn là chỉ số
+  // GỐC trong mon.cac_buoc; điều hướng khi nấu đi theo chiSoNauChinh.
+  const tachBuoc = useMemo(() => tachBuocChuanBi(mon.cac_buoc), [mon.cac_buoc]);
+  const chiSoChuanBi = tachBuoc.chiSoChuanBi;
+  const chiSoNauChinh = tachBuoc.chiSoNauChinh;
+  const dongHoChoDaiChuanBi = useMemo(
+    () =>
+      Object.values(dongHo)
+        .filter(
+          (dh) =>
+            chiSoChuanBi.includes(dh.buocIdx) && dh.tongGoc >= CHO_DAI_TOI_THIEU_GIAY
+        )
+        .sort((a, b) => a.buocIdx - b.buocIdx || a.mocIdx - b.mocIdx),
+    [dongHo, chiSoChuanBi]
   );
   const mocCuaBuocNay = useMemo(
     () =>
@@ -680,22 +707,44 @@ export function BuoiNau({
     luuSlot({ ...slotRef.current, soNguoiAn: chuan });
   };
 
-  const batDauNau = () => {
+  // Giới thiệu -> Giai đoạn chuẩn bị (chưa ghi slot nấu: mới chuẩn bị).
+  const vaoChuanBi = () => {
     damBaoAudio(audioRef);
-    setBuocIdx(0);
-    setGiaiDoan("dang-nau");
-    luuSlot({
-      ...slotRef.current,
-      monDangNau: mon.id,
-      buocHienTai: 0,
-      soNguoiAn: soNguoi,
-    });
+    setGiaiDoan("chuan-bi");
+    window.scrollTo({ top: 0 });
   };
 
-  const sangBuoc = (idx: number) => {
-    const chuan = Math.min(tongBuoc - 1, Math.max(0, idx));
-    setBuocIdx(chuan);
-    luuSlot({ ...slotRef.current, monDangNau: mon.id, buocHienTai: chuan });
+  // "Chuẩn bị xong" -> vào bước nấu chính đầu tiên (lần đầu) hoặc quay lại
+  // đúng bước đang nấu dở (khi xem lại chuẩn bị giữa chừng). Bấm nút này
+  // cũng chính là cách BỎ QUA khoảng chờ dài: không cần chờ đồng hồ xong.
+  const chuanBiXong = () => {
+    damBaoAudio(audioRef);
+    if (!daVaoNau) {
+      const dauTien = chiSoNauChinh[0] ?? 0;
+      setBuocIdx(dauTien);
+      setDaVaoNau(true);
+      luuSlot({
+        ...slotRef.current,
+        monDangNau: mon.id,
+        buocHienTai: dauTien,
+        soNguoiAn: soNguoi,
+      });
+    }
+    setGiaiDoan("dang-nau");
+    window.scrollTo({ top: 0 });
+  };
+
+  const xemLaiChuanBi = () => {
+    setGiaiDoan("chuan-bi");
+    window.scrollTo({ top: 0 });
+  };
+
+  // Điều hướng theo VỊ TRÍ trong danh sách bước nấu chính (0..len-1).
+  const sangViTriNau = (viTri: number) => {
+    const chuan = Math.min(chiSoNauChinh.length - 1, Math.max(0, viTri));
+    const goc = chiSoNauChinh[chuan] ?? 0;
+    setBuocIdx(goc);
+    luuSlot({ ...slotRef.current, monDangNau: mon.id, buocHienTai: goc });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -708,9 +757,72 @@ export function BuoiNau({
   };
 
   const buocHienTai = mon.cac_buoc[buocIdx];
+  const viTriNau = Math.max(0, chiSoNauChinh.indexOf(buocIdx));
+  const tongBuocNau = chiSoNauChinh.length;
   const tongPhut = mon.thoi_gian_chuan_bi + mon.thoi_gian_nau;
   const phanTramTienDo =
-    tongBuoc > 0 ? Math.round(((buocIdx + 1) / tongBuoc) * 100) : 0;
+    tongBuocNau > 0 ? Math.round(((viTriNau + 1) / tongBuocNau) * 100) : 0;
+
+  // Khối nguyên liệu đã chia theo số người — dùng ở cả màn giới thiệu và
+  // màn giai đoạn chuẩn bị (chỉ một màn hiện tại một thời điểm).
+  const khoiNguyenLieu = () => (
+    <>
+      {/* Nguyên liệu đã chia theo số người */}
+      <div className="space-y-4 rounded-3xl border bg-card p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-bold">
+              {n.nguyen_lieu} · {soNguoi} {n.nguoi}
+            </h2>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label={n.giam_so_nguoi}
+                disabled={soNguoi <= 1}
+                onClick={() => doiSoNguoi(soNguoi - 1)}
+                className="flex h-11 w-11 items-center justify-center rounded-full border transition hover:bg-muted disabled:opacity-40"
+              >
+                <Minus className="h-5 w-5" />
+              </button>
+              <span
+                data-testid="so-nguoi-hien-tai"
+                className="w-10 text-center text-2xl font-bold tabular-nums"
+              >
+                {soNguoi}
+              </span>
+              <button
+                type="button"
+                aria-label={n.tang_so_nguoi}
+                disabled={soNguoi >= 50}
+                onClick={() => doiSoNguoi(soNguoi + 1)}
+                className="flex h-11 w-11 items-center justify-center rounded-full border transition hover:bg-muted disabled:opacity-40"
+              >
+                <Plus className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          {nguyenLieuDaChia.length > 0 ? (
+            <ul className="divide-y divide-border/60">
+              {nguyenLieuDaChia.map((nl, i) => (
+                <li
+                  key={i}
+                  data-testid="dong-nguyen-lieu"
+                  className="flex items-center justify-between gap-3 py-2.5 text-sm"
+                >
+                  <span className="font-medium">{nl.ten}</span>
+                  <span className="shrink-0 font-mono font-semibold">
+                    {nl.hien_thi}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="py-3 text-sm text-muted-foreground">
+              {n.chua_co_nguyen_lieu}
+            </p>
+          )}
+      </div>
+    </>
+  );
 
   const khoiCongTac = (gon: boolean) => (
     <div className={cn("grid gap-3", !gon && "sm:grid-cols-2")}>
@@ -757,8 +869,8 @@ export function BuoiNau({
         </div>
       )}
 
-      {/* ============ MÀN A — CHUẨN BỊ ============ */}
-      {giaiDoan === "chuan-bi" && (
+      {/* ============ MÀN A — GIỚI THIỆU ============ */}
+      {giaiDoan === "gioi-thieu" && (
         <section data-testid="man-chuan-bi" className="space-y-5">
           {mon.anh_dai_dien && (
             <div className="relative aspect-16/9 w-full overflow-hidden rounded-3xl bg-muted shadow-sm">
@@ -798,60 +910,7 @@ export function BuoiNau({
             </div>
           </div>
 
-          {/* Nguyên liệu đã chia theo số người */}
-          <div className="space-y-4 rounded-3xl border bg-card p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-lg font-bold">
-                {n.nguyen_lieu} · {soNguoi} {n.nguoi}
-              </h2>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  aria-label={n.giam_so_nguoi}
-                  disabled={soNguoi <= 1}
-                  onClick={() => doiSoNguoi(soNguoi - 1)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border transition hover:bg-muted disabled:opacity-40"
-                >
-                  <Minus className="h-5 w-5" />
-                </button>
-                <span
-                  data-testid="so-nguoi-hien-tai"
-                  className="w-10 text-center text-2xl font-bold tabular-nums"
-                >
-                  {soNguoi}
-                </span>
-                <button
-                  type="button"
-                  aria-label={n.tang_so_nguoi}
-                  disabled={soNguoi >= 50}
-                  onClick={() => doiSoNguoi(soNguoi + 1)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border transition hover:bg-muted disabled:opacity-40"
-                >
-                  <Plus className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-            {nguyenLieuDaChia.length > 0 ? (
-              <ul className="divide-y divide-border/60">
-                {nguyenLieuDaChia.map((nl, i) => (
-                  <li
-                    key={i}
-                    data-testid="dong-nguyen-lieu"
-                    className="flex items-center justify-between gap-3 py-2.5 text-sm"
-                  >
-                    <span className="font-medium">{nl.ten}</span>
-                    <span className="shrink-0 font-mono font-semibold">
-                      {nl.hien_thi}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="py-3 text-sm text-muted-foreground">
-                {n.chua_co_nguyen_lieu}
-              </p>
-            )}
-          </div>
+          {khoiNguyenLieu()}
 
           {khoiCongTac(false)}
 
@@ -863,12 +922,115 @@ export function BuoiNau({
             <button
               type="button"
               data-testid="nut-bat-dau-nau"
-              onClick={batDauNau}
+              onClick={vaoChuanBi}
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-4 text-lg font-bold text-primary-foreground shadow-md transition hover:opacity-95 active:scale-[0.99]"
             >
-              <Play className="h-6 w-6" /> {n.bat_dau_nau}
+              <Play className="h-6 w-6" /> {n.bat_dau_chuan_bi}
             </button>
           )}
+        </section>
+      )}
+
+      {/* ============ MÀN A2 — GIAI ĐOẠN CHUẨN BỊ (đợt 2, F.3.5) ============ */}
+      {giaiDoan === "chuan-bi" && (
+        <section data-testid="man-giai-doan-chuan-bi" className="space-y-5">
+          <div className="space-y-2">
+            <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary">
+              <CookingPot className="h-4 w-4" /> {n.giai_doan_chuan_bi}
+            </p>
+            <h1 className="text-2xl font-extrabold tracking-tight md:text-3xl">
+              {n.giai_doan_chuan_bi}: {mon.tieu_de}
+            </h1>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {n.chuan_bi_mo_ta}
+            </p>
+          </div>
+
+          <h2 className="text-lg font-bold">{n.nguyen_lieu_can_san_sang}</h2>
+          {khoiNguyenLieu()}
+
+          {chiSoChuanBi.length > 0 ? (
+            <div className="space-y-3">
+              <h2 className="text-lg font-bold">{n.viec_chuan_bi}</h2>
+              <div className="space-y-3">
+                {chiSoChuanBi.map((idx) => (
+                  <div
+                    key={idx}
+                    data-testid="buoc-chuan-bi"
+                    className="rounded-3xl border bg-card p-5"
+                  >
+                    <p className="text-xs font-bold uppercase tracking-wider text-primary">
+                      {n.buoc} {idx + 1}
+                    </p>
+                    <p className="mt-1.5 whitespace-pre-line text-base leading-relaxed">
+                      {mon.cac_buoc[idx].noi_dung}
+                    </p>
+                    {mon.cac_buoc[idx].anh && (
+                      <div className="relative mt-3 aspect-16/9 w-full overflow-hidden rounded-2xl bg-muted">
+                        <Image
+                          src={mon.cac_buoc[idx].anh as string}
+                          alt={`${n.buoc} ${idx + 1}`}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 768px"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p
+              data-testid="khong-co-buoc-chuan-bi"
+              className="rounded-2xl border border-dashed p-4 text-sm text-muted-foreground"
+            >
+              {n.khong_co_buoc_chuan_bi}
+            </p>
+          )}
+
+          {dongHoChoDaiChuanBi.length > 0 && (
+            <div className="space-y-3">
+              <h2 className="flex items-center gap-2 text-base font-bold">
+                <Timer className="h-5 w-5 text-primary" /> {n.cho_dai_o_chuan_bi}
+              </h2>
+              <div className="grid gap-3">
+                {dongHoChoDaiChuanBi.map((dh) => (
+                  <TheDongHo
+                    key={dh.key}
+                    dh={dh}
+                    bayGio={bayGio}
+                    onBatDau={batDauDongHo}
+                    onTamDung={tamDungDongHo}
+                    onCongPhut={congMotPhut}
+                    onDatLai={datLaiDongHo}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {khoiCongTac(false)}
+
+          <div className="flex gap-3 pb-2">
+            <button
+              type="button"
+              data-testid="nut-quay-lai-gioi-thieu"
+              onClick={() => setGiaiDoan(daVaoNau ? "dang-nau" : "gioi-thieu")}
+              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border px-4 py-4 text-base font-semibold transition hover:bg-muted"
+            >
+              <ArrowLeft className="h-5 w-5" /> {n.quay_lai}
+            </button>
+            <button
+              type="button"
+              data-testid="nut-chuan-bi-xong"
+              onClick={chuanBiXong}
+              className="inline-flex flex-[2] items-center justify-center gap-1.5 rounded-2xl bg-primary px-4 py-4 text-base font-bold text-primary-foreground shadow transition hover:opacity-95"
+            >
+              <CheckCircle2 className="h-5 w-5" />{" "}
+              {daVaoNau ? n.quay_lai_nau : n.chuan_bi_xong}
+            </button>
+          </div>
         </section>
       )}
 
@@ -881,7 +1043,7 @@ export function BuoiNau({
                 data-testid="tieu-de-buoc"
                 className="text-2xl font-extrabold tracking-tight md:text-3xl"
               >
-                {n.buoc} {buocIdx + 1}/{tongBuoc}
+                {n.buoc} {viTriNau + 1}/{tongBuocNau}
               </h1>
               <p className="shrink-0 text-sm font-medium text-muted-foreground">
                 {mon.tieu_de}
@@ -960,21 +1122,30 @@ export function BuoiNau({
 
           <div className="grid gap-3">{khoiCongTac(true)}</div>
 
+          <button
+            type="button"
+            data-testid="nut-xem-chuan-bi"
+            onClick={xemLaiChuanBi}
+            className="inline-flex items-center gap-1.5 rounded-full border px-4 py-2.5 text-sm font-semibold transition hover:bg-muted"
+          >
+            <BookOpen className="h-4 w-4" /> {n.xem_lai_chuan_bi}
+          </button>
+
           <div className="flex gap-3 pb-2">
             <button
               type="button"
               data-testid="nut-buoc-truoc"
-              disabled={buocIdx === 0}
-              onClick={() => sangBuoc(buocIdx - 1)}
+              disabled={viTriNau === 0}
+              onClick={() => sangViTriNau(viTriNau - 1)}
               className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-2xl border px-4 py-4 text-base font-semibold transition hover:bg-muted disabled:opacity-40"
             >
               <ArrowLeft className="h-5 w-5" /> {n.quay_lai}
             </button>
-            {buocIdx < tongBuoc - 1 ? (
+            {viTriNau < tongBuocNau - 1 ? (
               <button
                 type="button"
                 data-testid="nut-buoc-tiep"
-                onClick={() => sangBuoc(buocIdx + 1)}
+                onClick={() => sangViTriNau(viTriNau + 1)}
                 className="inline-flex flex-[2] items-center justify-center gap-1.5 rounded-2xl bg-primary px-4 py-4 text-base font-bold text-primary-foreground shadow transition hover:opacity-95"
               >
                 {n.xong_buoc_nay} <ArrowRight className="h-5 w-5" />

@@ -75,6 +75,12 @@ test.describe("Cokba Đợt 4 — nấu rảnh tay", () => {
     test.setTimeout(180_000);
     await page.goto("/nau/sup-cua");
     await page.getByTestId("nut-bat-dau-nau").click();
+    // Đợt 2 (F.3.5): sau giới thiệu là GIAI ĐOẠN CHUẨN BỊ. Súp cua không
+    // tách được bước chuẩn bị nào ở đầu (bước 1 đã là nấu nước dùng) nên
+    // màn chuẩn bị chỉ có nguyên liệu + thông báo không có bước sơ chế.
+    await expect(page.getByTestId("man-giai-doan-chuan-bi")).toBeVisible();
+    await expect(page.getByTestId("khong-co-buoc-chuan-bi")).toBeVisible();
+    await page.getByTestId("nut-chuan-bi-xong").click();
     await expect(page.getByTestId("man-buoc")).toBeVisible();
     await expect(page.getByTestId("tieu-de-buoc")).toHaveText("Bước 1/6");
 
@@ -154,6 +160,7 @@ test.describe("Cokba Đợt 4 — nấu rảnh tay", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/nau/sup-cua");
     await page.getByTestId("nut-bat-dau-nau").click();
+    await page.getByTestId("nut-chuan-bi-xong").click();
     await expect(page.getByTestId("man-buoc")).toBeVisible();
     const tranNgang = await page.evaluate(
       () =>
@@ -180,5 +187,41 @@ test.describe("Cokba Đợt 4 — nấu rảnh tay", () => {
     await nut.click();
     await page.waitForURL(/\/nau\/sup-cua$/);
     await expect(page.getByTestId("man-chuan-bi")).toBeVisible();
+  });
+
+  // Đợt 2 (F.3.5): món CÓ bước chuẩn bị tách được — Gà nướng mật ong có
+  // 3 bước đầu là chuẩn bị (sơ chế, pha nước ướp, ướp 2 giờ trở lên) và
+  // 4 bước nấu chính (nướng x2, kiểm tra/nghỉ, thưởng thức).
+  test("e) giai đoạn chuẩn bị: Gà nướng mật ong tách 3 bước chuẩn bị + đồng hồ chờ dài; Chuẩn bị xong vào đúng bước nướng đầu tiên; xem lại chuẩn bị được", async ({
+    page,
+  }) => {
+    await page.goto("/nau/ga-nuong-mat-ong");
+    await expect(page.getByTestId("man-chuan-bi")).toBeVisible();
+    await page.getByTestId("nut-bat-dau-nau").click();
+
+    await expect(page.getByTestId("man-giai-doan-chuan-bi")).toBeVisible();
+    const cacBuocCB = page.getByTestId("buoc-chuan-bi");
+    await expect(cacBuocCB).toHaveCount(3);
+    await expect(cacBuocCB.nth(0)).toContainText("Sơ chế gà");
+    await expect(cacBuocCB.nth(2)).toContainText("Ướp gà");
+    // Nguyên liệu cần sẵn sàng vẫn hiện ở màn chuẩn bị (theo số người ăn)
+    await expect(
+      page.getByTestId("dong-nguyen-lieu").filter({ hasText: "Mật ong" })
+    ).toBeVisible();
+    // Khoảng chờ dài của bước ướp (2 giờ) có đồng hồ riêng ở màn chuẩn bị
+    await expect(page.locator('[data-testid^="dong-ho-2-"]').first()).toBeVisible();
+
+    await page.getByTestId("nut-chuan-bi-xong").click();
+    await expect(page.getByTestId("man-buoc")).toBeVisible();
+    // Chỉ đếm bước nấu chính: 4 bước, bắt đầu ở "Nướng giai đoạn 1"
+    await expect(page.getByTestId("tieu-de-buoc")).toHaveText("Bước 1/4");
+    await expect(page.getByTestId("noi-dung-buoc")).toContainText("Nướng giai đoạn 1");
+
+    // Quay lại xem chuẩn bị giữa chừng rồi trở lại đúng bước đang nấu
+    await page.getByTestId("nut-xem-chuan-bi").click();
+    await expect(page.getByTestId("man-giai-doan-chuan-bi")).toBeVisible();
+    await page.getByTestId("nut-chuan-bi-xong").click();
+    await expect(page.getByTestId("man-buoc")).toBeVisible();
+    await expect(page.getByTestId("tieu-de-buoc")).toHaveText("Bước 1/4");
   });
 });

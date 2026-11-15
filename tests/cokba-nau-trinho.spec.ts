@@ -72,6 +72,9 @@ test("e) đăng nhập -> bắt đầu nấu -> tro_ly_tri_nho có dòng với m
   await page.goto("/nau/sup-cua");
   await expect(page.getByTestId("man-chuan-bi")).toBeVisible();
   await page.getByTestId("nut-bat-dau-nau").click();
+  // Đợt 2 (F.3.5): qua giai đoạn chuẩn bị mới vào bước nấu (lúc đó slot
+  // monDangNau mới được ghi, như hành vi đợt 4).
+  await page.getByTestId("nut-chuan-bi-xong").click();
   await expect(page.getByTestId("man-buoc")).toBeVisible();
 
   // Chờ dòng trí nhớ xuất hiện trên server với monDangNau khác null
