@@ -43,6 +43,9 @@ export function FormGoi({ goiBanDau }: FormGoiProps) {
   const [hoatDong, setHoatDong] = useState(goiBanDau?.hoat_dong ?? true);
 
   const [dangLuu, setDangLuu] = useState(false);
+  // Lỗi từ server hiển thị CỐ ĐỊNH trong form (L-02, đợt 2): trước đây chỉ
+  // có toast tự tắt sau vài giây, admin dễ bỏ lỡ nguyên nhân lỗi.
+  const [loiLuu, setLoiLuu] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +65,7 @@ export function FormGoi({ goiBanDau }: FormGoiProps) {
       .map((q) => q.trim())
       .filter(Boolean);
 
+    setLoiLuu(null);
     setDangLuu(true);
     try {
       if (laSua) {
@@ -77,6 +81,7 @@ export function FormGoi({ goiBanDau }: FormGoiProps) {
         });
 
         if (!res.thanh_cong) {
+          setLoiLuu(res.loi || "Cập nhật gói thất bại");
           toast.error(res.loi || "Cập nhật gói thất bại");
           setDangLuu(false);
           return;
@@ -96,6 +101,7 @@ export function FormGoi({ goiBanDau }: FormGoiProps) {
         });
 
         if (!res.thanh_cong) {
+          setLoiLuu(res.loi || "Tạo gói thất bại");
           toast.error(res.loi || "Tạo gói thất bại");
           setDangLuu(false);
           return;
@@ -107,7 +113,9 @@ export function FormGoi({ goiBanDau }: FormGoiProps) {
       router.push("/quan-tri/quan-ly-goi");
       router.refresh();
     } catch (err) {
-      toast.error(err instanceof Error && err.message ? err.message : "Lỗi xử lý dữ liệu");
+      const thongDiep = err instanceof Error && err.message ? err.message : "Lỗi xử lý dữ liệu";
+      setLoiLuu(thongDiep);
+      toast.error(thongDiep);
       setDangLuu(false);
     }
   };
@@ -232,6 +240,16 @@ export function FormGoi({ goiBanDau }: FormGoiProps) {
               />
             </div>
           </div>
+
+          {loiLuu && (
+            <div
+              role="alert"
+              className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-200"
+            >
+              <p className="font-semibold">Không lưu được gói:</p>
+              <p>{loiLuu}</p>
+            </div>
+          )}
 
           <div className="pt-4 flex justify-end gap-3">
             <Button

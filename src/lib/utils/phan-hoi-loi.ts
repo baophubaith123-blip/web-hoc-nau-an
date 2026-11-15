@@ -30,6 +30,14 @@ export function chuanHoaLoi(loi: unknown): KetQua<never> {
   console.error("[LOI]", e?.code, e?.message);
 
   if (e?.code === "23505") return thatBai("Dữ liệu đã tồn tại");
+  // 23514 = vi phạm CHECK của DB (VD gói Pro: migration 003 chỉ cho mã gói
+  // pro_thang/pro_nam và thời hạn 30/365 ngày — lỗi L-02, chờ nới ở
+  // migration 009 đợt 3). Trả thông điệp rõ để admin hiểu nguyên nhân
+  // thay vì lỗi chung chung.
+  if (e?.code === "23514")
+    return thatBai(
+      "Dữ liệu chưa khớp ràng buộc của cơ sở dữ liệu (ví dụ mã gói hoặc thời hạn gói chưa được phép). Vui lòng kiểm tra lại giá trị vừa nhập."
+    );
   if (e?.code === "42501") return thatBai("Bạn không có quyền thực hiện thao tác này");
   if (e?.code === "23503") return thatBai("Dữ liệu liên quan không tồn tại hoặc đang được sử dụng");
   // P0001 = RAISE EXCEPTION trong trigger (ví dụ giới hạn tần suất), message đã là tiếng Việt

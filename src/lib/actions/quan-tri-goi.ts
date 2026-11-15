@@ -250,16 +250,25 @@ export async function duyetYeuCauNangCapAction(dauVao: unknown): Promise<KetQua>
     const batDau = new Date();
     const hetHan = tinhNgayHetHan(goi.thoi_han_ngay, profile?.goi_het_han);
 
-    // 1. Cập nhật bảng yeu_cau_nang_cap
-    const { error: errYc } = await p.supabase
+    // 1. Cập nhật bảng yeu_cau_nang_cap — CÓ ĐIỀU KIỆN trạng thái (gia cố
+    // đợt 2, chống duyệt trùng): chỉ dòng còn "cho_duyet" mới chuyển được;
+    // nếu 2 lượt duyệt chạy đồng thời, lượt sau không khớp dòng nào và
+    // dừng ngay tại đây, KHÔNG cộng hạn lần thứ hai (idempotent).
+    const { data: dongDaDuyet, error: errYc } = await p.supabase
       .from("yeu_cau_nang_cap")
       .update({
         trang_thai: "da_duyet",
         nguoi_duyet_id: p.user.id,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", yc.id);
+      .eq("id", yc.id)
+      .eq("trang_thai", "cho_duyet")
+      .select("id")
+      .maybeSingle();
     if (errYc) throw errYc;
+    if (!dongDaDuyet) {
+      return thatBai("Yêu cầu này đã được xử lý trước đó.");
+    }
 
     // 2. Thêm vào bảng goi_nguoi_dung
     const { error: errGnd } = await p.supabase.from("goi_nguoi_dung").insert({
@@ -337,7 +346,7 @@ export async function tuChoiYeuCauNangCapAction(dauVao: unknown): Promise<KetQua
       return thatBai("Yêu cầu này đã được xử lý trước đó.");
     }
 
-    const { error: errYc } = await p.supabase
+    const { data: dongTuChoi, error: errYc } = await p.supabase
       .from("yeu_cau_nang_cap")
       .update({
         trang_thai: "tu_choi",
@@ -345,8 +354,14 @@ export async function tuChoiYeuCauNangCapAction(dauVao: unknown): Promise<KetQua
         ly_do_tu_choi: d.ly_do_tu_choi,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", yc.id);
+      .eq("id", yc.id)
+      .eq("trang_thai", "cho_duyet")
+      .select("id")
+      .maybeSingle();
     if (errYc) throw errYc;
+    if (!dongTuChoi) {
+      return thatBai("Yêu cầu này đã được xử lý trước đó.");
+    }
 
     // Gửi thông báo cho người dùng
     await guiThongBaoNhieuNguoi(p.supabase, [yc.nguoi_dung_id], {

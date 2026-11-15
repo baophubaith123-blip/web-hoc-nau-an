@@ -49,6 +49,12 @@ export async function taoCongThuc(dauVao: unknown, mucDich: MucDich): Promise<Ke
   try {
     const p = await canPhien();
     if (!p.ok) return p.loi;
+    // Chốt chặn phía server (gia cố L-05, đợt 2): chỉ user Pro / chef / admin
+    // mới được tạo công thức — vai support bị chặn TƯỜNG MINH tại action
+    // (trước đây chỉ bị chặn gián tiếp ở trang khóa Pro).
+    if (p.vaiTro === "support") {
+      return thatBai("Tài khoản hỗ trợ không được đăng công thức.");
+    }
     // Chốt chặn phía server: user thường phải là Pro còn hạn mới được tạo công thức
     if (p.vaiTro === "user" && !laProConHan(p.profile)) {
       return thatBai("Tính năng đăng công thức chỉ dành cho thành viên Pro. Hãy nâng cấp tài khoản để sử dụng.");
@@ -78,6 +84,10 @@ export async function capNhatCongThuc(id: unknown, dauVao: unknown, mucDich: Muc
   try {
     const p = await canPhien();
     if (!p.ok) return p.loi;
+    // Gia cố L-05 (đợt 2): support bị chặn tường minh cả ở action sửa.
+    if (p.vaiTro === "support") {
+      return thatBai("Tài khoản hỗ trợ không được sửa công thức.");
+    }
     // Chốt chặn phía server: user thường phải là Pro còn hạn mới được sửa công thức của mình
     if (p.vaiTro === "user" && !laProConHan(p.profile)) {
       return thatBai("Tính năng đăng công thức chỉ dành cho thành viên Pro. Hãy nâng cấp tài khoản để sử dụng.");

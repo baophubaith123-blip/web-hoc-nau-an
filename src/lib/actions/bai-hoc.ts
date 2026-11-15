@@ -17,12 +17,31 @@ const lamMoiKhoa = (khoaHocId: string) => {
   revalidatePath("/khoa-hoc");
 };
 
-// Tạo (id = null) hoặc cập nhật bài học. Quyền do RLS: chef chủ khóa hoặc admin
+// Gia cố L-05 (đợt 2): chủ khóa tường minh — chef chỉ thao tác được bài học
+// của khóa do mình đăng; admin thao tác được mọi khóa. Trước đây các action
+// bài học chỉ dựa vào RLS; nay kiểm tra dau_bep_id ngay trong action.
+async function kiemTraChuKhoa(
+  p: Awaited<ReturnType<typeof canPhien>>,
+  khoaHocId: string
+): Promise<KetQua | null> {
+  if (!p.ok) return p.loi;
+  const { data: kh } = await p.supabase
+    .from("khoa_hoc").select("dau_bep_id").eq("id", khoaHocId).maybeSingle();
+  if (!kh) return thatBai(t("loi.khong_tim_thay"));
+  if (kh.dau_bep_id !== p.user.id && p.vaiTro !== "admin") return thatBai(t("loi.khong_co_quyen"));
+  return null;
+}
+
+// Tạo (id = null) hoặc cập nhật bài học. Quyền: chef chủ khóa hoặc admin
+// (kiểm tra tường minh trong action + RLS làm lớp dự phòng).
 export async function luuBaiHoc(id: string | null, dauVao: unknown): Promise<KetQua<{ id: string }>> {
   try {
     const p = await canPhien(["chef", "admin"]);
     if (!p.ok) return p.loi;
     const d = baiHocSchema.parse(dauVao);
+
+    const loiQuyen = await kiemTraChuKhoa(p, d.khoa_hoc_id);
+    if (loiQuyen) return loiQuyen;
 
     const { data: kh } = await p.supabase
       .from("khoa_hoc").select("id, co_tai_lieu, co_bai_tap").eq("id", d.khoa_hoc_id).maybeSingle();
@@ -64,8 +83,13 @@ export async function xoaBaiHoc(id: unknown): Promise<KetQua> {
   try {
     const p = await canPhien(["chef", "admin"]);
     if (!p.ok) return p.loi;
+    const idBh = idUuid.parse(id);
+    const { data: bh } = await p.supabase.from("bai_hoc").select("khoa_hoc_id").eq("id", idBh).maybeSingle();
+    if (!bh) return thatBai(t("loi.khong_tim_thay"));
+    const loiQuyen = await kiemTraChuKhoa(p, bh.khoa_hoc_id);
+    if (loiQuyen) return loiQuyen;
     const { data, error } = await p.supabase
-      .from("bai_hoc").delete().eq("id", idUuid.parse(id)).select("khoa_hoc_id").maybeSingle();
+      .from("bai_hoc").delete().eq("id", idBh).select("khoa_hoc_id").maybeSingle();
     if (error) throw error;
     if (!data) return thatBai(t("loi.khong_co_quyen"));
     await ghiNhatKy(p.supabase, p.user.id, "xoa_bai_hoc", "bai_hoc", String(id));
@@ -82,6 +106,8 @@ export async function sapXepBaiHoc(khoaHocId: unknown, danhSachId: unknown): Pro
     const p = await canPhien(["chef", "admin"]);
     if (!p.ok) return p.loi;
     const idKh = idUuid.parse(khoaHocId);
+    const loiQuyen = await kiemTraChuKhoa(p, idKh);
+    if (loiQuyen) return loiQuyen;
     const ids = z.array(idUuid).max(200).parse(danhSachId);
     const kq = await Promise.all(
       ids.map((id, i) => p.supabase.from("bai_hoc").update({ thu_tu: i + 1 }).eq("id", id).eq("khoa_hoc_id", idKh))

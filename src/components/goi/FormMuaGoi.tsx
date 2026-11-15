@@ -71,7 +71,8 @@ export function FormMuaGoi({
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Không thể tạo liên kết thanh toán VNPay");
+        // API tao-url trả lỗi ở trường "loi" (giữ cả "error" làm dự phòng)
+        throw new Error(data.loi || data.error || "Không thể tạo liên kết thanh toán VNPay");
       }
 
       if (data.url) {

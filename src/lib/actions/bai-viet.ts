@@ -76,9 +76,14 @@ export async function xoaBaiViet(id: unknown): Promise<KetQua> {
 
 type MucDichBaiViet = "nhap" | "gui"; // nhap = lưu bản nháp, gui = gửi duyệt
 
-// Chốt chặn: user thường phải là Pro còn hạn; chef/admin được dùng (vẫn chờ duyệt như user)
+// Chốt chặn: user thường phải là Pro còn hạn; chef/admin được dùng (vẫn chờ duyệt như user).
+// Gia cố L-05 (đợt 2): vai support bị chặn TƯỜNG MINH tại action (trước đây
+// chỉ bị chặn gián tiếp ở trang).
 async function kiemTraQuyenDangBai(p: Awaited<ReturnType<typeof canPhien>>) {
   if (!p.ok) return p.loi;
+  if (p.vaiTro === "support") {
+    return thatBai("Tài khoản hỗ trợ không được viết bài.");
+  }
   if (p.vaiTro === "user" && !laProConHan(p.profile)) {
     return thatBai("Tính năng viết bài viết chỉ dành cho thành viên Pro. Hãy nâng cấp tài khoản để sử dụng.");
   }

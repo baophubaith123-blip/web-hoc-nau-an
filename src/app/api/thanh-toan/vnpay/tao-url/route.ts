@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { layPhienHienTai, taoSupabaseServer } from "@/lib/supabase/server";
 import { taoSupabaseAdmin } from "@/lib/supabase/admin";
 import { taoUrlThanhToanVNPay } from "@/lib/thanh-toan/vnpay";
+import { donYeuCauHetHan } from "@/lib/thanh-toan/yeu-cau";
 import { customAlphabet } from "nanoid";
 
 const nanoid = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", 8);
@@ -38,6 +39,27 @@ export async function POST(request: NextRequest) {
 
       if (errGoi || !goi || !goi.hoat_dong) {
         return NextResponse.json({ loi: "Gói Premium không tồn tại hoặc đã tạm dừng" }, { status: 404 });
+      }
+
+      // Chống trùng yêu cầu Pro (quan sát đợt 1, gia cố đợt 2): dọn các yêu
+      // cầu đã hết hiệu lực (giao dịch thất bại / treo quá 30 phút) trước,
+      // rồi nếu người dùng ĐÃ có một yêu cầu đang chờ duyệt thì KHÔNG tạo
+      // thêm — tránh admin duyệt 2 lần cộng hạn 2 lần cho cùng một người.
+      await donYeuCauHetHan(supabaseAdmin);
+      const { data: ycDangCho } = await supabaseAdmin
+        .from("yeu_cau_nang_cap")
+        .select("id, ma_yeu_cau, goi_id")
+        .eq("nguoi_dung_id", phien.user.id)
+        .eq("trang_thai", "cho_duyet")
+        .limit(1)
+        .maybeSingle();
+      if (ycDangCho) {
+        return NextResponse.json(
+          {
+            loi: `Bạn đã có yêu cầu nâng cấp (${ycDangCho.ma_yeu_cau}) đang chờ duyệt. Vui lòng chờ quản trị viên xử lý hoặc hủy yêu cầu đó ở trang "Gói của tôi" trước khi tạo yêu cầu mới.`,
+          },
+          { status: 409 }
+        );
       }
 
       // Lưu bảng thanh_toan

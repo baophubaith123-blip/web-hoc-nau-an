@@ -84,11 +84,16 @@ export async function capNhatKhoaHoc(id: unknown, dauVao: unknown, mucDich: MucD
 }
 
 // Lưu trữ khóa học (ẩn khỏi trang công khai, học viên cũ vẫn giữ lịch sử)
+// Gia cố L-05 (đợt 2): kiểm tra chủ sở hữu TƯỜNG MINH trong action (trước đây
+// chỉ dựa vào RLS) — đúng mẫu capNhatKhoaHoc đã dùng.
 export async function luuTruKhoaHoc(id: unknown): Promise<KetQua> {
   try {
     const p = await canPhien(["chef", "admin"]);
     if (!p.ok) return p.loi;
     const idKh = idUuid.parse(id);
+    const { data: cu } = await p.supabase.from("khoa_hoc").select("dau_bep_id").eq("id", idKh).maybeSingle();
+    if (!cu) return thatBai(t("loi.khong_tim_thay"));
+    if (cu.dau_bep_id !== p.user.id && p.vaiTro !== "admin") return thatBai(t("loi.khong_co_quyen"));
     const { data, error } = await p.supabase
       .from("khoa_hoc").update({ trang_thai: "luu_tru" }).eq("id", idKh).select("id").maybeSingle();
     if (error) throw error;
