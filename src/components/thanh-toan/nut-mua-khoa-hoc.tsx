@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, Loader2 } from "lucide-react";
+import { BookOpen, CreditCard, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { dangKyMienPhi } from "@/lib/actions/khoa-hoc";
 
 interface NutMuaKhoaHocProps {
   khoaHocId: string;
@@ -29,6 +30,50 @@ export function NutMuaKhoaHoc({
         className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
       >
         Vào học ngay
+      </Button>
+    );
+  }
+
+  // Khóa MIỄN PHÍ: ghi danh trực tiếp bằng server action dangKyMienPhi.
+  // (Trước đây nút này vẫn gọi API tạo URL VNPay — API đó từ chối khóa
+  // miễn phí với lỗi 400 nên học viên không bao giờ đăng ký được khóa
+  // miễn phí; action dangKyMienPhi đã có sẵn nhưng chưa từng được nối.)
+  const xuLyDangKyMienPhi = async () => {
+    setDangXuLy(true);
+    try {
+      const res = await dangKyMienPhi(khoaHocId);
+      if (!res.thanh_cong) {
+        toast.error(res.loi || "Không đăng ký được khóa học, vui lòng thử lại");
+        return;
+      }
+      toast.success("Đăng ký học thành công! Chúc bạn học vui.");
+      router.refresh();
+    } catch {
+      toast.error("Không đăng ký được khóa học, vui lòng thử lại");
+    } finally {
+      setDangXuLy(false);
+    }
+  };
+
+  if (mienPhi) {
+    return (
+      <Button
+        onClick={xuLyDangKyMienPhi}
+        disabled={dangXuLy}
+        size="lg"
+        className="w-full gap-2 font-bold shadow-md"
+      >
+        {dangXuLy ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Đang đăng ký...
+          </>
+        ) : (
+          <>
+            <BookOpen className="h-4 w-4" />
+            Đăng ký học miễn phí
+          </>
+        )}
       </Button>
     );
   }
@@ -79,9 +124,7 @@ export function NutMuaKhoaHoc({
       ) : (
         <>
           <CreditCard className="h-4 w-4" />
-          {mienPhi
-            ? "Đăng ký học miễn phí"
-            : `Mua khóa học - ${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(gia)}`}
+          {`Mua khóa học - ${new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(gia)}`}
         </>
       )}
     </Button>
