@@ -49,7 +49,7 @@ async function xoaVaoThungRac(page: Page, vung: ReturnType<Page["locator"]>) {
   const hopThoai = page.getByRole("dialog");
   await expect(hopThoai.getByText(/Thùng rác/)).toBeVisible();
   await hopThoai.getByRole("button", { name: "Chuyển vào thùng rác" }).click();
-  await expect(hopThoai).toBeHidden({ timeout: 20_000 });
+  await expect(hopThoai).toBeHidden({ timeout: 45_000 });
 }
 
 // Xóa vĩnh viễn 1 dòng trong thùng rác (hộp xác nhận 2 lớp)
@@ -61,7 +61,7 @@ async function xoaVinhVienDongRac(page: Page, tieuDe: string) {
   await expect(hopThoai.getByText(/không khôi phục được/)).toBeVisible();
   await hopThoai.getByRole("button", { name: "Tôi hiểu, tiếp tục" }).click();
   await hopThoai.getByRole("button", { name: "Xóa vĩnh viễn" }).click();
-  await expect(hopThoai).toBeHidden({ timeout: 20_000 });
+  await expect(hopThoai).toBeHidden({ timeout: 45_000 });
   await expect(page.locator("div.divide-y").getByText(tieuDe)).toHaveCount(0, { timeout: 20_000 });
 }
 
@@ -253,6 +253,10 @@ test.describe("Đợt 3 — Bề mặt thùng rác quản trị + phân quyền 
 
 test.describe("Đợt 3 — Khóa học / bài viết / khôi phục đúng trạng thái (chạy thật sau migration 009)", () => {
   test("Khóa học: đầu bếp xóa -> học viên không học được -> thùng rác bếp (không có nút xóa vĩnh viễn) -> khôi phục -> học lại được", async ({ page, browser }) => {
+    // Ca dài nhất suite (tạo khóa + duyệt + ghi danh + 2 vòng xóa/khôi
+    // phục, 3 ngữ cảnh trình duyệt) — nới trần thời gian cho máy dev
+    // chậm/biên dịch nguội; các assert chức năng giữ nguyên độ chặt.
+    test.setTimeout(300_000);
     const tieuDeKhoa = `TEST_DOT3_ Khóa thùng rác ${DAU}`;
     const tieuDeBai = `TEST_DOT3_ Bài học thùng rác ${DAU}`;
 
