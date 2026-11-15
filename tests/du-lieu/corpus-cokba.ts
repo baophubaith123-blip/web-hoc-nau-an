@@ -87,7 +87,7 @@ export const CORPUS: MucCorpus[] = [
   { nhom: "viet_tay", cauHoi: "Có khóa học miễn phí không?", kyVong: { loaiThe: "khoaHoc", chuaTieuDe: "Món chay thanh đạm" } },
   { nhom: "viet_tay", cauHoi: "Có khóa học cơ bản nào không?", kyVong: { loaiThe: "khoaHoc", chuaTieuDe: "Ăn sáng kiểu Việt" } },
   { nhom: "viet_tay", cauHoi: "Có khóa học nâng cao nào không?", kyVong: { loaiThe: "khoaHoc", chuaTieuDe: "Kỹ thuật bếp chuyên nghiệp" } },
-  { nhom: "viet_tay", cauHoi: "Có khóa học trung cấp nào không?", kyVong: { loaiThe: "khoaHoc", chuaTieuDe: "Làm bánh Âu căn bản" } },
+  { nhom: "viet_tay", cauHoi: "Có khóa học trung cấp nào không?", kyVong: { loaiThe: "khoaHoc", chuaTieuDe: "Bí quyết nấu phở và bún" }, ghiChu: "Đợt 2: kỳ vọng cũ 'Làm bánh Âu căn bản' đã lệch vì khóa đó được duyệt hạ cap_do xuống co_ban ngày 14/11/2026; khóa trung cấp thật hiện tại gồm Bí quyết nấu phở và bún / Món Hàn tại nhà / Món Âu cho bữa tối." },
   { nhom: "viet_tay", cauHoi: "Có khóa học trung cấp nào dạy món Hàn không?", kyVong: { loaiThe: "khoaHoc", chuaTieuDe: "Món Hàn tại nhà" } },
   // intent 8: khóa gồm gì
   { nhom: "viet_tay", cauHoi: "Khóa Nấu ăn cho người mới bắt đầu gồm mấy bài?", kyVong: { loaiThe: "khoaHoc", chuaChuoi: "3 bài" }, ghiChu: "Mỗi khóa trong DB đều có 3 bài học thật." },
@@ -121,7 +121,7 @@ export const CORPUS: MucCorpus[] = [
   { nhom: "dien_dat_lai", cauHoi: "Cho tớ xin mấy món có trứng gà đi", kyVong: { loaiThe: "mon", chuaTieuDe: "Bánh flan caramel" } },
   { nhom: "dien_dat_lai", cauHoi: "Tôm sú chế biến được món gì vậy?", kyVong: { loaiThe: "mon", chuaTieuDe: "Gỏi cuốn tôm thịt" } },
   { nhom: "dien_dat_lai", cauHoi: "Ở nhà còn cá lóc, làm món gì ngon?", kyVong: { loaiThe: "mon", chuaTieuDe: "Canh chua cá lóc" } },
-  { nhom: "dien_dat_lai", cauHoi: "Thịt ba rọi nấu được món gì?", kyVong: { loaiThe: "mon", chuaTieuDe: "Gỏi cuốn tôm thịt" }, ghiChu: "Ba rọi = ba chỉ (bí danh vùng miền có sẵn)." },
+  { nhom: "dien_dat_lai", cauHoi: "Thịt ba rọi nấu được món gì?", kyVong: { loaiThe: "mon", chuaTieuDe: "Bún chả Hà Nội" }, ghiChu: "Ba rọi = ba chỉ (bí danh vùng miền có sẵn). Đợt 2: có 4 món khớp (Bánh xèo, Bún chả, Cá kho tộ, Gỏi cuốn) nhưng engine chỉ hiện 3 thẻ đầu; từ khi bộ nạp test sắp xếp xác định theo tiêu đề, Gỏi cuốn rơi khỏi cửa sổ 3 thẻ — kỳ vọng đổi sang Bún chả Hà Nội, vẫn là món khớp thật trong cửa sổ." },
   { nhom: "dien_dat_lai", cauHoi: "Hành hoa nấu được món gì?", kyVong: { loaiThe: "mon", chuaTieuDe: "Bánh xèo miền Tây" }, ghiChu: "Hành hoa = hành lá (bí danh); món đầu tiên có hành lá theo thứ tự DB là Bánh xèo." },
   { nhom: "dien_dat_lai", cauHoi: "Xin công thức làm phở bò Hà Nội", kyVong: { loaiThe: "mon", chuaTieuDe: "Phở bò Hà Nội" } },
   { nhom: "dien_dat_lai", cauHoi: "Phở bò nấu sao vậy bạn?", kyVong: { loaiThe: "mon", chuaTieuDe: "Phở bò Hà Nội" } },

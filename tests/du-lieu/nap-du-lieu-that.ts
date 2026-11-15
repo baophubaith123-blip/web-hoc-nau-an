@@ -76,14 +76,20 @@ export async function napDuLieuThat(): Promise<DuLieuTroLy> {
         "id, tieu_de, slug, mo_ta, nguyen_lieu, cac_buoc, thoi_gian_chuan_bi, thoi_gian_nau, khau_phan, do_kho, anh_dai_dien, calories, tac_gia_id"
       )
       .eq("trang_thai", "xuat_ban")
-      .is("deleted_at", null),
+      .is("deleted_at", null)
+      // Đợt 2: sắp xếp XÁC ĐỊNH theo tiêu đề. Truy vấn không ORDER BY trả
+      // thứ tự heap của Postgres — thứ tự này đổi sau mỗi lần UPDATE dòng
+      // (đã gặp khi sửa dữ liệu 2 món: cửa sổ gợi ý "còn món khác" lệch
+      // hẳn). tai-du-lieu.ts phía server vẫn giữ nguyên như cũ.
+      .order("tieu_de", { ascending: true }),
     supabase.from("cong_thuc_danh_muc").select("cong_thuc_id, danh_muc:danh_muc(ten, slug)"),
     supabase
       .from("khoa_hoc")
       .select(
         "id, tieu_de, slug, mo_ta, mo_ta_chi_tiet, anh_dai_dien, cap_do, gia, mien_phi, dau_bep_id, tong_thoi_gian, so_bai_hoc"
       )
-      .eq("trang_thai", "xuat_ban"),
+      .eq("trang_thai", "xuat_ban")
+      .order("tieu_de", { ascending: true }),
     supabase
       .from("bai_hoc")
       .select("id, khoa_hoc_id, tieu_de, mo_ta, thoi_gian_phut, thu_tu, xem_truoc")
