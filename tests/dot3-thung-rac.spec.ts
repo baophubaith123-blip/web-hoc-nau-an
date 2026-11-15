@@ -1,17 +1,12 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page, type Browser } from "@playwright/test";
 
 // ĐỢT 3 (15/11/2026) — THÙNG RÁC (hoàn tác xóa) cho công thức / khóa học / bài viết.
 //
-// Trạng thái khi viết spec: migration 009 CHƯA được dán vào Supabase
-// (DB chưa có khoa_hoc.deleted_at, bai_viet.deleted_at,
-// *.trang_thai_truoc_xoa — đã kiểm chứng bằng truy vấn thật, lỗi 42703).
-// - cong_thuc: deleted_at đã có từ migration 001 và action đợt 3 GIỮ
-//   NGUYÊN trang_thai khi xóa mềm → luồng thùng rác của công thức chạy
-//   THẬT ngay cả trước migration (xóa → ẩn công khai → vào thùng rác →
-//   khôi phục về ĐÚNG trạng thái trước xóa → xóa vĩnh viễn).
-// - khoa_hoc / bai_viet và ca "khôi phục về đúng xuất bản nhờ cột
-//   trang_thai_truoc_xoa": để test.fixme kèm ghi chú "bật sau migration
-//   009" — TUYỆT ĐỐI không để spec fail đỏ trong suite khi chưa dán 009.
+// Cập nhật 16/11/2026 (việc 0 — kiểm chứng bù): migration 009 ĐÃ được dán
+// vào Supabase (kiểm chứng bằng admin client: cong_thuc / khoa_hoc /
+// bai_viet đều đã có deleted_at + trang_thai_truoc_xoa). Toàn bộ ca
+// trong file này nay chạy THẬT — gồm cả 4 ca khóa học / bài viết / khôi
+// phục đúng trạng thái xuất bản từng để test.fixme chờ 009.
 // Mọi dữ liệu tạo ra có tiền tố TEST_DOT3_ và tự dọn bằng xóa vĩnh viễn
 // ngay trong test (DB trở về baseline sau suite).
 const MAT_KHAU = process.env.TEST_PASSWORD ?? "Matkhau@123";
@@ -45,12 +40,16 @@ function dongThungRac(page: Page, tieuDe: string) {
   return page.locator("div.divide-y > div").filter({ hasText: tieuDe }).first();
 }
 
-// Bấm Xóa trên thẻ/dòng hiện tại -> xác nhận "Chuyển vào thùng rác" trong hộp thoại
+// Bấm Xóa trên thẻ/dòng hiện tại -> xác nhận "Chuyển vào thùng rác" trong hộp thoại.
+// QUAN TRỌNG: phải chờ hộp thoại ĐÓNG (chỉ đóng khi server action thành
+// công) trước khi điều hướng đi nơi khác — điều hướng ngay sẽ hủy request
+// đang bay và thao tác xóa không kịp ghi (race đã gặp ở lượt chạy đầu).
 async function xoaVaoThungRac(page: Page, vung: ReturnType<Page["locator"]>) {
   await vung.getByRole("button", { name: "Xóa", exact: true }).click();
   const hopThoai = page.getByRole("dialog");
   await expect(hopThoai.getByText(/Thùng rác/)).toBeVisible();
   await hopThoai.getByRole("button", { name: "Chuyển vào thùng rác" }).click();
+  await expect(hopThoai).toBeHidden({ timeout: 20_000 });
 }
 
 // Xóa vĩnh viễn 1 dòng trong thùng rác (hộp xác nhận 2 lớp)
@@ -62,7 +61,69 @@ async function xoaVinhVienDongRac(page: Page, tieuDe: string) {
   await expect(hopThoai.getByText(/không khôi phục được/)).toBeVisible();
   await hopThoai.getByRole("button", { name: "Tôi hiểu, tiếp tục" }).click();
   await hopThoai.getByRole("button", { name: "Xóa vĩnh viễn" }).click();
+  await expect(hopThoai).toBeHidden({ timeout: 20_000 });
   await expect(page.locator("div.divide-y").getByText(tieuDe)).toHaveCount(0, { timeout: 20_000 });
+}
+
+// --- Khóa học: helper dùng chung với spec đợt 1 ---
+function theKhoaHoc(page: Page, tieuDe: string) {
+  return page.locator("div.border.rounded-2xl").filter({ hasText: tieuDe }).first();
+}
+
+// Đầu bếp tạo khóa MIỄN PHÍ + 1 bài học -> gửi duyệt -> admin duyệt ->
+// xuất bản. Trả về id khóa học (lấy từ URL trang bài học).
+async function taoKhoaHocXuatBan(
+  page: Page,
+  browser: Browser,
+  tieuDeKhoa: string,
+  tieuDeBai: string
+): Promise<string> {
+  await page.goto("/bep/khoa-hoc/moi");
+  await page.locator("#tieu_de").fill(tieuDeKhoa);
+  await page.locator("#mo_ta").fill("Khóa học kiểm thử thùng rác đợt 3 — sẽ được dọn sau khi kiểm tra.");
+  await page.getByRole("button", { name: "Lưu nháp" }).click();
+  await expect(page).toHaveURL(/\/bep\/khoa-hoc$/);
+
+  // Thêm 1 bài học, đồng thời lấy id khóa từ URL
+  await theKhoaHoc(page, tieuDeKhoa).getByRole("link", { name: /Bài học/ }).click();
+  await expect(page).toHaveURL(/\/bep\/khoa-hoc\/[0-9a-f-]{36}\/bai-hoc/);
+  const khoaHocId = page.url().match(/khoa-hoc\/([0-9a-f-]{36})\/bai-hoc/)![1];
+  await page.getByRole("button", { name: "Thêm bài học mới" }).click();
+  await page.locator("#tieu_de_bh").fill(tieuDeBai);
+  await page.locator("#mo_ta_bh").fill("Bài học kiểm thử thùng rác đợt 3.");
+  await page.getByRole("button", { name: "Thêm bài học", exact: true }).click();
+  await expect(page.getByText(tieuDeBai).first()).toBeVisible();
+
+  // Gửi phê duyệt
+  await page.goto("/bep/khoa-hoc");
+  await theKhoaHoc(page, tieuDeKhoa).getByRole("link", { name: "Sửa" }).click();
+  await page.getByRole("button", { name: "Gửi phê duyệt" }).click();
+  await expect(page).toHaveURL(/\/bep\/khoa-hoc$/);
+  await expect(theKhoaHoc(page, tieuDeKhoa).getByText("Chờ phê duyệt")).toBeVisible();
+
+  // Admin duyệt -> xuất bản
+  const ctxAdmin = await browser.newContext();
+  const admin = await ctxAdmin.newPage();
+  await dangNhap(admin, "admin@naungon.vn");
+  await admin.goto("/quan-tri/khoa-hoc");
+  const theAdmin = theKhoaHoc(admin, tieuDeKhoa);
+  await expect(theAdmin.getByText("Chờ phê duyệt")).toBeVisible();
+  await theAdmin.getByRole("button", { name: "Duyệt", exact: true }).click();
+  await expect(theAdmin.getByText("Đã xuất bản")).toBeVisible({ timeout: 20_000 });
+  await ctxAdmin.close();
+
+  return khoaHocId;
+}
+
+// --- Bài viết: form dùng chung với spec đợt 1 ---
+async function dienFormBaiViet(page: Page, tieuDe: string) {
+  await page.getByLabel(/Tiêu đề bài viết/).fill(tieuDe);
+  await page.getByLabel(/Tóm tắt ngắn/).fill("Bài viết kiểm thử thùng rác đợt 3 — sẽ được dọn sau khi kiểm tra.");
+  await page.getByLabel(/Chuyên mục/).fill("Mẹo vặt");
+  await page.getByLabel(/Ảnh bìa/).fill("https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=800");
+  await page
+    .getByLabel(/Nội dung bài viết/)
+    .fill("Nội dung kiểm thử thùng rác đợt 3: lưu nháp, xóa vào thùng rác, khôi phục về đúng bản nháp rồi xóa vĩnh viễn.");
 }
 
 test.describe("Đợt 3 — Thùng rác công thức (chạy thật trước migration 009)", () => {
@@ -162,7 +223,7 @@ test.describe("Đợt 3 — Thùng rác công thức (chạy thật trước mig
 });
 
 test.describe("Đợt 3 — Bề mặt thùng rác quản trị + phân quyền khu vực", () => {
-  test("Admin: trang thùng rác mở được, đủ 3 mục Công thức/Khóa học/Bài viết và nút Dọn thùng rác", async ({ page }) => {
+  test("Admin: trang thùng rác mở được, đủ 3 mục Công thức/Khóa học/Bài viết và nút Dọn thùng rác (đã kích hoạt sau 009)", async ({ page }) => {
     await dangNhap(page, "admin@naungon.vn");
     await page.goto("/quan-tri/thung-rac");
     await expect(page.getByRole("heading", { name: "Thùng rác" })).toBeVisible();
@@ -170,9 +231,8 @@ test.describe("Đợt 3 — Bề mặt thùng rác quản trị + phân quyền 
     await expect(page.getByText("Khóa học đã xóa")).toBeVisible();
     await expect(page.getByText("Bài viết đã xóa")).toBeVisible();
     await expect(page.getByRole("button", { name: "Dọn thùng rác" }).first()).toBeVisible();
-    // Chưa dán migration 009: mục khóa học/bài viết hiện thông báo kích hoạt sau, trang không sập.
-    // (Sau khi dán 009: bỏ dòng kiểm thông báo này và bật các test.fixme ở dưới.)
-    await expect(page.getByText(/migration 009/).first()).toBeVisible();
+    // Sau migration 009: không còn thông báo "kích hoạt sau" — 3 mục đã chạy thật.
+    await expect(page.getByText(/migration 009/)).toHaveCount(0);
   });
 
   test("Phân quyền: Pro vào thùng rác khu bếp/quản trị bị đưa về bảng điều khiển; đầu bếp vào thùng rác quản trị bị đưa về khu bếp", async ({ page, browser }) => {
@@ -191,49 +251,196 @@ test.describe("Đợt 3 — Bề mặt thùng rác quản trị + phân quyền 
   });
 });
 
-test.describe("Đợt 3 — Ca chờ migration 009 (bật sau khi Bảo dán 009)", () => {
-  // Cần cột khoa_hoc.deleted_at + trang_thai_truoc_xoa của migration 009.
-  // Sau khi dán 009: bỏ .fixme và chạy thật theo kịch bản trong thân test.
-  test.fixme("Khóa học: đầu bếp xóa -> học viên không học được -> thùng rác bếp (không có nút xóa vĩnh viễn) -> khôi phục -> học lại được", async () => {
-    // Kịch bản dự kiến:
-    // 1) chef tạo khóa TEST_DOT3_ (miễn phí) + 1 bài học, gửi duyệt; admin duyệt -> xuất bản.
-    // 2) user1 mở /hoc-bai/<khoaHocId> học được bài đầu tiên.
-    // 3) chef vào /bep/khoa-hoc bấm Xóa -> hộp xác nhận nêu rõ vào Thùng rác, khôi phục được 30 ngày.
-    // 4) user1 vào lại /hoc-bai/<khoaHocId> -> 404; trang /khoa-hoc không còn khóa.
-    // 5) chef mở /bep/thung-rac: thấy khóa, có nút Khôi phục, KHÔNG có nút Xóa vĩnh viễn
-    //    (kèm ghi chú "Xóa vĩnh viễn khóa học do Admin thực hiện").
-    // 6) Khôi phục -> user1 học lại được, tiến độ cũ còn nguyên.
-    // 7) Dọn: chef xóa lại -> admin xóa vĩnh viễn trong /quan-tri/thung-rac (xác nhận 2 lớp,
-    //    nêu rõ mất bài học/ghi danh/tiến độ/chứng chỉ).
+test.describe("Đợt 3 — Khóa học / bài viết / khôi phục đúng trạng thái (chạy thật sau migration 009)", () => {
+  test("Khóa học: đầu bếp xóa -> học viên không học được -> thùng rác bếp (không có nút xóa vĩnh viễn) -> khôi phục -> học lại được", async ({ page, browser }) => {
+    const tieuDeKhoa = `TEST_DOT3_ Khóa thùng rác ${DAU}`;
+    const tieuDeBai = `TEST_DOT3_ Bài học thùng rác ${DAU}`;
+
+    await dangNhap(page, "chef@naungon.vn");
+    const khoaHocId = await taoKhoaHocXuatBan(page, browser, tieuDeKhoa, tieuDeBai);
+
+    // Học viên ghi danh theo luồng THẬT: mở chi tiết khóa từ danh sách
+    // công khai -> "Đăng ký học miễn phí" -> "Vào học ngay" -> vào được
+    // bài học đầu tiên. (RLS bài học yêu cầu có bản ghi đăng ký: đi thẳng
+    // /hoc-bai khi chưa ghi danh sẽ bị đưa về /khoa-hoc-cua-toi.)
+    const ctxHv = await browser.newContext();
+    const hv = await ctxHv.newPage();
+    await dangNhap(hv, "user1@naungon.vn");
+    await hv.goto("/khoa-hoc");
+    await hv.locator("a").filter({ hasText: tieuDeKhoa }).first().click();
+    await expect(hv).toHaveURL(/\/khoa-hoc\/[a-z0-9-]+$/);
+    await hv.getByRole("button", { name: "Đăng ký học miễn phí" }).click();
+    await expect(hv.getByRole("button", { name: "Vào học ngay" })).toBeVisible({ timeout: 20_000 });
+    await hv.getByRole("button", { name: "Vào học ngay" }).click();
+    await expect(hv).toHaveURL(new RegExp(`/hoc-bai/${khoaHocId}/[0-9a-f-]{36}`));
+    await expect(hv.getByText(tieuDeBai).first()).toBeVisible();
+
+    // Đầu bếp xóa khóa -> vào thùng rác
+    await page.goto("/bep/khoa-hoc");
+    await xoaVaoThungRac(page, theKhoaHoc(page, tieuDeKhoa));
+    await expect(page.getByText(tieuDeKhoa)).toHaveCount(0, { timeout: 20_000 });
+
+    // Học viên không học được nữa (404) + khóa biến mất khỏi danh sách công khai
+    const resp = await hv.goto(`/hoc-bai/${khoaHocId}`);
+    expect(resp?.status()).toBe(404);
+    await hv.goto("/khoa-hoc");
+    await expect(hv.getByText(tieuDeKhoa)).toHaveCount(0);
+    await ctxHv.close();
+
+    // Thùng rác khu bếp: có Khôi phục, KHÔNG có Xóa vĩnh viễn cho khóa học + có ghi chú Admin
+    await page.goto("/bep/thung-rac");
+    const dong = dongThungRac(page, tieuDeKhoa);
+    await expect(dong).toBeVisible();
+    await expect(dong.getByRole("button", { name: "Khôi phục" })).toBeVisible();
+    await expect(dong.getByRole("button", { name: "Xóa vĩnh viễn" })).toHaveCount(0);
+    await expect(page.getByText(/Xóa vĩnh viễn khóa học do Admin thực hiện/)).toBeVisible();
+
+    // Khôi phục -> học viên học lại được
+    await dong.getByRole("button", { name: "Khôi phục" }).click();
+    await expect(page.locator("div.divide-y").getByText(tieuDeKhoa)).toHaveCount(0, { timeout: 20_000 });
+    const ctxHv2 = await browser.newContext();
+    const hv2 = await ctxHv2.newPage();
+    await dangNhap(hv2, "user1@naungon.vn");
+    await hv2.goto(`/hoc-bai/${khoaHocId}`);
+    await expect(hv2).toHaveURL(new RegExp(`/hoc-bai/${khoaHocId}/[0-9a-f-]{36}`));
+    await expect(hv2.getByText(tieuDeBai).first()).toBeVisible();
+    await ctxHv2.close();
+
+    // Dọn: đầu bếp xóa lại -> Admin xóa vĩnh viễn trong thùng rác quản trị
+    await page.goto("/bep/khoa-hoc");
+    await xoaVaoThungRac(page, theKhoaHoc(page, tieuDeKhoa));
+    const ctxAdmin = await browser.newContext();
+    const admin = await ctxAdmin.newPage();
+    await dangNhap(admin, "admin@naungon.vn");
+    await admin.goto("/quan-tri/thung-rac");
+    await xoaVinhVienDongRac(admin, tieuDeKhoa);
+    await ctxAdmin.close();
   });
 
-  // Cần migration 009 như trên. Action xoaVinhVienKhoaHoc đã từ chối tường
-  // minh mọi vai khác admin — ca này kiểm ở tầng giao diện + hành vi sau 009.
-  test.fixme("Phân quyền xóa vĩnh viễn khóa học: chỉ Admin (đầu bếp không có nút, gọi thẳng bị từ chối); đầu bếp A không thấy mục của đầu bếp B", async () => {
-    // Kịch bản dự kiến:
-    // 1) chef A (chef@naungon.vn) xóa 1 khóa của mình -> vào /bep/thung-rac của A thấy dòng.
-    // 2) chef B đăng nhập /bep/thung-rac: không thấy khóa của A.
-    // 3) Admin mở /quan-tri/thung-rac: thấy khóa, có nút Xóa vĩnh viễn cho khóa học.
+  test("Phân quyền xóa vĩnh viễn khóa học: thùng rác của Pro không thấy khóa của bếp; Admin thấy và xóa vĩnh viễn được", async ({ page, browser }) => {
+    // Ghi chú phạm vi: hệ thống demo chỉ có 1 tài khoản đầu bếp đăng nhập
+    // được (chef@naungon.vn) nên ca "đầu bếp A vs đầu bếp B" được kiểm
+    // bằng cùng cơ chế lọc chủ sở hữu đã có ca riêng cho công thức ở
+    // trên; riêng việc "chỉ Admin xóa vĩnh viễn khóa học" được bảo đảm
+    // TƯỜNG MINH trong action xoaVinhVienKhoaHoc (mọi vai khác admin bị
+    // từ chối ngay trong server action — đã đọc trực tiếp code) và kiểm
+    // ở đây qua giao diện: khu bếp không có nút, khu quản trị có nút.
+    const tieuDeKhoa = `TEST_DOT3_ Khóa phân quyền rác ${DAU}`;
+    await dangNhap(page, "chef@naungon.vn");
+    await page.goto("/bep/khoa-hoc/moi");
+    await page.locator("#tieu_de").fill(tieuDeKhoa);
+    await page.locator("#mo_ta").fill("Khóa nháp kiểm thử phân quyền thùng rác đợt 3.");
+    await page.getByRole("button", { name: "Lưu nháp" }).click();
+    await expect(page).toHaveURL(/\/bep\/khoa-hoc$/);
+
+    // Đầu bếp xóa khóa nháp của mình
+    await xoaVaoThungRac(page, theKhoaHoc(page, tieuDeKhoa));
+    await page.goto("/bep/thung-rac");
+    const dongBep = dongThungRac(page, tieuDeKhoa);
+    await expect(dongBep).toBeVisible();
+    await expect(dongBep.getByRole("button", { name: "Xóa vĩnh viễn" })).toHaveCount(0);
+
+    // Học viên Pro không thấy khóa của đầu bếp trong thùng rác của mình
+    const ctxPro = await browser.newContext();
+    const pro = await ctxPro.newPage();
+    await dangNhap(pro, "user1@naungon.vn");
+    await pro.goto("/thung-rac");
+    await expect(pro.getByText(tieuDeKhoa)).toHaveCount(0);
+    await ctxPro.close();
+
+    // Admin thấy khóa trong thùng rác quản trị và xóa vĩnh viễn được (dọn)
+    const ctxAdmin = await browser.newContext();
+    const admin = await ctxAdmin.newPage();
+    await dangNhap(admin, "admin@naungon.vn");
+    await admin.goto("/quan-tri/thung-rac");
+    await xoaVinhVienDongRac(admin, tieuDeKhoa);
+    await ctxAdmin.close();
   });
 
-  // Ca chuẩn của kế hoạch B.3 cho người dùng thường: công thức ĐANG XUẤT BẢN
-  // của Pro (đã được admin duyệt) bị xóa rồi khôi phục phải về đúng
-  // 'xuat_ban' — bảo đảm bởi cột trang_thai_truoc_xoa của migration 009.
-  test.fixme("Công thức xuất bản của Pro: xóa -> khôi phục về đúng trạng thái xuất bản nhờ trang_thai_truoc_xoa", async () => {
-    // Kịch bản dự kiến:
-    // 1) user1 tạo công thức TEST_DOT3_ gửi duyệt; admin duyệt -> xuất bản, hiện công khai.
-    // 2) user1 xóa tại /cong-thuc-da-gui -> biến mất công khai, vào /thung-rac.
-    // 3) Khôi phục tại /thung-rac -> hiện công khai lại ngay với trạng thái Đã xuất bản.
-    // 4) Dọn: xóa lại + xóa vĩnh viễn trong /thung-rac.
+  test("Công thức xuất bản của Pro: xóa -> khôi phục về đúng trạng thái xuất bản nhờ trang_thai_truoc_xoa", async ({ page, browser }) => {
+    const tieuDe = `TEST_DOT3_ Món Pro xuất bản ${DAU}`;
+    await dangNhap(page, "user1@naungon.vn");
+    await taoCongThucGui(page, "/tao-cong-thuc", tieuDe);
+    await expect(theCongThucDaGui(page, tieuDe).getByText("Chờ phê duyệt")).toBeVisible();
+
+    // Admin duyệt -> xuất bản
+    const ctxAdmin = await browser.newContext();
+    const admin = await ctxAdmin.newPage();
+    await dangNhap(admin, "admin@naungon.vn");
+    await admin.goto("/quan-tri/cong-thuc");
+    const theAdmin = admin.locator("div.border.rounded-2xl").filter({ hasText: tieuDe }).first();
+    await expect(theAdmin).toBeVisible();
+    await theAdmin.getByRole("button", { name: "Duyệt", exact: true }).click();
+    await expect(theAdmin.getByText("Đã xuất bản")).toBeVisible({ timeout: 20_000 });
+    await ctxAdmin.close();
+
+    // Hiện công khai + phía Pro hiện Đã xuất bản
+    await page.goto("/cong-thuc");
+    await expect(page.getByText(tieuDe).first()).toBeVisible();
+    await page.goto("/cong-thuc-da-gui");
+    await expect(theCongThucDaGui(page, tieuDe).getByText("Đã xuất bản")).toBeVisible();
+
+    // Pro xóa -> mất công khai, vào thùng rác với trạng thái nhớ = Đã xuất bản
+    await xoaVaoThungRac(page, theCongThucDaGui(page, tieuDe));
+    await page.goto("/cong-thuc");
+    await expect(page.getByText(tieuDe)).toHaveCount(0);
+    await page.goto("/thung-rac");
+    const dong = dongThungRac(page, tieuDe);
+    await expect(dong).toBeVisible();
+    await expect(dong.getByText(/Đã xuất bản/)).toBeVisible();
+
+    // Khôi phục -> về ĐÚNG xuất bản, hiện công khai lại ngay
+    await dong.getByRole("button", { name: "Khôi phục" }).click();
+    await expect(page.locator("div.divide-y").getByText(tieuDe)).toHaveCount(0, { timeout: 20_000 });
+    await page.goto("/cong-thuc-da-gui");
+    await expect(theCongThucDaGui(page, tieuDe).getByText("Đã xuất bản")).toBeVisible();
+    await page.goto("/cong-thuc");
+    await expect(page.getByText(tieuDe).first()).toBeVisible();
+
+    // Dọn dữ liệu test
+    await page.goto("/cong-thuc-da-gui");
+    await xoaVaoThungRac(page, theCongThucDaGui(page, tieuDe));
+    await page.goto("/thung-rac");
+    await xoaVinhVienDongRac(page, tieuDe);
   });
 
-  // Cần bai_viet.deleted_at của migration 009 (trước 009 xóa bài là xóa cứng).
-  test.fixme("Bài viết: người dùng xóa bài nháp -> vào thùng rác -> khôi phục về đúng trạng thái nháp; admin thấy trong thùng rác quản trị", async () => {
-    // Kịch bản dự kiến:
-    // 1) user1 viết bài TEST_DOT3_ lưu nháp tại /bai-viet-cua-toi.
-    // 2) Bấm Xóa -> hộp thoại nêu rõ vào Thùng rác, khôi phục được 30 ngày.
-    // 3) /thung-rac (người dùng) thấy bài; admin /quan-tri/thung-rac cũng thấy ở mục Bài viết.
-    // 4) Khôi phục -> bài trở lại /bai-viet-cua-toi với trạng thái Bản nháp.
-    // 5) Dọn: xóa lại + xóa vĩnh viễn trong thùng rác.
+  test("Bài viết: người dùng xóa bài nháp -> vào thùng rác -> khôi phục về đúng trạng thái nháp; admin thấy trong thùng rác quản trị", async ({ page, browser }) => {
+    const tieuDe = `TEST_DOT3_ Bài nháp thùng rác ${DAU}`;
+    await dangNhap(page, "user1@naungon.vn");
+    await page.goto("/tao-bai-viet");
+    await dienFormBaiViet(page, tieuDe);
+    await page.getByRole("button", { name: "Lưu bản nháp" }).click();
+    await expect(page).toHaveURL(/\/bai-viet-cua-toi/);
+    await expect(page.getByText(tieuDe)).toBeVisible();
+
+    // Xóa bài nháp -> vào thùng rác (hộp thoại của NutXoaVaoThungRac)
+    const vungBai = page.locator("div.overflow-hidden.shadow-xs").filter({ hasText: tieuDe }).first();
+    await xoaVaoThungRac(page, vungBai);
+    await expect(page.getByText(tieuDe)).toHaveCount(0, { timeout: 20_000 });
+
+    // Thùng rác người dùng thấy bài; thùng rác quản trị cũng thấy
+    await page.goto("/thung-rac");
+    const dong = dongThungRac(page, tieuDe);
+    await expect(dong).toBeVisible();
+    await expect(dong.getByText(/Bản nháp/)).toBeVisible();
+    const ctxAdmin = await browser.newContext();
+    const admin = await ctxAdmin.newPage();
+    await dangNhap(admin, "admin@naungon.vn");
+    await admin.goto("/quan-tri/thung-rac");
+    await expect(dongThungRac(admin, tieuDe)).toBeVisible();
+    await ctxAdmin.close();
+
+    // Khôi phục -> bài trở lại danh sách của tôi với trạng thái Bản nháp
+    await dong.getByRole("button", { name: "Khôi phục" }).click();
+    await expect(page.locator("div.divide-y").getByText(tieuDe)).toHaveCount(0, { timeout: 20_000 });
+    await page.goto("/bai-viet-cua-toi");
+    await expect(page.getByText(tieuDe)).toBeVisible();
+    await expect(page.getByText("Bản nháp").first()).toBeVisible();
+
+    // Dọn dữ liệu test
+    const vungBai2 = page.locator("div.overflow-hidden.shadow-xs").filter({ hasText: tieuDe }).first();
+    await xoaVaoThungRac(page, vungBai2);
+    await page.goto("/thung-rac");
+    await xoaVinhVienDongRac(page, tieuDe);
   });
 });
