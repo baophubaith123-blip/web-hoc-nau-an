@@ -280,9 +280,15 @@ test.describe("Đợt 3 — Khóa học / bài viết / khôi phục đúng tr�
     await xoaVaoThungRac(page, theKhoaHoc(page, tieuDeKhoa));
     await expect(page.getByText(tieuDeKhoa)).toHaveCount(0, { timeout: 20_000 });
 
-    // Học viên không học được nữa (404) + khóa biến mất khỏi danh sách công khai
-    const resp = await hv.goto(`/hoc-bai/${khoaHocId}`);
-    expect(resp?.status()).toBe(404);
+    // Học viên không học được nữa: trang vào học hiện trang 404 thân
+    // thiện của app và KHÔNG vào được bài học. (Không assert HTTP status:
+    // layout khu người dùng phát streaming phần khung trước khi trang
+    // con gọi notFound() nên status là 200 — đã kiểm chứng thủ công:
+    // nội dung hiện đúng "404 Không tìm thấy trang", không lộ bài học.)
+    await hv.goto(`/hoc-bai/${khoaHocId}`);
+    await expect(hv.getByText("Không tìm thấy trang")).toBeVisible({ timeout: 20_000 });
+    await expect(hv).not.toHaveURL(new RegExp(`/hoc-bai/${khoaHocId}/[0-9a-f-]{36}`));
+    await expect(hv.getByText(tieuDeBai)).toHaveCount(0);
     await hv.goto("/khoa-hoc");
     await expect(hv.getByText(tieuDeKhoa)).toHaveCount(0);
     await ctxHv.close();
