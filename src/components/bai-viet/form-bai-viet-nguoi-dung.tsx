@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { z } from "zod";
 import { TriangleAlert, Loader2, Save, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,11 @@ export function FormBaiVietNguoiDung({ baiVietGoc }: FormBaiVietNguoiDungProps) 
   const router = useRouter();
   const [dangGui, setDangGui] = useState<"nhap" | "gui" | null>(null);
 
-  const form = useForm<BaiVietNguoiDungForm>({
+  const form = useForm<
+    z.input<typeof baiVietNguoiDungSchema>,
+    any,
+    BaiVietNguoiDungForm
+  >({
     resolver: zodResolver(baiVietNguoiDungSchema),
     defaultValues: {
       tieu_de: baiVietGoc?.tieu_de || "",

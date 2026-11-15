@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { z } from "zod";
 import { hoSoSchema, doiMatKhauSchema, type HoSoForm, type DoiMatKhauForm } from "@/lib/validations/ho-so";
 import { capNhatHoSo, doiMatKhau } from "@/lib/actions/ho-so";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,9 @@ export function FormHoSoClient({ profile }: FormHoSoClientProps) {
   const [dangDoiMk, setDangDoiMk] = useState(false);
 
   // Form hồ sơ
-  const formHoSo = useForm<HoSoForm>({
+  // Schema ho so co truong tuy chon dung transform (input: string|null|undefined,
+  // output: string) nen useForm khai bao ca kieu input lan output da transform.
+  const formHoSo = useForm<z.input<typeof hoSoSchema>, any, HoSoForm>({
     resolver: zodResolver(hoSoSchema),
     defaultValues: {
       ho_ten: profile.ho_ten || "",

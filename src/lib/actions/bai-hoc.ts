@@ -41,7 +41,7 @@ export async function luuBaiHoc(id: string | null, dauVao: unknown): Promise<Ket
     const d = baiHocSchema.parse(dauVao);
 
     const loiQuyen = await kiemTraChuKhoa(p, d.khoa_hoc_id);
-    if (loiQuyen) return loiQuyen;
+    if (loiQuyen && !loiQuyen.thanh_cong) return { thanh_cong: false, loi: loiQuyen.loi };
 
     const { data: kh } = await p.supabase
       .from("khoa_hoc").select("id, co_tai_lieu, co_bai_tap").eq("id", d.khoa_hoc_id).maybeSingle();

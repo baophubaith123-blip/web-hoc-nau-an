@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { z } from "zod";
 import { toast } from "sonner";
 import { khoaHocSchema, type KhoaHocForm } from "@/lib/validations/khoa-hoc";
 import { taoKhoaHoc, capNhatKhoaHoc } from "@/lib/actions/khoa-hoc";
@@ -39,7 +40,7 @@ export function FormKhoaHoc({
     setValue,
     watch,
     formState: { errors },
-  } = useForm<KhoaHocForm>({
+  } = useForm<z.input<typeof khoaHocSchema>, any, KhoaHocForm>({
     resolver: zodResolver(khoaHocSchema),
     defaultValues: {
       tieu_de: duLieuMacDinh?.tieu_de || "",
